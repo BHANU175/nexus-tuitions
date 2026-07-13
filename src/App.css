@@ -1,0 +1,148 @@
+/* ==========================================================================
+   App.css — global, app-wide styles for Learning Hub
+   Loaded once in App.jsx (import './App.css'), alongside index.css which
+   handles the Tailwind entry point and @theme tokens. Nothing here re-
+   imports Tailwind — this file is plain CSS that layers on top of it.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Design tokens
+   Single source of truth for the palette. Previously each page component
+   (Home, TeacherApply, StudentRequest) redeclared these on its own root
+   element via an inline style attribute. Defining them once on :root means
+   every page, current or future, inherits the same values automatically —
+   the inline style blocks in those components are now redundant and safe
+   to delete whenever you touch those files next.
+   -------------------------------------------------------------------------- */
+:root {
+  --chalk: #16302A;    /* primary dark surface / headings on light bg */
+  --paper: #EEEFE4;     /* page background */
+  --ink: #1C2420;       /* body text */
+  --card: #FCFBF6;      /* card / panel surfaces */
+  --marigold: #E7A23D;  /* primary accent, CTAs, highlights */
+  --rust: #B6472F;      /* secondary accent, hover states, emphasis */
+  --line: #C9CBB8;      /* borders, dividers, disabled states */
+  --good: #3F7D5C;      /* success / confirmation states */
+}
+
+/* --------------------------------------------------------------------------
+   2. Base element behaviour
+   -------------------------------------------------------------------------- */
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+button:not(:disabled) {
+  cursor: pointer;
+}
+
+/* --------------------------------------------------------------------------
+   3. Selection & focus
+   Keeps text selection and keyboard focus on-brand everywhere, without
+   needing a `selection:` / `focus-visible:` utility on every element.
+   -------------------------------------------------------------------------- */
+::selection {
+  background: rgba(231, 162, 61, 0.35); /* marigold @ ~35% */
+  color: var(--ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--marigold);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* --------------------------------------------------------------------------
+   4. Scrollbar theming (WebKit + Firefox)
+   -------------------------------------------------------------------------- */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) var(--paper);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--paper);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 999px;
+  border: 2px solid var(--paper);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--chalk);
+}
+
+/* --------------------------------------------------------------------------
+   5. Decorative texture utilities
+   These match the inline backgroundImage styles currently written by hand
+   in the hero sections of Home.jsx, StudentRequest.jsx (ruled paper) and
+   the HeroBanner in Home.jsx (dot grid). Swap the inline `style={{...}}`
+   for className="bg-ruled-paper" / "bg-dot-grid" next time you edit those
+   files — same look, one definition to maintain instead of three.
+   -------------------------------------------------------------------------- */
+.bg-ruled-paper {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    var(--ink) 0,
+    var(--ink) 1px,
+    transparent 1px,
+    transparent 34px
+  );
+}
+
+.bg-dot-grid {
+  background-image: radial-gradient(circle, var(--ink) 1.5px, transparent 1.5px);
+  background-size: 24px 24px;
+}
+
+/* --------------------------------------------------------------------------
+   6. Motion
+   Respect the OS-level "reduce motion" preference across every Tailwind
+   transition/animation utility in the app, not just custom keyframes.
+   -------------------------------------------------------------------------- */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.45s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

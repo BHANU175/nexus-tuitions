@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+@theme {
+  /* Legacy brand tokens — kept so any existing pages/components that
+     still reference bg-brandBlue / bg-brandNavy keep working. */
+  --color-brandBlue: #0A58FF;
+  --color-brandNavy: #0F172A;
+
+  /* Learning Hub palette — chalkboard / paper / marigold theme used
+     across the tutor-facing pages. Available anywhere as Tailwind
+     utilities, e.g. bg-chalk, text-marigold, border-line. */
+  --color-chalk: #16302A;
+  --color-paper: #EEEFE4;
+  --color-ink: #1C2420;
+  --color-card: #FCFBF6;
+  --color-marigold: #E7A23D;
+  --color-rust: #B6472F;
+  --color-line: #C9CBB8;
+  --color-good: #3F7D5C;
+}
+
+body {
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
