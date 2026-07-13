@@ -256,7 +256,7 @@ export default function StudentRequest() {
     setStatusMessage({ text: 'Submitting your request…', type: 'loading' });
 
     try {
-      await axios.post('https://rich-kids-open.loca.lt/api/public/student-request', formData);
+      await axios.post('https://learning-hub-backend-one.vercel.app/api/public/student-request', formData);
 
       setStatusMessage({ text: 'Request received! An advisor will contact you shortly.', type: 'success' });
       setFormData({
