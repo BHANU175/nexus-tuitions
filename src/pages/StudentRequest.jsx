@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback, memo } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 
@@ -6,7 +6,14 @@ import axios from 'axios';
 /* Static data                                                            */
 /* ---------------------------------------------------------------------- */
 
-const CITIES = ['Jaipur', 'Delhi', 'Mumbai', 'Bangalore', 'Other'];
+const CLASS_LEVELS = [
+  'Pre-Nursery', 'Nursery', 'LKG', 'UKG',
+  'Class 1', 'Class 2', 'Class 3', 'Class 4',
+  'Class 5', 'Class 6', 'Class 7', 'Class 8',
+];
+
+const SUBJECT_SUGGESTIONS = ['Hindi', 'English', 'Mathematics', 'Science', 'Social Studies', 'Sanskrit'];
+const MAX_SUBJECTS = 8;
 
 const MODES = [
   { id: 'online', label: 'Online', icon: '💻' },
@@ -24,7 +31,7 @@ const TRUST_BENEFITS = [
 ];
 
 const HOW_STEPS = [
-  { title: 'Tell us what you need', copy: "Share your child's subject, level, and preferred schedule." },
+  { title: 'Tell us what you need', copy: "Share your child's class, subjects, and preferred schedule." },
   { title: 'Get matched', copy: 'An advisor reviews your request and introduces vetted tutors who fit.' },
   { title: 'Start learning', copy: 'Choose your tutor and book the first session, online or in person.' },
 ];
@@ -37,6 +44,9 @@ const BANNER_SLIDES = [
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_RE = /^(\+91[\s-]?)?[6-9]\d{9}$/;
+
+const SELECT_ARROW_URL =
+  "data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23131313%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E";
 
 /* ---------------------------------------------------------------------- */
 /* Small building blocks                                                  */
@@ -63,6 +73,9 @@ const inputClass = (hasError) =>
     hasError ? 'border-[var(--rust)]/50 focus:border-[var(--rust)]' : 'border-transparent focus:border-[var(--marigold)]'
   }`;
 
+const selectClass = (hasError) =>
+  `${inputClass(hasError)} cursor-pointer appearance-none bg-[url('${SELECT_ARROW_URL}')] bg-[length:10px_10px] bg-[right_1rem_center] bg-no-repeat`;
+
 function SectionLabel({ children }) {
   return (
     <div className="mb-6 flex items-center gap-3">
@@ -77,9 +90,11 @@ function SectionLabel({ children }) {
 
 /* ---------------------------------------------------------------------- */
 /* Decorative illustrations + rotating banner                             */
+/* Memoized: these are static SVGs and shouldn't re-render every time the */
+/* banner's active slide index changes.                                  */
 /* ---------------------------------------------------------------------- */
 
-function NotebookIllustration() {
+const NotebookIllustration = memo(function NotebookIllustration() {
   return (
     <svg width="200" height="154" viewBox="0 0 220 170" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" className="drop-shadow-sm">
       <path d="M20 22 Q20 10 32 10 H106 V148 H32 Q20 148 20 136 Z" fill="var(--card)" />
@@ -100,9 +115,9 @@ function NotebookIllustration() {
       </g>
     </svg>
   );
-}
+});
 
-function MentorBadgeIllustration() {
+const MentorBadgeIllustration = memo(function MentorBadgeIllustration() {
   return (
     <svg width="154" height="154" viewBox="0 0 170 170" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" className="drop-shadow-sm">
       <circle cx="85" cy="85" r="82" fill="var(--card)" />
@@ -115,7 +130,7 @@ function MentorBadgeIllustration() {
       <line x1="87" y1="112" x2="87" y2="129" stroke="var(--card)" strokeWidth="2" />
     </svg>
   );
-}
+});
 
 function HeroBanner() {
   const [active, setActive] = useState(0);
@@ -172,43 +187,73 @@ function HeroBanner() {
 /* Main component                                                         */
 /* ---------------------------------------------------------------------- */
 
-export default function StudentRequest() {
-  const [formData, setFormData] = useState({
-    student_name: '',
-    email: '',
-    contact_number: '',
-    subject_needed: '',
-    preferred_mode: 'online',
-    city: 'Jaipur',
-    specific_area: '',
-    location_coords: '',
-  });
+const INITIAL_FORM = {
+  student_name: '',
+  class_level: '',
+  parent_name: '',
+  email: '',
+  contact_number: '',
+  subjects: [],
+  preferred_mode: 'online',
+  city: 'Jaipur',
+  specific_area: '',
+  location_coords: '',
+};
 
+export default function StudentRequest() {
+  const [formData, setFormData] = useState(INITIAL_FORM);
+  const [subjectInput, setSubjectInput] = useState('');
   const [errors, setErrors] = useState({});
   const [gpsError, setGpsError] = useState('');
   const [statusMessage, setStatusMessage] = useState({ text: '', type: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
 
-  const clearError = (name) =>
+  const clearError = useCallback((name) => {
     setErrors((e) => {
       if (!(name in e)) return e;
       const next = { ...e };
       delete next[name];
       return next;
     });
+  }, []);
 
-  const handleChange = (e) => {
+  const handleChange = useCallback((e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     clearError(name);
-  };
+  }, [clearError]);
 
-  const handleModeSelect = (id) => {
+  const handleModeSelect = useCallback((id) => {
     setFormData((prev) => ({ ...prev, preferred_mode: id }));
-  };
+  }, []);
 
-  const handleGetLocation = () => {
+  /* ---- Subjects: add-as-you-go tag input ---- */
+  const addSubject = useCallback((raw) => {
+    setFormData((prev) => {
+      const value = (raw ?? subjectInput).trim();
+      if (!value) return prev;
+      if (prev.subjects.length >= MAX_SUBJECTS) return prev;
+      const alreadyAdded = prev.subjects.some((s) => s.toLowerCase() === value.toLowerCase());
+      if (alreadyAdded) return prev;
+      return { ...prev, subjects: [...prev.subjects, value] };
+    });
+    setSubjectInput('');
+    clearError('subjects');
+  }, [subjectInput, clearError]);
+
+  const removeSubject = useCallback((subject) => {
+    setFormData((prev) => ({ ...prev, subjects: prev.subjects.filter((s) => s !== subject) }));
+  }, []);
+
+  const handleSubjectKeyDown = useCallback((e) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      addSubject();
+    }
+  }, [addSubject]);
+
+  const handleGetLocation = useCallback(() => {
     if (!navigator.geolocation) {
       setGpsError('Location services are not supported in this browser.');
       return;
@@ -229,17 +274,19 @@ export default function StudentRequest() {
       },
       { enableHighAccuracy: true, timeout: 8000 }
     );
-  };
+  }, []);
 
-  const validate = () => {
+  const validate = useCallback(() => {
     const e = {};
     if (!formData.student_name.trim()) e.student_name = "Enter the student's full name.";
+    if (!formData.class_level) e.class_level = 'Select a class.';
+    if (!formData.parent_name.trim()) e.parent_name = "Enter the parent's full name.";
     if (!EMAIL_RE.test(formData.email)) e.email = 'Enter a valid email address.';
     if (!PHONE_RE.test(formData.contact_number.replace(/\s/g, ''))) e.contact_number = 'Enter a valid phone number.';
-    if (!formData.subject_needed.trim()) e.subject_needed = 'Tell us the subject and class or level.';
+    if (formData.subjects.length === 0) e.subjects = 'Add at least one subject.';
     if (!formData.specific_area.trim()) e.specific_area = 'Enter your area or locality.';
     return e;
-  };
+  }, [formData]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -247,7 +294,8 @@ export default function StudentRequest() {
     setErrors(formErrors);
     if (Object.keys(formErrors).length > 0) {
       // Scroll to the first error smoothly
-      const firstError = document.getElementsByName(Object.keys(formErrors)[0])[0];
+      const firstErrorName = Object.keys(formErrors)[0];
+      const firstError = document.getElementsByName(firstErrorName)[0];
       if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
@@ -256,13 +304,14 @@ export default function StudentRequest() {
     setStatusMessage({ text: 'Submitting your request…', type: 'loading' });
 
     try {
-      await axios.post('https://learning-hub-backend-one.vercel.app/api/public/student-request', formData);
+      await axios.post('https://learning-hub-backend-one.vercel.app/api/public/student-request', {
+        ...formData,
+        subjects: formData.subjects, // array of strings, e.g. ["Hindi", "English"]
+      });
 
       setStatusMessage({ text: 'Request received! An advisor will contact you shortly.', type: 'success' });
-      setFormData({
-        student_name: '', email: '', contact_number: '', subject_needed: '',
-        preferred_mode: 'online', city: 'Jaipur', specific_area: '', location_coords: '',
-      });
+      setFormData(INITIAL_FORM);
+      setSubjectInput('');
     } catch (error) {
       console.error(error);
       setStatusMessage({ text: 'Could not connect. Please check your network and try again.', type: 'error' });
@@ -317,12 +366,12 @@ export default function StudentRequest() {
         />
         <div className="relative mx-auto max-w-[1200px] px-4 sm:px-6 md:px-10">
           <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-8">
-            
+
             {/* Left: Copy */}
             <div className="max-w-xl text-center lg:text-left">
               <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[var(--marigold)]/30 bg-[var(--marigold)]/10 px-3.5 py-1.5 font-mono text-[11px] font-bold uppercase tracking-widest text-[var(--ink)]">
                 <span className="h-2 w-2 animate-pulse rounded-full bg-[var(--rust)]" />
-                For students &amp; parents
+                For students &amp; parents in Jaipur
               </div>
               <h1 className="font-serif text-4xl font-black leading-[1.05] tracking-tight text-[var(--ink)] sm:text-5xl md:text-6xl">
                 Find the right tutor,<br className="hidden sm:block lg:hidden xl:block" />
@@ -352,7 +401,7 @@ export default function StudentRequest() {
             <div className="mx-auto w-full max-w-lg lg:max-w-none">
               <HeroBanner />
             </div>
-            
+
           </div>
         </div>
       </header>
@@ -428,10 +477,10 @@ export default function StudentRequest() {
             {/* Premium Card Wrapper */}
             <div className="overflow-hidden rounded-[2rem] bg-white shadow-2xl shadow-[var(--chalk)]/10 ring-1 ring-[var(--line)]/40 sm:rounded-[2.5rem]">
               <div className="h-2 w-full bg-gradient-to-r from-[var(--marigold)] to-[var(--rust)]" />
-              
+
               <div className="p-6 sm:p-10 md:p-12">
                 <div className="space-y-10">
-                  
+
                   {/* Student details */}
                   <div>
                     <SectionLabel>Student Details</SectionLabel>
@@ -442,8 +491,30 @@ export default function StudentRequest() {
                           value={formData.student_name} onChange={handleChange} className={inputClass(errors.student_name)}
                         />
                       </Field>
+                      <Field label="Class" error={errors.class_level} hint="Pre-Nursery to Class 8">
+                        <select
+                          name="class_level" value={formData.class_level} onChange={handleChange}
+                          className={selectClass(errors.class_level)}
+                        >
+                          <option value="" disabled>Select class</option>
+                          {CLASS_LEVELS.map((c) => <option key={c} value={c}>{c}</option>)}
+                        </select>
+                      </Field>
+                    </div>
+                  </div>
+
+                  {/* Parent details */}
+                  <div>
+                    <SectionLabel>Parent Details</SectionLabel>
+                    <div className="space-y-6">
+                      <Field label="Parent's full name" error={errors.parent_name}>
+                        <input
+                          name="parent_name" type="text" autoComplete="name" placeholder="e.g. Rohit Sharma"
+                          value={formData.parent_name} onChange={handleChange} className={inputClass(errors.parent_name)}
+                        />
+                      </Field>
                       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                        <Field label="Parent Email" error={errors.email}>
+                        <Field label="Parent email" error={errors.email}>
                           <input
                             name="email" type="email" autoComplete="email" placeholder="you@example.com"
                             value={formData.email} onChange={handleChange} className={inputClass(errors.email)}
@@ -463,12 +534,70 @@ export default function StudentRequest() {
                   <div>
                     <SectionLabel>Learning Needs</SectionLabel>
                     <div className="space-y-6">
-                      <Field label="Subject & class / level" error={errors.subject_needed} hint="e.g. Class 10 Mathematics, or Python Programming">
-                        <input
-                          name="subject_needed" type="text" placeholder="e.g. Class 10 Mathematics"
-                          value={formData.subject_needed} onChange={handleChange} className={inputClass(errors.subject_needed)}
-                        />
+                      <Field
+                        label="Subjects"
+                        error={errors.subjects}
+                        hint={`Add each subject one at a time · up to ${MAX_SUBJECTS}`}
+                      >
+                        {formData.subjects.length > 0 && (
+                          <div className="mb-1 flex flex-wrap gap-2">
+                            {formData.subjects.map((subject) => (
+                              <span
+                                key={subject}
+                                className="inline-flex items-center gap-1.5 rounded-full bg-[var(--marigold)]/15 py-1.5 pl-3 pr-2 text-xs font-bold text-[var(--ink)]"
+                              >
+                                {subject}
+                                <button
+                                  type="button"
+                                  onClick={() => removeSubject(subject)}
+                                  aria-label={`Remove ${subject}`}
+                                  className="flex h-4 w-4 items-center justify-center rounded-full text-[var(--rust)] transition-colors hover:bg-[var(--rust)]/15"
+                                >
+                                  ×
+                                </button>
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        <div className="flex gap-2">
+                          <input
+                            name="subject_input" type="text" placeholder="e.g. Mathematics"
+                            value={subjectInput}
+                            onChange={(e) => setSubjectInput(e.target.value)}
+                            onKeyDown={handleSubjectKeyDown}
+                            disabled={formData.subjects.length >= MAX_SUBJECTS}
+                            className={inputClass(errors.subjects)}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => addSubject()}
+                            disabled={!subjectInput.trim() || formData.subjects.length >= MAX_SUBJECTS}
+                            className="shrink-0 rounded-xl bg-[var(--chalk)] px-5 text-xs font-black uppercase tracking-wider text-[var(--paper)] transition-colors hover:bg-[var(--rust)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-[var(--chalk)]"
+                          >
+                            + Add
+                          </button>
+                        </div>
+                        {formData.subjects.length < MAX_SUBJECTS && (
+                          <div className="flex flex-wrap items-center gap-2 pt-1">
+                            <span className="mr-1 font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--ink)]/40">
+                              Quick add:
+                            </span>
+                            {SUBJECT_SUGGESTIONS
+                              .filter((s) => !formData.subjects.some((f) => f.toLowerCase() === s.toLowerCase()))
+                              .map((s) => (
+                                <button
+                                  key={s}
+                                  type="button"
+                                  onClick={() => addSubject(s)}
+                                  className="rounded-full border border-[var(--line)] px-3 py-1 text-xs font-semibold text-[var(--ink)]/60 transition-colors hover:border-[var(--marigold)] hover:text-[var(--ink)]"
+                                >
+                                  + {s}
+                                </button>
+                              ))}
+                          </div>
+                        )}
                       </Field>
+
                       <div className="space-y-3">
                         <label className="block font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--ink)]/70">
                           Preferred mode
@@ -496,13 +625,10 @@ export default function StudentRequest() {
                   <div>
                     <SectionLabel>Location</SectionLabel>
                     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                      <Field label="City">
-                        <select
-                          name="city" value={formData.city} onChange={handleChange}
-                          className={`${inputClass(false)} cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23131313%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E')] bg-[length:10px_10px] bg-[right_1rem_center] bg-no-repeat`}
-                        >
-                          {CITIES.map((c) => <option key={c} value={c}>{c}</option>)}
-                        </select>
+                      <Field label="City" hint="We currently serve Jaipur only">
+                        <div className="flex items-center gap-2 rounded-xl border-2 border-transparent bg-black/[0.02] px-4 py-3.5 text-sm font-semibold text-[var(--ink)]/70">
+                          <span aria-hidden="true">📍</span> Jaipur, Rajasthan
+                        </div>
                       </Field>
                       <Field label="Area / locality" error={errors.specific_area}>
                         <div className="flex gap-2">
@@ -548,9 +674,9 @@ export default function StudentRequest() {
 
                     <button
                       type="submit" disabled={isSubmitting}
-                      className={`w-full rounded-2xl py-4.5 text-sm font-black uppercase tracking-widest text-white transition-all disabled:cursor-not-allowed ${
-                        isSubmitting 
-                          ? 'bg-[var(--ink)]/30' 
+                      className={`w-full rounded-2xl py-5 text-sm font-black uppercase tracking-widest text-white transition-all disabled:cursor-not-allowed ${
+                        isSubmitting
+                          ? 'bg-[var(--ink)]/30'
                           : 'bg-[var(--chalk)] shadow-lg shadow-[var(--chalk)]/20 hover:-translate-y-0.5 hover:bg-[var(--rust)] hover:shadow-[var(--rust)]/20 active:translate-y-0'
                       }`}
                     >
