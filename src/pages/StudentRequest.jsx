@@ -55,48 +55,47 @@ const SELECT_ARROW_URL =
 function Field({ label, error, hint, children }) {
   return (
     <div className="space-y-2">
-      <label className="block font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--ink)]/70">
+      <label className="block font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--ink)]/70 pl-1">
         {label}
       </label>
       {children}
       {error ? (
-        <p className="font-mono text-[11px] font-semibold text-[var(--rust)]">{error}</p>
+        <p className="font-mono text-[11px] font-semibold text-[var(--rust)] pl-1">{error}</p>
       ) : hint ? (
-        <p className="text-[11px] font-medium text-[var(--ink)]/40">{hint}</p>
+        <p className="text-[11px] font-medium text-[var(--ink)]/40 pl-1">{hint}</p>
       ) : null}
     </div>
   );
 }
 
+// NEW: Glassmorphism Input Styling
 const inputClass = (hasError) =>
-  `w-full rounded-xl border-2 bg-black/[0.02] px-4 py-3.5 text-sm font-semibold text-[var(--ink)] placeholder-[var(--ink)]/30 transition-all focus:bg-white focus:outline-none focus:ring-4 focus:ring-[var(--marigold)]/20 ${
-    hasError ? 'border-[var(--rust)]/50 focus:border-[var(--rust)]' : 'border-transparent focus:border-[var(--marigold)]'
+  `w-full rounded-[1.5rem] border border-white/60 bg-white/40 backdrop-blur-md px-5 py-4 text-sm font-semibold text-[var(--ink)] placeholder-[var(--ink)]/40 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] transition-all focus:bg-white/70 focus:outline-none focus:ring-2 focus:ring-[var(--marigold)] focus:border-transparent ${
+    hasError ? 'border-[var(--rust)]/60 bg-red-50/50 ring-2 ring-[var(--rust)]' : ''
   }`;
 
 const selectClass = (hasError) =>
-  `${inputClass(hasError)} cursor-pointer appearance-none bg-[url('${SELECT_ARROW_URL}')] bg-[length:10px_10px] bg-[right_1rem_center] bg-no-repeat`;
+  `${inputClass(hasError)} cursor-pointer appearance-none bg-[url('${SELECT_ARROW_URL}')] bg-[length:12px_12px] bg-[right_1.25rem_center] bg-no-repeat`;
 
 function SectionLabel({ children }) {
   return (
-    <div className="mb-6 flex items-center gap-3">
-      <div className="h-px flex-1 bg-[var(--line)]/50" />
+    <div className="mb-8 flex items-center gap-3">
+      <div className="h-px flex-1 bg-gradient-to-r from-transparent via-[var(--line)] to-[var(--line)] opacity-50" />
       <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-[var(--marigold)]">
         {children}
       </p>
-      <div className="h-px flex-1 bg-[var(--line)]/50" />
+      <div className="h-px flex-1 bg-gradient-to-l from-transparent via-[var(--line)] to-[var(--line)] opacity-50" />
     </div>
   );
 }
 
 /* ---------------------------------------------------------------------- */
 /* Decorative illustrations + rotating banner                             */
-/* Memoized: these are static SVGs and shouldn't re-render every time the */
-/* banner's active slide index changes.                                  */
 /* ---------------------------------------------------------------------- */
 
 const NotebookIllustration = memo(function NotebookIllustration() {
   return (
-    <svg width="200" height="154" viewBox="0 0 220 170" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" className="drop-shadow-sm">
+    <svg width="200" height="154" viewBox="0 0 220 170" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" className="drop-shadow-lg">
       <path d="M20 22 Q20 10 32 10 H106 V148 H32 Q20 148 20 136 Z" fill="var(--card)" />
       <path d="M200 22 Q200 10 188 10 H114 V148 H188 Q200 148 200 136 Z" fill="var(--card)" />
       <path d="M20 22 Q20 10 32 10 H106 V148 H32 Q20 148 20 136 Z" stroke="var(--line)" strokeWidth="1.5" />
@@ -119,7 +118,7 @@ const NotebookIllustration = memo(function NotebookIllustration() {
 
 const MentorBadgeIllustration = memo(function MentorBadgeIllustration() {
   return (
-    <svg width="154" height="154" viewBox="0 0 170 170" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" className="drop-shadow-sm">
+    <svg width="154" height="154" viewBox="0 0 170 170" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" className="drop-shadow-lg">
       <circle cx="85" cy="85" r="82" fill="var(--card)" />
       <circle cx="85" cy="85" r="82" stroke="var(--chalk)" strokeOpacity="0.12" strokeWidth="2" />
       <path d="M32 128 Q32 92 62 92 Q92 92 92 128 Z" fill="var(--chalk)" />
@@ -147,29 +146,29 @@ function HeroBanner() {
     <div
       onMouseEnter={() => { pausedRef.current = true; }}
       onMouseLeave={() => { pausedRef.current = false; }}
-      className="relative w-full overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-[var(--marigold)] to-[var(--rust)] shadow-2xl shadow-[var(--marigold)]/20 lg:h-full lg:min-h-[400px]"
+      className="relative w-full overflow-hidden rounded-[3rem] bg-gradient-to-br from-[var(--marigold)] to-[var(--rust)] shadow-[0_20px_50px_-12px_rgba(59,130,246,0.3)] lg:h-full lg:min-h-[400px]"
     >
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 opacity-[0.12]"
-        style={{ backgroundImage: 'radial-gradient(circle, var(--ink) 1.5px, transparent 1.5px)', backgroundSize: '24px 24px' }}
+        className="pointer-events-none absolute inset-0 opacity-[0.15]"
+        style={{ backgroundImage: 'radial-gradient(circle, #FFFFFF 1.5px, transparent 1.5px)', backgroundSize: '32px 32px' }}
       />
       <div className="relative flex h-full flex-col justify-center px-6 py-12 sm:px-10 lg:p-14">
         <div className="flex w-full items-center justify-between gap-6">
           <div className="hidden sm:block">
              <NotebookIllustration />
           </div>
-          <div className="z-10 mx-auto w-full max-w-[260px] -rotate-3 rounded-2xl bg-[var(--card)] p-6 shadow-xl transition-transform hover:-rotate-1 lg:mx-0">
+          <div className="z-10 mx-auto w-full max-w-[260px] -rotate-2 rounded-[2rem] bg-white/90 backdrop-blur-xl p-7 shadow-2xl transition-transform hover:rotate-0 lg:mx-0">
             <p key={active} className="animate-in fade-in font-serif text-base font-bold leading-snug text-[var(--ink)] duration-500">
               {BANNER_SLIDES[active].note}
             </p>
-            <div className="mt-5 flex gap-2">
+            <div className="mt-6 flex gap-2">
               {BANNER_SLIDES.map((_, i) => (
                 <button
                   key={i}
                   onClick={() => setActive(i)}
                   aria-label={`Show message ${i + 1}`}
-                  className={`h-1.5 rounded-full transition-all ${i === active ? 'w-8 bg-[var(--marigold)]' : 'w-2 bg-[var(--ink)]/20 hover:bg-[var(--ink)]/40'}`}
+                  className={`h-2 rounded-full transition-all ${i === active ? 'w-8 bg-[var(--marigold)]' : 'w-2 bg-[var(--ink)]/10 hover:bg-[var(--ink)]/30'}`}
                 />
               ))}
             </div>
@@ -293,7 +292,6 @@ export default function StudentRequest() {
     const formErrors = validate();
     setErrors(formErrors);
     if (Object.keys(formErrors).length > 0) {
-      // Scroll to the first error smoothly
       const firstErrorName = Object.keys(formErrors)[0];
       const firstError = document.getElementsByName(firstErrorName)[0];
       if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -306,7 +304,7 @@ export default function StudentRequest() {
     try {
       await axios.post('https://learning-hub-backend-one.vercel.app/api/public/student-request', {
         ...formData,
-        subjects: formData.subjects, // array of strings, e.g. ["Hindi", "English"]
+        subjects: formData.subjects, 
       });
 
       setStatusMessage({ text: 'Request received! An advisor will contact you shortly.', type: 'success' });
@@ -323,34 +321,39 @@ export default function StudentRequest() {
   return (
    <div
       style={{
-        '--chalk': '#2E1065',     /* Deep Violet */
-        '--paper': '#FFFBF7',     /* Warm Peach/White */
-        '--ink': '#171717',       /* Sharp Charcoal */
-        '--card': '#FFFFFF',      /* Pure White */
-        '--marigold': '#F59E0B',  /* Bright Amber/Yellow */
-        '--rust': '#EF4444',      /* Punchy Red/Coral */
-        '--line': '#E5E7EB',      /* Soft Gray */
-        '--good': '#22C55E',      /* Bright Green */
+        // Modern & Vibrant Tech Theme applied to root
+        '--chalk': '#1E1B4B',     
+        '--paper': '#F8FAFC',     
+        '--ink': '#0F172A',       
+        '--card': '#FFFFFF',      
+        '--marigold': '#3B82F6',  
+        '--rust': '#8B5CF6',      
+        '--line': '#E2E8F0',      
+        '--good': '#10B981',      
       }}
-      className="flex min-h-screen scroll-smooth flex-col bg-[var(--paper)] font-sans text-[var(--ink)] selection:bg-[var(--marigold)]/30"
+      className="relative flex min-h-screen scroll-smooth flex-col bg-[var(--paper)] font-sans text-[var(--ink)] selection:bg-[var(--marigold)]/30 overflow-hidden"
     >
+      {/* Background Abstract Blobs for Glassmorphism Effect */}
+      <div className="pointer-events-none absolute left-[-10%] top-[10%] h-[500px] w-[500px] rounded-full bg-[var(--marigold)]/10 blur-[120px]" />
+      <div className="pointer-events-none absolute right-[-10%] top-[40%] h-[600px] w-[600px] rounded-full bg-[var(--rust)]/10 blur-[150px]" />
+      
       {/* --- NAV --- */}
-      <nav className="sticky top-0 z-50 border-b border-[var(--line)]/60 bg-[var(--paper)]/80 backdrop-blur-xl">
+      <nav className="sticky top-0 z-50 border-b border-white/40 bg-white/50 backdrop-blur-2xl">
         <div className="mx-auto flex max-w-[1200px] items-center justify-between px-4 py-3 sm:px-6 sm:py-4 md:px-10">
           <div className="flex items-center gap-3 text-lg font-black tracking-tight">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--chalk)] font-mono text-sm text-[var(--paper)] shadow-md sm:h-10 sm:w-10">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[var(--chalk)] font-mono text-sm text-white shadow-lg">
               LH
             </div>
             <span className="hidden sm:inline">Learning Hub</span>
           </div>
           <div className="hidden items-center gap-8 font-mono text-[13px] font-bold uppercase tracking-wide text-[var(--ink)]/60 md:flex">
             <Link to="/" className="transition-colors hover:text-[var(--ink)]">Home</Link>
-            <Link to="/request-tutor" className="text-[var(--rust)]">Find a tutor</Link>
+            <Link to="/request-tutor" className="text-[var(--marigold)]">Find a tutor</Link>
             <Link to="/apply-teacher" className="transition-colors hover:text-[var(--ink)]">Become a tutor</Link>
           </div>
           <Link
             to="/apply-teacher"
-            className="rounded-xl bg-white px-4 py-2.5 text-xs font-bold text-[var(--ink)] shadow-sm ring-1 ring-[var(--line)] transition-all hover:bg-[var(--chalk)] hover:text-[var(--paper)] sm:px-5 sm:text-sm"
+            className="rounded-2xl bg-white/80 backdrop-blur-md border border-white/60 px-5 py-2.5 text-xs font-bold text-[var(--ink)] shadow-sm transition-all hover:bg-[var(--marigold)] hover:text-white hover:border-transparent sm:px-6 sm:text-sm"
           >
             Teach with us
           </Link>
@@ -358,39 +361,34 @@ export default function StudentRequest() {
       </nav>
 
       {/* --- UNIFIED HERO SECTION --- */}
-      <header className="relative overflow-hidden border-b border-[var(--line)]/50 pt-10 pb-16 sm:pt-16 sm:pb-24 lg:pt-20 lg:pb-28">
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 opacity-10"
-          style={{ backgroundImage: 'repeating-linear-gradient(to right, var(--line) 0, var(--line) 1px, transparent 1px, transparent 40px)' }}
-        />
+      <header className="relative pt-12 pb-20 sm:pt-20 sm:pb-32 lg:pt-24 lg:pb-36 z-10">
         <div className="relative mx-auto max-w-[1200px] px-4 sm:px-6 md:px-10">
-          <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-8">
+          <div className="grid grid-cols-1 items-center gap-16 lg:grid-cols-2 lg:gap-12">
 
             {/* Left: Copy */}
             <div className="max-w-xl text-center lg:text-left">
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[var(--marigold)]/30 bg-[var(--marigold)]/10 px-3.5 py-1.5 font-mono text-[11px] font-bold uppercase tracking-widest text-[var(--ink)]">
-                <span className="h-2 w-2 animate-pulse rounded-full bg-[var(--rust)]" />
+              <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-[var(--marigold)]/30 bg-white/60 backdrop-blur-md px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-widest text-[var(--ink)] shadow-sm">
+                <span className="h-2 w-2 animate-pulse rounded-full bg-[var(--marigold)]" />
                 For students &amp; parents in Jaipur
               </div>
-              <h1 className="font-serif text-4xl font-black leading-[1.05] tracking-tight text-[var(--ink)] sm:text-5xl md:text-6xl">
+              <h1 className="font-serif text-4xl font-black leading-[1.1] tracking-tight text-[var(--ink)] sm:text-5xl md:text-6xl">
                 Find the right tutor,<br className="hidden sm:block lg:hidden xl:block" />
-                matched to <span className="italic text-[var(--rust)]">your</span> child.
+                matched to <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--marigold)] to-[var(--rust)]">your</span> child.
               </h1>
-              <p className="mx-auto mt-6 text-base font-medium leading-relaxed text-[var(--ink)]/65 lg:mx-0 lg:text-lg">
+              <p className="mx-auto mt-6 text-base font-medium leading-relaxed text-[var(--ink)]/60 lg:mx-0 lg:text-lg">
                 Tell us what you're looking for. A learning advisor reviews every request personally
                 and introduces you to verified tutors who fit — usually within 24 hours.
               </p>
-              <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row lg:justify-start">
+              <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row lg:justify-start">
                 <a
                   href="#request"
-                  className="w-full rounded-xl bg-[var(--chalk)] px-8 py-4 text-center text-sm font-black uppercase tracking-widest text-[var(--paper)] shadow-lg shadow-[var(--chalk)]/20 transition-all hover:-translate-y-0.5 hover:bg-[var(--rust)] hover:shadow-xl hover:shadow-[var(--rust)]/20 sm:w-auto"
+                  className="w-full rounded-[1.5rem] bg-[var(--chalk)] px-8 py-4 text-center text-sm font-black uppercase tracking-widest text-white shadow-[0_10px_30px_-10px_rgba(30,27,75,0.4)] transition-all hover:-translate-y-1 hover:shadow-[0_20px_40px_-10px_rgba(30,27,75,0.5)] sm:w-auto"
                 >
                   Request a tutor
                 </a>
                 <a
                   href="#how"
-                  className="w-full rounded-xl border-2 border-[var(--ink)]/10 px-8 py-3.5 text-center text-sm font-black uppercase tracking-widest text-[var(--ink)]/70 transition-colors hover:border-[var(--ink)]/30 sm:w-auto"
+                  className="w-full rounded-[1.5rem] border border-[var(--line)] bg-white/50 backdrop-blur-sm px-8 py-4 text-center text-sm font-black uppercase tracking-widest text-[var(--ink)]/70 transition-all hover:bg-white sm:w-auto"
                 >
                   See how it works
                 </a>
@@ -407,7 +405,7 @@ export default function StudentRequest() {
       </header>
 
       {/* --- WHY TRUST US --- */}
-      <section className="relative py-16 sm:py-24">
+      <section className="relative py-20 sm:py-32 z-10">
         <div className="mx-auto max-w-[1200px] px-4 sm:px-6 md:px-10">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="font-serif text-3xl font-black tracking-tight text-[var(--ink)] sm:text-4xl">
@@ -419,10 +417,10 @@ export default function StudentRequest() {
             </p>
           </div>
 
-          <div className="mt-14 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {TRUST_BENEFITS.map((b) => (
-              <div key={b.title} className="group rounded-3xl bg-white p-8 shadow-xl shadow-[var(--chalk)]/5 transition-all hover:-translate-y-1 hover:shadow-2xl hover:shadow-[var(--marigold)]/10">
-                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--paper)] text-2xl transition-transform group-hover:scale-110">
+              <div key={b.title} className="group rounded-[2.5rem] bg-white/60 backdrop-blur-xl border border-white/50 p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all hover:-translate-y-2 hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] hover:bg-white/90">
+                <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-[1.25rem] bg-[var(--marigold)]/10 text-2xl transition-transform group-hover:scale-110 group-hover:bg-[var(--marigold)]/20">
                   {b.icon}
                 </div>
                 <h3 className="mb-2 text-lg font-black text-[var(--ink)]">{b.title}</h3>
@@ -434,7 +432,7 @@ export default function StudentRequest() {
       </section>
 
       {/* --- HOW IT WORKS --- */}
-      <section id="how" className="border-t border-[var(--line)]/50 py-16 sm:py-24">
+      <section id="how" className="relative py-20 sm:py-32 z-10">
         <div className="mx-auto max-w-[1000px] px-4 sm:px-6 md:px-10">
           <div className="mx-auto max-w-xl text-center">
             <h2 className="font-serif text-3xl font-black tracking-tight text-[var(--ink)] sm:text-4xl">
@@ -442,14 +440,14 @@ export default function StudentRequest() {
             </h2>
           </div>
 
-          <div className="relative mt-16 flex flex-col gap-12 md:flex-row md:justify-between md:gap-8">
-            <div aria-hidden="true" className="absolute left-[15%] right-[15%] top-7 hidden h-0.5 rounded-full bg-[var(--line)]/50 md:block" />
+          <div className="relative mt-20 flex flex-col gap-12 md:flex-row md:justify-between md:gap-8">
+            <div aria-hidden="true" className="absolute left-[15%] right-[15%] top-8 hidden h-0.5 rounded-full bg-gradient-to-r from-transparent via-[var(--line)] to-transparent md:block" />
             {HOW_STEPS.map((s, i) => (
               <div key={s.title} className="relative z-10 flex flex-1 flex-col items-center text-center">
-                <span className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--marigold)] font-mono text-lg font-black text-[var(--ink)] shadow-lg shadow-[var(--marigold)]/30 ring-4 ring-[var(--paper)] transition-transform hover:scale-110">
+                <span className="mb-8 flex h-16 w-16 items-center justify-center rounded-[1.5rem] bg-gradient-to-br from-[var(--marigold)] to-[var(--rust)] font-mono text-xl font-black text-white shadow-[0_10px_20px_rgba(59,130,246,0.3)] ring-8 ring-[var(--paper)] transition-transform hover:scale-110">
                   0{i + 1}
                 </span>
-                <h3 className="mb-2 text-lg font-black text-[var(--ink)]">{s.title}</h3>
+                <h3 className="mb-3 text-lg font-black text-[var(--ink)]">{s.title}</h3>
                 <p className="max-w-[260px] text-sm font-medium leading-relaxed text-[var(--ink)]/60">{s.copy}</p>
               </div>
             ))}
@@ -457,29 +455,25 @@ export default function StudentRequest() {
         </div>
       </section>
 
-      {/* --- REQUEST FORM (ELEVATED) --- */}
-      <section id="request" className="relative border-t border-[var(--line)]/50 pb-24 pt-16 sm:pt-24">
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 bottom-0 top-1/2 bg-gradient-to-b from-transparent to-[var(--chalk)]/5"
-        />
+      {/* --- REQUEST FORM (GLASSMORPHISM ELEVATED) --- */}
+      <section id="request" className="relative pb-32 pt-20 sm:pt-32 z-10">
         <div className="relative mx-auto max-w-[760px] px-4 sm:px-6 md:px-10">
-          <div className="mb-12 text-center">
+          <div className="mb-14 text-center">
             <h2 className="font-serif text-3xl font-black tracking-tight text-[var(--ink)] sm:text-4xl">
               Ready to begin?
             </h2>
-            <p className="mt-3 text-base font-medium text-[var(--ink)]/60">
+            <p className="mt-4 text-base font-medium text-[var(--ink)]/60">
               Fill out the details below. An advisor will review it today.
             </p>
           </div>
 
           <form onSubmit={handleSubmit} noValidate className="relative">
-            {/* Premium Card Wrapper */}
-            <div className="overflow-hidden rounded-[2rem] bg-white shadow-2xl shadow-[var(--chalk)]/10 ring-1 ring-[var(--line)]/40 sm:rounded-[2.5rem]">
+            {/* Glassmorphism Card Wrapper */}
+            <div className="overflow-hidden rounded-[2.5rem] bg-white/50 backdrop-blur-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] ring-1 ring-white/60 sm:rounded-[3rem]">
               <div className="h-2 w-full bg-gradient-to-r from-[var(--marigold)] to-[var(--rust)]" />
 
-              <div className="p-6 sm:p-10 md:p-12">
-                <div className="space-y-10">
+              <div className="p-6 sm:p-10 md:p-14">
+                <div className="space-y-12">
 
                   {/* Student details */}
                   <div>
@@ -487,7 +481,7 @@ export default function StudentRequest() {
                     <div className="space-y-6">
                       <Field label="Student's full name" error={errors.student_name}>
                         <input
-                          name="student_name" type="text" autoComplete="name" placeholder="e.g. Aarav Sharma"
+                          name="student_name" type="text" autoComplete="name" placeholder="e.g. AA"
                           value={formData.student_name} onChange={handleChange} className={inputClass(errors.student_name)}
                         />
                       </Field>
@@ -533,25 +527,25 @@ export default function StudentRequest() {
                   {/* Learning needs */}
                   <div>
                     <SectionLabel>Learning Needs</SectionLabel>
-                    <div className="space-y-6">
+                    <div className="space-y-8">
                       <Field
                         label="Subjects"
                         error={errors.subjects}
                         hint={`Add each subject one at a time · up to ${MAX_SUBJECTS}`}
                       >
                         {formData.subjects.length > 0 && (
-                          <div className="mb-1 flex flex-wrap gap-2">
+                          <div className="mb-2 flex flex-wrap gap-2">
                             {formData.subjects.map((subject) => (
                               <span
                                 key={subject}
-                                className="inline-flex items-center gap-1.5 rounded-full bg-[var(--marigold)]/15 py-1.5 pl-3 pr-2 text-xs font-bold text-[var(--ink)]"
+                                className="inline-flex items-center gap-1.5 rounded-full bg-white px-4 py-2 text-xs font-bold text-[var(--ink)] shadow-sm border border-white/60"
                               >
                                 {subject}
                                 <button
                                   type="button"
                                   onClick={() => removeSubject(subject)}
                                   aria-label={`Remove ${subject}`}
-                                  className="flex h-4 w-4 items-center justify-center rounded-full text-[var(--rust)] transition-colors hover:bg-[var(--rust)]/15"
+                                  className="flex h-5 w-5 items-center justify-center rounded-full text-[var(--rust)] transition-colors hover:bg-[var(--rust)]/10"
                                 >
                                   ×
                                 </button>
@@ -559,7 +553,7 @@ export default function StudentRequest() {
                             ))}
                           </div>
                         )}
-                        <div className="flex gap-2">
+                        <div className="flex gap-3">
                           <input
                             name="subject_input" type="text" placeholder="e.g. Mathematics"
                             value={subjectInput}
@@ -572,14 +566,14 @@ export default function StudentRequest() {
                             type="button"
                             onClick={() => addSubject()}
                             disabled={!subjectInput.trim() || formData.subjects.length >= MAX_SUBJECTS}
-                            className="shrink-0 rounded-xl bg-[var(--chalk)] px-5 text-xs font-black uppercase tracking-wider text-[var(--paper)] transition-colors hover:bg-[var(--rust)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-[var(--chalk)]"
+                            className="shrink-0 rounded-[1.5rem] bg-[var(--chalk)] px-6 text-xs font-black uppercase tracking-wider text-white shadow-md transition-all hover:-translate-y-0.5 hover:bg-[var(--marigold)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:bg-[var(--chalk)]"
                           >
                             + Add
                           </button>
                         </div>
                         {formData.subjects.length < MAX_SUBJECTS && (
-                          <div className="flex flex-wrap items-center gap-2 pt-1">
-                            <span className="mr-1 font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--ink)]/40">
+                          <div className="flex flex-wrap items-center gap-2 pt-2">
+                            <span className="mr-2 font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--ink)]/40">
                               Quick add:
                             </span>
                             {SUBJECT_SUGGESTIONS
@@ -589,7 +583,7 @@ export default function StudentRequest() {
                                   key={s}
                                   type="button"
                                   onClick={() => addSubject(s)}
-                                  className="rounded-full border border-[var(--line)] px-3 py-1 text-xs font-semibold text-[var(--ink)]/60 transition-colors hover:border-[var(--marigold)] hover:text-[var(--ink)]"
+                                  className="rounded-full border border-white/60 bg-white/30 backdrop-blur-sm px-3 py-1.5 text-xs font-semibold text-[var(--ink)]/70 transition-all hover:bg-white hover:border-transparent hover:shadow-sm"
                                 >
                                   + {s}
                                 </button>
@@ -598,21 +592,21 @@ export default function StudentRequest() {
                         )}
                       </Field>
 
-                      <div className="space-y-3">
-                        <label className="block font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--ink)]/70">
+                      <div className="space-y-4">
+                        <label className="block font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--ink)]/70 pl-1">
                           Preferred mode
                         </label>
-                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                           {MODES.map((mode) => (
                             <button
                               type="button" key={mode.id} onClick={() => handleModeSelect(mode.id)}
-                              className={`flex flex-col items-center justify-center gap-2 rounded-2xl border-2 p-4 text-center text-sm font-bold transition-all ${
+                              className={`flex flex-col items-center justify-center gap-3 rounded-[1.5rem] border border-white/60 p-5 text-center text-sm font-bold transition-all ${
                                 formData.preferred_mode === mode.id
-                                  ? 'border-[var(--marigold)] bg-[var(--marigold)]/10 text-[var(--ink)] shadow-sm'
-                                  : 'border-transparent bg-black/[0.02] text-[var(--ink)]/60 hover:bg-black/[0.04]'
+                                  ? 'bg-white shadow-[0_10px_20px_-10px_rgba(0,0,0,0.1)] ring-2 ring-[var(--marigold)] text-[var(--ink)]'
+                                  : 'bg-white/30 backdrop-blur-sm text-[var(--ink)]/60 hover:bg-white/60'
                               }`}
                             >
-                              <span className="text-2xl drop-shadow-sm">{mode.icon}</span>
+                              <span className="text-3xl drop-shadow-sm">{mode.icon}</span>
                               {mode.label}
                             </button>
                           ))}
@@ -626,12 +620,12 @@ export default function StudentRequest() {
                     <SectionLabel>Location</SectionLabel>
                     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                       <Field label="City" hint="We currently serve Jaipur only">
-                        <div className="flex items-center gap-2 rounded-xl border-2 border-transparent bg-black/[0.02] px-4 py-3.5 text-sm font-semibold text-[var(--ink)]/70">
+                        <div className="flex items-center gap-2 rounded-[1.5rem] border border-white/60 bg-white/30 backdrop-blur-md px-5 py-4 text-sm font-semibold text-[var(--ink)]/70">
                           <span aria-hidden="true">📍</span> Jaipur, Rajasthan
                         </div>
                       </Field>
                       <Field label="Area / locality" error={errors.specific_area}>
-                        <div className="flex gap-2">
+                        <div className="flex gap-3">
                           <input
                             name="specific_area" type="text" placeholder="e.g. Malviya Nagar"
                             value={formData.specific_area} onChange={handleChange}
@@ -639,50 +633,50 @@ export default function StudentRequest() {
                           />
                           <button
                             type="button" onClick={handleGetLocation} disabled={isLocating}
-                            className={`shrink-0 rounded-xl border-2 px-4 text-xs font-bold transition-all ${
+                            className={`shrink-0 rounded-[1.5rem] border px-5 text-xs font-bold transition-all ${
                               formData.location_coords
-                                ? 'border-[var(--good)] bg-[var(--good)]/10 text-[var(--good)]'
-                                : 'border-transparent bg-[var(--ink)]/5 text-[var(--ink)]/60 hover:bg-[var(--ink)]/10'
+                                ? 'border-transparent bg-[var(--good)] text-white shadow-md'
+                                : 'border-white/60 bg-white/40 backdrop-blur-sm text-[var(--ink)] hover:bg-white hover:shadow-sm'
                             }`}
                           >
                             {isLocating ? '···' : formData.location_coords ? '✓ Pinned' : '📍 GPS'}
                           </button>
                         </div>
-                        {gpsError && <p className="font-mono text-[11px] font-semibold text-[var(--rust)]">{gpsError}</p>}
+                        {gpsError && <p className="font-mono text-[11px] font-semibold text-[var(--rust)] pl-1 pt-1">{gpsError}</p>}
                       </Field>
                     </div>
                   </div>
 
                   {/* Submission Area */}
-                  <div className="pt-4">
+                  <div className="pt-6">
                     {statusMessage.text && (
                       <div
-                        className={`mb-6 flex items-center gap-3 rounded-2xl border px-5 py-4 text-sm font-bold ${
+                        className={`mb-8 flex items-center gap-4 rounded-[1.5rem] border px-6 py-5 text-sm font-bold backdrop-blur-md ${
                           statusMessage.type === 'error'
-                            ? 'border-[var(--rust)]/30 bg-[var(--rust)]/10 text-[var(--rust)]'
+                            ? 'border-red-200 bg-red-50/80 text-red-700'
                             : statusMessage.type === 'success'
-                            ? 'border-[var(--good)]/30 bg-[var(--good)]/10 text-[var(--good)]'
-                            : 'border-[var(--marigold)]/40 bg-[var(--marigold)]/15 text-[var(--ink)]'
+                            ? 'border-green-200 bg-green-50/80 text-green-700'
+                            : 'border-blue-200 bg-blue-50/80 text-blue-700'
                         }`}
                       >
                         {statusMessage.type === 'loading' && (
-                          <span className="h-5 w-5 shrink-0 animate-spin rounded-full border-2 border-[var(--marigold)]/30 border-t-[var(--marigold)]" />
+                          <span className="h-6 w-6 shrink-0 animate-spin rounded-full border-2 border-current border-t-transparent opacity-70" />
                         )}
-                        <span className="flex-1">{statusMessage.text}</span>
+                        <span className="flex-1 text-[15px]">{statusMessage.text}</span>
                       </div>
                     )}
 
                     <button
                       type="submit" disabled={isSubmitting}
-                      className={`w-full rounded-2xl py-5 text-sm font-black uppercase tracking-widest text-white transition-all disabled:cursor-not-allowed ${
+                      className={`w-full rounded-[1.5rem] py-5 text-[15px] font-black uppercase tracking-widest text-white transition-all disabled:cursor-not-allowed ${
                         isSubmitting
                           ? 'bg-[var(--ink)]/30'
-                          : 'bg-[var(--chalk)] shadow-lg shadow-[var(--chalk)]/20 hover:-translate-y-0.5 hover:bg-[var(--rust)] hover:shadow-[var(--rust)]/20 active:translate-y-0'
+                          : 'bg-gradient-to-r from-[var(--marigold)] to-[var(--rust)] shadow-[0_15px_30px_-10px_rgba(59,130,246,0.5)] hover:-translate-y-1 hover:shadow-[0_20px_40px_-10px_rgba(59,130,246,0.6)] active:translate-y-0'
                       }`}
                     >
                       {isSubmitting ? 'Sending Request…' : 'Submit Tutor Request'}
                     </button>
-                    <p className="mt-5 flex items-center justify-center gap-2 text-center font-mono text-[11px] font-medium text-[var(--ink)]/40">
+                    <p className="mt-6 flex items-center justify-center gap-2 text-center font-mono text-[11px] font-medium text-[var(--ink)]/50">
                       <span className="text-sm drop-shadow-sm">🔒</span> Your details are shared only with matched tutors.
                     </p>
                   </div>
@@ -694,8 +688,8 @@ export default function StudentRequest() {
         </div>
       </section>
 
-      {/* --- FOOTER (ANCHORS THE BOTTOM) --- */}
-      <footer className="mt-auto bg-[var(--chalk)] py-10 text-center font-mono text-[12px] font-medium uppercase tracking-widest text-[var(--paper)]/50">
+      {/* --- FOOTER --- */}
+      <footer className="mt-auto bg-[var(--chalk)] py-12 text-center font-mono text-[12px] font-medium uppercase tracking-widest text-white/50 z-10 relative">
         Learning Hub — connecting educators and students, one lesson at a time.
       </footer>
     </div>
