@@ -323,14 +323,14 @@ export default function StudentRequest() {
   return (
     <div
       style={{
-        '--chalk': '#16302A',
-        '--paper': '#EEEFE4',
-        '--ink': '#1C2420',
-        '--card': '#FCFBF6',
-        '--marigold': '#E7A23D',
-        '--rust': '#B6472F',
-        '--line': '#C9CBB8',
-        '--good': '#3F7D5C',
+        '--chalk': '#1E1B4B',     /* Deep Indigo (Buttons, Footer, Logo block) */
+        '--paper': '#F8FAFC',     /* Crisp Light Slate (Main Background) */
+        '--ink': '#0F172A',       /* Dark Blue/Slate (Main Text) */
+        '--card': '#FFFFFF',      /* Pure White (Cards, Forms) */
+        '--marigold': '#3B82F6',  /* Bright Blue (Highlights, Focus Rings, Numbers) */
+        '--rust': '#8B5CF6',      /* Vibrant Purple (Secondary Accents, Gradients) */
+        '--line': '#E2E8F0',      /* Clean Gray (Borders, Dividers) */
+        '--good': '#10B981',      /* Emerald Green (Success States, GPS pin) */
       }}
       className="flex min-h-screen scroll-smooth flex-col bg-[var(--paper)] font-sans text-[var(--ink)] selection:bg-[var(--marigold)]/30"
     >
