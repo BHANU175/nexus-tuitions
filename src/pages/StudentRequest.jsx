@@ -68,10 +68,9 @@ function Field({ label, error, hint, children }) {
   );
 }
 
-// NEW: Glassmorphism Input Styling
 const inputClass = (hasError) =>
-  `w-full rounded-[1.5rem] border border-white/60 bg-white/40 backdrop-blur-md px-5 py-4 text-sm font-semibold text-[var(--ink)] placeholder-[var(--ink)]/40 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] transition-all focus:bg-white/70 focus:outline-none focus:ring-2 focus:ring-[var(--marigold)] focus:border-transparent ${
-    hasError ? 'border-[var(--rust)]/60 bg-red-50/50 ring-2 ring-[var(--rust)]' : ''
+  `w-full rounded-xl border-2 bg-gray-50/50 px-5 py-4 text-sm font-semibold text-[var(--ink)] placeholder-[var(--ink)]/30 transition-all focus:bg-white focus:outline-none focus:ring-4 focus:ring-[var(--marigold)]/20 ${
+    hasError ? 'border-[var(--rust)]/50 focus:border-[var(--rust)]' : 'border-[var(--line)] focus:border-[var(--marigold)]'
   }`;
 
 const selectClass = (hasError) =>
@@ -79,12 +78,9 @@ const selectClass = (hasError) =>
 
 function SectionLabel({ children }) {
   return (
-    <div className="mb-8 flex items-center gap-3">
-      <div className="h-px flex-1 bg-gradient-to-r from-transparent via-[var(--line)] to-[var(--line)] opacity-50" />
-      <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-[var(--marigold)]">
-        {children}
-      </p>
-      <div className="h-px flex-1 bg-gradient-to-l from-transparent via-[var(--line)] to-[var(--line)] opacity-50" />
+    <div className="mb-6 flex items-center gap-3">
+      <h3 className="font-serif text-2xl font-black text-[var(--ink)]">{children}</h3>
+      <div className="h-px flex-1 bg-[var(--line)]/60" />
     </div>
   );
 }
@@ -146,19 +142,19 @@ function HeroBanner() {
     <div
       onMouseEnter={() => { pausedRef.current = true; }}
       onMouseLeave={() => { pausedRef.current = false; }}
-      className="relative w-full overflow-hidden rounded-[3rem] bg-gradient-to-br from-[var(--marigold)] to-[var(--rust)] shadow-[0_20px_50px_-12px_rgba(59,130,246,0.3)] lg:h-full lg:min-h-[400px]"
+      className="relative w-full overflow-hidden rounded-3xl bg-[var(--chalk)] shadow-2xl shadow-[var(--chalk)]/20 lg:h-full lg:min-h-[400px]"
     >
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 opacity-[0.15]"
-        style={{ backgroundImage: 'radial-gradient(circle, #FFFFFF 1.5px, transparent 1.5px)', backgroundSize: '32px 32px' }}
+        className="pointer-events-none absolute inset-0 opacity-10"
+        style={{ backgroundImage: 'radial-gradient(circle, #FFFFFF 1.5px, transparent 1.5px)', backgroundSize: '24px 24px' }}
       />
       <div className="relative flex h-full flex-col justify-center px-6 py-12 sm:px-10 lg:p-14">
         <div className="flex w-full items-center justify-between gap-6">
           <div className="hidden sm:block">
              <NotebookIllustration />
           </div>
-          <div className="z-10 mx-auto w-full max-w-[260px] -rotate-2 rounded-[2rem] bg-white/90 backdrop-blur-xl p-7 shadow-2xl transition-transform hover:rotate-0 lg:mx-0">
+          <div className="z-10 mx-auto w-full max-w-[260px] -rotate-2 rounded-2xl bg-white p-7 shadow-xl transition-transform hover:rotate-0 lg:mx-0">
             <p key={active} className="animate-in fade-in font-serif text-base font-bold leading-snug text-[var(--ink)] duration-500">
               {BANNER_SLIDES[active].note}
             </p>
@@ -168,7 +164,7 @@ function HeroBanner() {
                   key={i}
                   onClick={() => setActive(i)}
                   aria-label={`Show message ${i + 1}`}
-                  className={`h-2 rounded-full transition-all ${i === active ? 'w-8 bg-[var(--marigold)]' : 'w-2 bg-[var(--ink)]/10 hover:bg-[var(--ink)]/30'}`}
+                  className={`h-2 rounded-full transition-all ${i === active ? 'w-8 bg-[var(--marigold)]' : 'w-2 bg-[var(--line)] hover:bg-[var(--line)]/70'}`}
                 />
               ))}
             </div>
@@ -207,6 +203,9 @@ export default function StudentRequest() {
   const [statusMessage, setStatusMessage] = useState({ text: '', type: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
+  
+  // New State for Multi-Step Form
+  const [currentStep, setCurrentStep] = useState(1);
 
   const clearError = useCallback((name) => {
     setErrors((e) => {
@@ -275,26 +274,45 @@ export default function StudentRequest() {
     );
   }, []);
 
-  const validate = useCallback(() => {
+  // Updated Step-by-Step Validation Logic
+  const validateStep = useCallback((step) => {
     const e = {};
-    if (!formData.student_name.trim()) e.student_name = "Enter the student's full name.";
-    if (!formData.class_level) e.class_level = 'Select a class.';
-    if (!formData.parent_name.trim()) e.parent_name = "Enter the parent's full name.";
-    if (!EMAIL_RE.test(formData.email)) e.email = 'Enter a valid email address.';
-    if (!PHONE_RE.test(formData.contact_number.replace(/\s/g, ''))) e.contact_number = 'Enter a valid phone number.';
-    if (formData.subjects.length === 0) e.subjects = 'Add at least one subject.';
-    if (!formData.specific_area.trim()) e.specific_area = 'Enter your area or locality.';
+    if (step === 1) {
+      if (!formData.student_name.trim()) e.student_name = "Enter the student's full name.";
+      if (!formData.class_level) e.class_level = 'Select a class.';
+    }
+    if (step === 2) {
+      if (!formData.parent_name.trim()) e.parent_name = "Enter the parent's full name.";
+      if (!EMAIL_RE.test(formData.email)) e.email = 'Enter a valid email address.';
+      if (!PHONE_RE.test(formData.contact_number.replace(/\s/g, ''))) e.contact_number = 'Enter a valid phone number.';
+    }
+    if (step === 3) {
+      if (formData.subjects.length === 0) e.subjects = 'Add at least one subject.';
+      if (!formData.specific_area.trim()) e.specific_area = 'Enter your area or locality.';
+    }
     return e;
   }, [formData]);
 
+  const handleNextStep = () => {
+    const stepErrors = validateStep(currentStep);
+    if (Object.keys(stepErrors).length > 0) {
+      setErrors(stepErrors);
+      return;
+    }
+    setErrors({});
+    setCurrentStep((prev) => prev + 1);
+  };
+
+  const handlePrevStep = () => {
+    setErrors({});
+    setCurrentStep((prev) => prev - 1);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const formErrors = validate();
-    setErrors(formErrors);
-    if (Object.keys(formErrors).length > 0) {
-      const firstErrorName = Object.keys(formErrors)[0];
-      const firstError = document.getElementsByName(firstErrorName)[0];
-      if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const stepErrors = validateStep(3); // Final step validation
+    if (Object.keys(stepErrors).length > 0) {
+      setErrors(stepErrors);
       return;
     }
 
@@ -310,6 +328,7 @@ export default function StudentRequest() {
       setStatusMessage({ text: 'Request received! An advisor will contact you shortly.', type: 'success' });
       setFormData(INITIAL_FORM);
       setSubjectInput('');
+      setCurrentStep(1); // Reset form to step 1 on success
     } catch (error) {
       console.error(error);
       setStatusMessage({ text: 'Could not connect. Please check your network and try again.', type: 'error' });
@@ -321,27 +340,24 @@ export default function StudentRequest() {
   return (
    <div
       style={{
-        // Modern & Vibrant Tech Theme applied to root
-        '--chalk': '#1E1B4B',     
-        '--paper': '#F8FAFC',     
-        '--ink': '#0F172A',       
-        '--card': '#FFFFFF',      
-        '--marigold': '#3B82F6',  
-        '--rust': '#8B5CF6',      
-        '--line': '#E2E8F0',      
-        '--good': '#10B981',      
+        /* Clean, Crisp SaaS Theme */
+        '--chalk': '#1E293B',     /* Slate 800 - Main dark color */
+        '--paper': '#F8FAFC',     /* Slate 50 - Very light grey background */
+        '--ink': '#0F172A',       /* Slate 900 - Text color */
+        '--card': '#FFFFFF',      /* Pure White */
+        '--marigold': '#3B82F6',  /* Blue 500 - Primary accent */
+        '--rust': '#6366F1',      /* Indigo 500 - Secondary accent */
+        '--line': '#E2E8F0',      /* Slate 200 - Borders */
+        '--good': '#10B981',      /* Emerald 500 - Success states */
       }}
-      className="relative flex min-h-screen scroll-smooth flex-col bg-[var(--paper)] font-sans text-[var(--ink)] selection:bg-[var(--marigold)]/30 overflow-hidden"
+      className="relative flex min-h-screen scroll-smooth flex-col bg-[var(--paper)] font-sans text-[var(--ink)] selection:bg-[var(--marigold)]/30"
     >
-      {/* Background Abstract Blobs for Glassmorphism Effect */}
-      <div className="pointer-events-none absolute left-[-10%] top-[10%] h-[500px] w-[500px] rounded-full bg-[var(--marigold)]/10 blur-[120px]" />
-      <div className="pointer-events-none absolute right-[-10%] top-[40%] h-[600px] w-[600px] rounded-full bg-[var(--rust)]/10 blur-[150px]" />
       
       {/* --- NAV --- */}
-      <nav className="sticky top-0 z-50 border-b border-white/40 bg-white/50 backdrop-blur-2xl">
+      <nav className="sticky top-0 z-50 border-b border-[var(--line)] bg-white/90 backdrop-blur-md">
         <div className="mx-auto flex max-w-[1200px] items-center justify-between px-4 py-3 sm:px-6 sm:py-4 md:px-10">
           <div className="flex items-center gap-3 text-lg font-black tracking-tight">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[var(--chalk)] font-mono text-sm text-white shadow-lg">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--marigold)] font-mono text-sm text-white shadow-sm">
               LH
             </div>
             <span className="hidden sm:inline">Learning Hub</span>
@@ -353,7 +369,7 @@ export default function StudentRequest() {
           </div>
           <Link
             to="/apply-teacher"
-            className="rounded-2xl bg-white/80 backdrop-blur-md border border-white/60 px-5 py-2.5 text-xs font-bold text-[var(--ink)] shadow-sm transition-all hover:bg-[var(--marigold)] hover:text-white hover:border-transparent sm:px-6 sm:text-sm"
+            className="rounded-xl border-2 border-[var(--line)] bg-white px-5 py-2.5 text-xs font-bold text-[var(--ink)] transition-all hover:border-[var(--chalk)] hover:bg-[var(--chalk)] hover:text-white sm:px-6 sm:text-sm"
           >
             Teach with us
           </Link>
@@ -361,34 +377,34 @@ export default function StudentRequest() {
       </nav>
 
       {/* --- UNIFIED HERO SECTION --- */}
-      <header className="relative pt-12 pb-20 sm:pt-20 sm:pb-32 lg:pt-24 lg:pb-36 z-10">
+      <header className="relative pt-12 pb-16 sm:pt-20 sm:pb-24 lg:pt-24 lg:pb-28">
         <div className="relative mx-auto max-w-[1200px] px-4 sm:px-6 md:px-10">
           <div className="grid grid-cols-1 items-center gap-16 lg:grid-cols-2 lg:gap-12">
 
             {/* Left: Copy */}
             <div className="max-w-xl text-center lg:text-left">
-              <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-[var(--marigold)]/30 bg-white/60 backdrop-blur-md px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-widest text-[var(--ink)] shadow-sm">
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[var(--line)] bg-white px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-widest text-[var(--ink)] shadow-sm">
                 <span className="h-2 w-2 animate-pulse rounded-full bg-[var(--marigold)]" />
                 For students &amp; parents in Jaipur
               </div>
               <h1 className="font-serif text-4xl font-black leading-[1.1] tracking-tight text-[var(--ink)] sm:text-5xl md:text-6xl">
                 Find the right tutor,<br className="hidden sm:block lg:hidden xl:block" />
-                matched to <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--marigold)] to-[var(--rust)]">your</span> child.
+                matched to <span className="text-[var(--marigold)]">your</span> child.
               </h1>
               <p className="mx-auto mt-6 text-base font-medium leading-relaxed text-[var(--ink)]/60 lg:mx-0 lg:text-lg">
                 Tell us what you're looking for. A learning advisor reviews every request personally
                 and introduces you to verified tutors who fit — usually within 24 hours.
               </p>
-              <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row lg:justify-start">
+              <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row lg:justify-start">
                 <a
                   href="#request"
-                  className="w-full rounded-[1.5rem] bg-[var(--chalk)] px-8 py-4 text-center text-sm font-black uppercase tracking-widest text-white shadow-[0_10px_30px_-10px_rgba(30,27,75,0.4)] transition-all hover:-translate-y-1 hover:shadow-[0_20px_40px_-10px_rgba(30,27,75,0.5)] sm:w-auto"
+                  className="w-full rounded-xl bg-[var(--chalk)] px-8 py-4 text-center text-sm font-black uppercase tracking-widest text-white shadow-lg shadow-[var(--chalk)]/20 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-[var(--chalk)]/30 sm:w-auto"
                 >
                   Request a tutor
                 </a>
                 <a
                   href="#how"
-                  className="w-full rounded-[1.5rem] border border-[var(--line)] bg-white/50 backdrop-blur-sm px-8 py-4 text-center text-sm font-black uppercase tracking-widest text-[var(--ink)]/70 transition-all hover:bg-white sm:w-auto"
+                  className="w-full rounded-xl border-2 border-[var(--line)] bg-white px-8 py-3.5 text-center text-sm font-black uppercase tracking-widest text-[var(--ink)]/70 transition-all hover:bg-gray-50 hover:border-gray-300 sm:w-auto"
                 >
                   See how it works
                 </a>
@@ -405,7 +421,7 @@ export default function StudentRequest() {
       </header>
 
       {/* --- WHY TRUST US --- */}
-      <section className="relative py-20 sm:py-32 z-10">
+      <section className="relative py-16 sm:py-24">
         <div className="mx-auto max-w-[1200px] px-4 sm:px-6 md:px-10">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="font-serif text-3xl font-black tracking-tight text-[var(--ink)] sm:text-4xl">
@@ -417,10 +433,10 @@ export default function StudentRequest() {
             </p>
           </div>
 
-          <div className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-14 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {TRUST_BENEFITS.map((b) => (
-              <div key={b.title} className="group rounded-[2.5rem] bg-white/60 backdrop-blur-xl border border-white/50 p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all hover:-translate-y-2 hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] hover:bg-white/90">
-                <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-[1.25rem] bg-[var(--marigold)]/10 text-2xl transition-transform group-hover:scale-110 group-hover:bg-[var(--marigold)]/20">
+              <div key={b.title} className="group rounded-2xl bg-white border border-[var(--line)]/50 p-8 shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl hover:border-[var(--line)]">
+                <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--paper)] border border-[var(--line)] text-xl transition-transform group-hover:scale-110">
                   {b.icon}
                 </div>
                 <h3 className="mb-2 text-lg font-black text-[var(--ink)]">{b.title}</h3>
@@ -432,7 +448,7 @@ export default function StudentRequest() {
       </section>
 
       {/* --- HOW IT WORKS --- */}
-      <section id="how" className="relative py-20 sm:py-32 z-10">
+      <section id="how" className="relative py-16 sm:py-24 border-t border-[var(--line)]/50">
         <div className="mx-auto max-w-[1000px] px-4 sm:px-6 md:px-10">
           <div className="mx-auto max-w-xl text-center">
             <h2 className="font-serif text-3xl font-black tracking-tight text-[var(--ink)] sm:text-4xl">
@@ -440,14 +456,14 @@ export default function StudentRequest() {
             </h2>
           </div>
 
-          <div className="relative mt-20 flex flex-col gap-12 md:flex-row md:justify-between md:gap-8">
-            <div aria-hidden="true" className="absolute left-[15%] right-[15%] top-8 hidden h-0.5 rounded-full bg-gradient-to-r from-transparent via-[var(--line)] to-transparent md:block" />
+          <div className="relative mt-16 flex flex-col gap-12 md:flex-row md:justify-between md:gap-8">
+            <div aria-hidden="true" className="absolute left-[15%] right-[15%] top-7 hidden h-0.5 rounded-full bg-[var(--line)] md:block" />
             {HOW_STEPS.map((s, i) => (
               <div key={s.title} className="relative z-10 flex flex-1 flex-col items-center text-center">
-                <span className="mb-8 flex h-16 w-16 items-center justify-center rounded-[1.5rem] bg-gradient-to-br from-[var(--marigold)] to-[var(--rust)] font-mono text-xl font-black text-white shadow-[0_10px_20px_rgba(59,130,246,0.3)] ring-8 ring-[var(--paper)] transition-transform hover:scale-110">
+                <span className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--marigold)] font-mono text-lg font-black text-white shadow-lg shadow-[var(--marigold)]/20 ring-4 ring-[var(--paper)] transition-transform hover:scale-110">
                   0{i + 1}
                 </span>
-                <h3 className="mb-3 text-lg font-black text-[var(--ink)]">{s.title}</h3>
+                <h3 className="mb-2 text-lg font-black text-[var(--ink)]">{s.title}</h3>
                 <p className="max-w-[260px] text-sm font-medium leading-relaxed text-[var(--ink)]/60">{s.copy}</p>
               </div>
             ))}
@@ -455,28 +471,57 @@ export default function StudentRequest() {
         </div>
       </section>
 
-      {/* --- REQUEST FORM (GLASSMORPHISM ELEVATED) --- */}
-      <section id="request" className="relative pb-32 pt-20 sm:pt-32 z-10">
+      {/* --- REQUEST FORM (MULTI-STEP) --- */}
+      <section id="request" className="relative pb-24 pt-16 sm:pt-24 border-t border-[var(--line)]/50">
         <div className="relative mx-auto max-w-[760px] px-4 sm:px-6 md:px-10">
-          <div className="mb-14 text-center">
+          <div className="mb-12 text-center">
             <h2 className="font-serif text-3xl font-black tracking-tight text-[var(--ink)] sm:text-4xl">
               Ready to begin?
             </h2>
-            <p className="mt-4 text-base font-medium text-[var(--ink)]/60">
+            <p className="mt-3 text-base font-medium text-[var(--ink)]/60">
               Fill out the details below. An advisor will review it today.
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} noValidate className="relative">
-            {/* Glassmorphism Card Wrapper */}
-            <div className="overflow-hidden rounded-[2.5rem] bg-white/50 backdrop-blur-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] ring-1 ring-white/60 sm:rounded-[3rem]">
-              <div className="h-2 w-full bg-gradient-to-r from-[var(--marigold)] to-[var(--rust)]" />
+          {statusMessage.text && (
+            <div
+              className={`mb-8 flex items-center gap-4 rounded-2xl border px-6 py-5 text-sm font-bold ${
+                statusMessage.type === 'error'
+                  ? 'border-red-200 bg-red-50 text-red-700'
+                  : statusMessage.type === 'success'
+                  ? 'border-green-200 bg-green-50 text-green-700'
+                  : 'border-blue-200 bg-blue-50 text-blue-700'
+              }`}
+            >
+              {statusMessage.type === 'loading' && (
+                <span className="h-5 w-5 shrink-0 animate-spin rounded-full border-2 border-current border-t-transparent opacity-70" />
+              )}
+              <span className="flex-1 text-[15px]">{statusMessage.text}</span>
+            </div>
+          )}
 
-              <div className="p-6 sm:p-10 md:p-14">
-                <div className="space-y-12">
+          <div className="overflow-hidden rounded-2xl bg-white shadow-xl shadow-[var(--chalk)]/5 ring-1 ring-[var(--line)]">
+            {/* Progress Bar */}
+            <div className="flex h-1.5 w-full bg-[var(--line)]/50">
+              <div 
+                className="bg-[var(--marigold)] transition-all duration-300" 
+                style={{ width: `${(currentStep / 3) * 100}%` }} 
+              />
+            </div>
 
-                  {/* Student details */}
-                  <div>
+            <div className="p-6 sm:p-10">
+              {/* Step Indicators */}
+              <div className="mb-8 flex justify-between text-xs font-bold uppercase tracking-widest text-[var(--ink)]/40">
+                <span className={currentStep >= 1 ? 'text-[var(--marigold)]' : ''}>1. Student</span>
+                <span className={currentStep >= 2 ? 'text-[var(--marigold)]' : ''}>2. Parent</span>
+                <span className={currentStep >= 3 ? 'text-[var(--marigold)]' : ''}>3. Details</span>
+              </div>
+
+              <form onSubmit={(e) => { e.preventDefault(); if(currentStep === 3) handleSubmit(e); }} noValidate>
+                
+                {/* --- STEP 1: STUDENT DETAILS --- */}
+                {currentStep === 1 && (
+                  <div className="animate-in fade-in slide-in-from-right-4 duration-300">
                     <SectionLabel>Student Details</SectionLabel>
                     <div className="space-y-6">
                       <Field label="Student's full name" error={errors.student_name}>
@@ -496,9 +541,11 @@ export default function StudentRequest() {
                       </Field>
                     </div>
                   </div>
+                )}
 
-                  {/* Parent details */}
-                  <div>
+                {/* --- STEP 2: PARENT DETAILS --- */}
+                {currentStep === 2 && (
+                  <div className="animate-in fade-in slide-in-from-right-4 duration-300">
                     <SectionLabel>Parent Details</SectionLabel>
                     <div className="space-y-6">
                       <Field label="Parent's full name" error={errors.parent_name}>
@@ -523,10 +570,12 @@ export default function StudentRequest() {
                       </div>
                     </div>
                   </div>
+                )}
 
-                  {/* Learning needs */}
-                  <div>
-                    <SectionLabel>Learning Needs</SectionLabel>
+                {/* --- STEP 3: LEARNING NEEDS & LOCATION --- */}
+                {currentStep === 3 && (
+                  <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+                    <SectionLabel>Learning Needs & Location</SectionLabel>
                     <div className="space-y-8">
                       <Field
                         label="Subjects"
@@ -538,7 +587,7 @@ export default function StudentRequest() {
                             {formData.subjects.map((subject) => (
                               <span
                                 key={subject}
-                                className="inline-flex items-center gap-1.5 rounded-full bg-white px-4 py-2 text-xs font-bold text-[var(--ink)] shadow-sm border border-white/60"
+                                className="inline-flex items-center gap-1.5 rounded-full bg-[var(--marigold)]/10 px-4 py-2 text-xs font-bold text-[var(--ink)] border border-[var(--marigold)]/20"
                               >
                                 {subject}
                                 <button
@@ -566,7 +615,7 @@ export default function StudentRequest() {
                             type="button"
                             onClick={() => addSubject()}
                             disabled={!subjectInput.trim() || formData.subjects.length >= MAX_SUBJECTS}
-                            className="shrink-0 rounded-[1.5rem] bg-[var(--chalk)] px-6 text-xs font-black uppercase tracking-wider text-white shadow-md transition-all hover:-translate-y-0.5 hover:bg-[var(--marigold)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:bg-[var(--chalk)]"
+                            className="shrink-0 rounded-xl bg-[var(--chalk)] px-6 text-xs font-black uppercase tracking-wider text-white transition-all hover:-translate-y-0.5 hover:bg-[var(--marigold)] hover:shadow-md disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:bg-[var(--chalk)] disabled:hover:shadow-none"
                           >
                             + Add
                           </button>
@@ -583,7 +632,7 @@ export default function StudentRequest() {
                                   key={s}
                                   type="button"
                                   onClick={() => addSubject(s)}
-                                  className="rounded-full border border-white/60 bg-white/30 backdrop-blur-sm px-3 py-1.5 text-xs font-semibold text-[var(--ink)]/70 transition-all hover:bg-white hover:border-transparent hover:shadow-sm"
+                                  className="rounded-full border border-[var(--line)] bg-white px-3 py-1.5 text-xs font-semibold text-[var(--ink)]/70 transition-all hover:border-[var(--marigold)] hover:text-[var(--ink)]"
                                 >
                                   + {s}
                                 </button>
@@ -600,10 +649,10 @@ export default function StudentRequest() {
                           {MODES.map((mode) => (
                             <button
                               type="button" key={mode.id} onClick={() => handleModeSelect(mode.id)}
-                              className={`flex flex-col items-center justify-center gap-3 rounded-[1.5rem] border border-white/60 p-5 text-center text-sm font-bold transition-all ${
+                              className={`flex flex-col items-center justify-center gap-3 rounded-xl border-2 p-5 text-center text-sm font-bold transition-all ${
                                 formData.preferred_mode === mode.id
-                                  ? 'bg-white shadow-[0_10px_20px_-10px_rgba(0,0,0,0.1)] ring-2 ring-[var(--marigold)] text-[var(--ink)]'
-                                  : 'bg-white/30 backdrop-blur-sm text-[var(--ink)]/60 hover:bg-white/60'
+                                  ? 'border-[var(--marigold)] bg-[var(--marigold)]/5 text-[var(--ink)] shadow-sm'
+                                  : 'border-[var(--line)] bg-gray-50/50 text-[var(--ink)]/60 hover:bg-gray-50'
                               }`}
                             >
                               <span className="text-3xl drop-shadow-sm">{mode.icon}</span>
@@ -612,84 +661,82 @@ export default function StudentRequest() {
                           ))}
                         </div>
                       </div>
-                    </div>
-                  </div>
 
-                  {/* Location */}
-                  <div>
-                    <SectionLabel>Location</SectionLabel>
-                    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                      <Field label="City" hint="We currently serve Jaipur only">
-                        <div className="flex items-center gap-2 rounded-[1.5rem] border border-white/60 bg-white/30 backdrop-blur-md px-5 py-4 text-sm font-semibold text-[var(--ink)]/70">
-                          <span aria-hidden="true">📍</span> Jaipur, Rajasthan
-                        </div>
-                      </Field>
-                      <Field label="Area / locality" error={errors.specific_area}>
-                        <div className="flex gap-3">
-                          <input
-                            name="specific_area" type="text" placeholder="e.g. Malviya Nagar"
-                            value={formData.specific_area} onChange={handleChange}
-                            className={inputClass(errors.specific_area)}
-                          />
-                          <button
-                            type="button" onClick={handleGetLocation} disabled={isLocating}
-                            className={`shrink-0 rounded-[1.5rem] border px-5 text-xs font-bold transition-all ${
-                              formData.location_coords
-                                ? 'border-transparent bg-[var(--good)] text-white shadow-md'
-                                : 'border-white/60 bg-white/40 backdrop-blur-sm text-[var(--ink)] hover:bg-white hover:shadow-sm'
-                            }`}
-                          >
-                            {isLocating ? '···' : formData.location_coords ? '✓ Pinned' : '📍 GPS'}
-                          </button>
-                        </div>
-                        {gpsError && <p className="font-mono text-[11px] font-semibold text-[var(--rust)] pl-1 pt-1">{gpsError}</p>}
-                      </Field>
-                    </div>
-                  </div>
-
-                  {/* Submission Area */}
-                  <div className="pt-6">
-                    {statusMessage.text && (
-                      <div
-                        className={`mb-8 flex items-center gap-4 rounded-[1.5rem] border px-6 py-5 text-sm font-bold backdrop-blur-md ${
-                          statusMessage.type === 'error'
-                            ? 'border-red-200 bg-red-50/80 text-red-700'
-                            : statusMessage.type === 'success'
-                            ? 'border-green-200 bg-green-50/80 text-green-700'
-                            : 'border-blue-200 bg-blue-50/80 text-blue-700'
-                        }`}
-                      >
-                        {statusMessage.type === 'loading' && (
-                          <span className="h-6 w-6 shrink-0 animate-spin rounded-full border-2 border-current border-t-transparent opacity-70" />
-                        )}
-                        <span className="flex-1 text-[15px]">{statusMessage.text}</span>
+                      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                        <Field label="City" hint="We currently serve Jaipur only">
+                          <div className="flex items-center gap-2 rounded-xl border-2 border-[var(--line)] bg-gray-50/50 px-5 py-4 text-sm font-semibold text-[var(--ink)]/70">
+                            <span aria-hidden="true">📍</span> Jaipur, Rajasthan
+                          </div>
+                        </Field>
+                        <Field label="Area / locality" error={errors.specific_area}>
+                          <div className="flex gap-3">
+                            <input
+                              name="specific_area" type="text" placeholder="e.g. Malviya Nagar"
+                              value={formData.specific_area} onChange={handleChange}
+                              className={inputClass(errors.specific_area)}
+                            />
+                            <button
+                              type="button" onClick={handleGetLocation} disabled={isLocating}
+                              className={`shrink-0 rounded-xl border-2 px-5 text-xs font-bold transition-all ${
+                                formData.location_coords
+                                  ? 'border-[var(--good)] bg-[var(--good)] text-white shadow-sm'
+                                  : 'border-[var(--line)] bg-white text-[var(--ink)] hover:bg-gray-50'
+                              }`}
+                            >
+                              {isLocating ? '···' : formData.location_coords ? '✓ Pinned' : '📍 GPS'}
+                            </button>
+                          </div>
+                          {gpsError && <p className="font-mono text-[11px] font-semibold text-[var(--rust)] pl-1 pt-1">{gpsError}</p>}
+                        </Field>
                       </div>
-                    )}
+                    </div>
+                  </div>
+                )}
 
+                {/* --- NAVIGATION BUTTONS --- */}
+                <div className="mt-12 flex gap-4 pt-6 border-t border-[var(--line)]/50">
+                  {currentStep > 1 && (
                     <button
-                      type="submit" disabled={isSubmitting}
-                      className={`w-full rounded-[1.5rem] py-5 text-[15px] font-black uppercase tracking-widest text-white transition-all disabled:cursor-not-allowed ${
+                      type="button"
+                      onClick={handlePrevStep}
+                      className="rounded-xl border-2 border-[var(--line)] px-6 py-4 text-sm font-black uppercase tracking-widest text-[var(--ink)]/70 transition-all hover:bg-gray-50 hover:text-[var(--ink)]"
+                    >
+                      Back
+                    </button>
+                  )}
+                  
+                  {currentStep < 3 ? (
+                    <button
+                      type="button"
+                      onClick={handleNextStep}
+                      className="ml-auto rounded-xl bg-[var(--chalk)] px-8 py-4 text-sm font-black uppercase tracking-widest text-white shadow-lg shadow-[var(--chalk)]/20 transition-all hover:-translate-y-0.5 hover:bg-[var(--marigold)] hover:shadow-[var(--marigold)]/30 active:translate-y-0"
+                    >
+                      Next Step
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleSubmit}
+                      disabled={isSubmitting}
+                      className={`ml-auto rounded-xl px-8 py-4 text-sm font-black uppercase tracking-widest text-white transition-all disabled:cursor-not-allowed ${
                         isSubmitting
                           ? 'bg-[var(--ink)]/30'
-                          : 'bg-gradient-to-r from-[var(--marigold)] to-[var(--rust)] shadow-[0_15px_30px_-10px_rgba(59,130,246,0.5)] hover:-translate-y-1 hover:shadow-[0_20px_40px_-10px_rgba(59,130,246,0.6)] active:translate-y-0'
+                          : 'bg-[var(--chalk)] shadow-lg shadow-[var(--chalk)]/20 hover:-translate-y-0.5 hover:bg-[var(--rust)] hover:shadow-[var(--rust)]/30 active:translate-y-0'
                       }`}
                     >
-                      {isSubmitting ? 'Sending Request…' : 'Submit Tutor Request'}
+                      {isSubmitting ? 'Sending…' : 'Submit Request'}
                     </button>
-                    <p className="mt-6 flex items-center justify-center gap-2 text-center font-mono text-[11px] font-medium text-[var(--ink)]/50">
-                      <span className="text-sm drop-shadow-sm">🔒</span> Your details are shared only with matched tutors.
-                    </p>
-                  </div>
-
+                  )}
                 </div>
-              </div>
+
+              </form>
             </div>
-          </form>
+          </div>
         </div>
       </section>
 
       {/* --- FOOTER --- */}
-      <footer className="mt-auto bg-[var(--chalk)] py-12 text-center font-mono text-[12px] font-medium uppercase tracking-widest text-white/50 z-10 relative">
+      <footer className="mt-auto bg-[var(--chalk)] py-10 text-center font-mono text-[12px] font-medium uppercase tracking-widest text-[var(--line)]/50">
         Learning Hub — connecting educators and students, one lesson at a time.
       </footer>
     </div>
