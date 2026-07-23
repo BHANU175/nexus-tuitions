@@ -70,31 +70,15 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Center Links */}
+          {/* Center Links (Contact Removed) */}
           <div className="hidden items-center gap-8 text-[15px] font-medium text-[var(--ink)] lg:flex">
             <a href="#why" className="transition-colors hover:text-[var(--marigold)]">Why Us</a>
             <Link to="/request-tutor" onClick={handleNavigation} className="transition-colors hover:text-[var(--marigold)]">Find a Tutor</Link>
             <Link to="/apply-teacher" onClick={handleNavigation} className="transition-colors hover:text-[var(--marigold)]">Become a Tutor</Link>
             <Link to="/about" className="transition-colors hover:text-[var(--marigold)]">About</Link>
-            <Link to="/contact" className="transition-colors hover:text-[var(--marigold)]">Contact</Link>
           </div>
-
-          {/* Right Action Buttons */}
-          <div className="flex items-center gap-3">
-            <Link
-              to="/login"
-              className="hidden rounded-full border border-[var(--line)] bg-white px-5 py-2 text-sm font-semibold transition-colors hover:bg-gray-50 sm:block"
-            >
-              Login
-            </Link>
-            <Link
-              to="/request-tutor"
-              onClick={handleNavigation}
-              className="flex items-center gap-2 rounded-full bg-[var(--chalk)] px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-opacity-90 sm:px-6 sm:py-2.5"
-            >
-              Get Started <span aria-hidden="true">&rarr;</span>
-            </Link>
-          </div>
+          
+          {/* Right Action Buttons (Login and Get Started completely removed as requested) */}
         </div>
       </nav>
 
@@ -109,7 +93,8 @@ export default function Home() {
                 🎓 Trusted by Families & Students Across India
               </div>
               
-              <h1 className="mt-6 font-serif text-5xl font-black leading-[1.1] tracking-tight text-[var(--ink)] md:text-6xl lg:text-7xl">
+              {/* Responsive Typography fixes for mobile overlapping */}
+              <h1 className="mt-6 font-serif text-4xl font-black leading-[1.25] tracking-tight text-[var(--ink)] break-words sm:text-5xl sm:leading-[1.15] md:text-6xl lg:text-7xl">
                 Unlock Your <br />
                 <span className="relative inline-block text-[var(--rust)]">
                   Learning
@@ -161,11 +146,11 @@ export default function Home() {
               <div className="absolute inset-0 right-4 top-4 -z-10 rounded-full bg-[#F6C280] opacity-50 blur-3xl"></div>
               <div className="absolute left-1/2 top-1/2 -z-10 h-[450px] w-[450px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#F3B770]"></div>
               
-              {/* NOTE: Replace 'hero-image.png' with your actual exported image path */}
+              {/* Working Unsplash Image link to fix the broken image */}
               <img 
-                src="/hero-image.png" 
+                src="https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&q=80&w=800" 
                 alt="Tutor helping a student" 
-                className="relative z-10 w-full object-contain drop-shadow-2xl" 
+                className="relative z-10 w-full object-contain rounded-2xl drop-shadow-2xl" 
               />
 
               {/* Floating Badges (Positioned absolutely around the image) */}
@@ -230,8 +215,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* --- THE REST REMAINS UNCHANGED --- */}
-        
         {/* --- WHY US --- */}
         <section id="why" className="border-y border-[var(--line)]/50 bg-white py-16 sm:py-20 md:py-24">
           <div className="mx-auto max-w-[1200px] px-4 sm:px-6 md:px-10">
