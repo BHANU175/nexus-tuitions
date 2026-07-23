@@ -321,16 +321,16 @@ export default function StudentRequest() {
   };
 
   return (
-    <div
+   <div
       style={{
-        '--chalk': '#1E1B4B',     /* Deep Indigo (Buttons, Footer, Logo block) */
-        '--paper': '#F8FAFC',     /* Crisp Light Slate (Main Background) */
-        '--ink': '#0F172A',       /* Dark Blue/Slate (Main Text) */
-        '--card': '#FFFFFF',      /* Pure White (Cards, Forms) */
-        '--marigold': '#3B82F6',  /* Bright Blue (Highlights, Focus Rings, Numbers) */
-        '--rust': '#8B5CF6',      /* Vibrant Purple (Secondary Accents, Gradients) */
-        '--line': '#E2E8F0',      /* Clean Gray (Borders, Dividers) */
-        '--good': '#10B981',      /* Emerald Green (Success States, GPS pin) */
+        '--chalk': '#2E1065',     /* Deep Violet */
+        '--paper': '#FFFBF7',     /* Warm Peach/White */
+        '--ink': '#171717',       /* Sharp Charcoal */
+        '--card': '#FFFFFF',      /* Pure White */
+        '--marigold': '#F59E0B',  /* Bright Amber/Yellow */
+        '--rust': '#EF4444',      /* Punchy Red/Coral */
+        '--line': '#E5E7EB',      /* Soft Gray */
+        '--good': '#22C55E',      /* Bright Green */
       }}
       className="flex min-h-screen scroll-smooth flex-col bg-[var(--paper)] font-sans text-[var(--ink)] selection:bg-[var(--marigold)]/30"
     >
