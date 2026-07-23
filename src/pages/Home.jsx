@@ -37,6 +37,9 @@ const VALUES = [
 /* ---------------------------------------------------------------------- */
 
 export default function Home() {
+  // CHANGE THIS URL to your downloaded local image path (e.g., "/my-photo.jpg")
+  const HERO_IMAGE_URL = "/1.png"; // Replace with your local image path  
+
   // Utility function to handle routing and scrolling to top
   const handleNavigation = () => {
     window.scrollTo(0, 0);
@@ -45,11 +48,11 @@ export default function Home() {
   return (
     <div
       style={{
-        '--chalk': '#0E3E35',     // Adjusted to match the dark green in your image
-        '--paper': '#FDF9F1',     // Adjusted to match the warm background
+        '--chalk': '#0E3E35',
+        '--paper': '#FDF9F1',
         '--ink': '#1C2420',
         '--card': '#FFFFFF',
-        '--marigold': '#F38C35',  // Adjusted to match the orange in your image
+        '--marigold': '#F38C35',
         '--rust': '#D95D39',
         '--line': '#E5E5E5',
         '--good': '#3F7D5C',
@@ -70,15 +73,13 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Center Links (Contact Removed) */}
+          {/* Center Links */}
           <div className="hidden items-center gap-8 text-[15px] font-medium text-[var(--ink)] lg:flex">
             <a href="#why" className="transition-colors hover:text-[var(--marigold)]">Why Us</a>
             <Link to="/request-tutor" onClick={handleNavigation} className="transition-colors hover:text-[var(--marigold)]">Find a Tutor</Link>
             <Link to="/apply-teacher" onClick={handleNavigation} className="transition-colors hover:text-[var(--marigold)]">Become a Tutor</Link>
             <Link to="/about" className="transition-colors hover:text-[var(--marigold)]">About</Link>
           </div>
-          
-          {/* Right Action Buttons (Login and Get Started completely removed as requested) */}
         </div>
       </nav>
 
@@ -93,12 +94,10 @@ export default function Home() {
                 🎓 Trusted by Families & Students Across India
               </div>
               
-              {/* Responsive Typography fixes for mobile overlapping */}
               <h1 className="mt-6 font-serif text-4xl font-black leading-[1.25] tracking-tight text-[var(--ink)] break-words sm:text-5xl sm:leading-[1.15] md:text-6xl lg:text-7xl">
                 Unlock Your <br />
                 <span className="relative inline-block text-[var(--rust)]">
                   Learning
-                  {/* Decorative underline */}
                   <svg className="absolute -bottom-2 left-0 w-full text-[var(--marigold)]" viewBox="0 0 200 12" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M3 9C60 -2 140 -2 197 9" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
                   </svg>
@@ -142,37 +141,35 @@ export default function Home() {
 
             {/* Right Content / Image Area */}
             <div className="relative mx-auto mt-10 w-full max-w-md lg:mt-0 lg:max-w-none">
-              {/* Background Orange Circle */}
               <div className="absolute inset-0 right-4 top-4 -z-10 rounded-full bg-[#F6C280] opacity-50 blur-3xl"></div>
               <div className="absolute left-1/2 top-1/2 -z-10 h-[450px] w-[450px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#F3B770]"></div>
               
-              {/* Working Unsplash Image link to fix the broken image */}
               <img 
-                src="https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&q=80&w=800" 
+                src={HERO_IMAGE_URL}
                 alt="Tutor helping a student" 
                 className="relative z-10 w-full object-contain rounded-2xl drop-shadow-2xl" 
               />
 
-              {/* Floating Badges (Positioned absolutely around the image) */}
-              <div className="absolute -left-6 top-10 z-20 flex flex-col items-center rounded-2xl bg-white p-4 shadow-xl">
+              {/* Floating Badges - Now with responsive mobile scaling (scale-[0.65]) */}
+              <div className="absolute -left-2 top-2 z-20 flex flex-col items-center rounded-2xl bg-white p-4 shadow-xl scale-[0.65] origin-top-left sm:scale-100 sm:-left-6 sm:top-10">
                 <div className="flex text-yellow-400">★★★★★</div>
                 <div className="mt-1 text-xl font-black text-[var(--ink)]">4.9/5</div>
                 <div className="text-xs font-medium text-gray-500">Average Rating</div>
               </div>
 
-              <div className="absolute -right-6 top-10 z-20 flex flex-col items-center rounded-2xl bg-white p-4 shadow-xl">
+              <div className="absolute -right-2 top-2 z-20 flex flex-col items-center rounded-2xl bg-white p-4 shadow-xl scale-[0.65] origin-top-right sm:scale-100 sm:-right-6 sm:top-10">
                 <span className="mb-1 text-2xl">📊</span>
                 <div className="text-xl font-black text-[var(--ink)]">1,500+</div>
                 <div className="text-xs font-medium text-gray-500">Happy Students</div>
               </div>
 
-              <div className="absolute -left-10 bottom-20 z-20 flex flex-col items-center rounded-2xl bg-white p-4 shadow-xl">
+              <div className="absolute -left-2 bottom-6 z-20 flex flex-col items-center rounded-2xl bg-white p-4 shadow-xl scale-[0.65] origin-bottom-left sm:scale-100 sm:-left-10 sm:bottom-20">
                 <span className="mb-1 text-2xl">🧑‍🏫</span>
                 <div className="text-xl font-black text-[var(--ink)]">500+</div>
                 <div className="text-xs font-medium text-gray-500">Verified Tutors</div>
               </div>
 
-              <div className="absolute -right-10 bottom-32 z-20 flex flex-col items-center rounded-2xl bg-white p-4 shadow-xl">
+              <div className="absolute -right-2 bottom-12 z-20 flex flex-col items-center rounded-2xl bg-white p-4 shadow-xl scale-[0.65] origin-bottom-right sm:scale-100 sm:-right-10 sm:bottom-32">
                 <span className="mb-1 text-2xl">🎓</span>
                 <div className="text-xl font-black text-[var(--ink)]">50+</div>
                 <div className="text-xs font-medium text-gray-500">Subjects</div>
