@@ -341,9 +341,9 @@ export default function StudentRequest() {
    <div
       style={{
         /* Clean, Crisp SaaS Theme */
-        '--chalk': '#1E293B',     /* Slate 800 - Main dark color */
+        '--chalk': '#f83b0c',     /* Slate 800 - Main dark color */
         '--paper': '#F8FAFC',     /* Slate 50 - Very light grey background */
-        '--ink': '#0F172A',       /* Slate 900 - Text color */
+        '--ink': '#e63c0d',       /* Slate 900 - Text color */
         '--card': '#FFFFFF',      /* Pure White */
         '--marigold': '#f26f28',  /* Blue 500 - Primary accent */
         '--rust': '#fc5d07',      /* Indigo 500 - Secondary accent */
