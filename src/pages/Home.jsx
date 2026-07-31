@@ -1,4 +1,3 @@
-import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 
 /* ---------------------------------------------------------------------- */
@@ -13,7 +12,7 @@ const TRUST_INDICATORS = [
 
 const BENEFITS = [
   { icon: '🧭', title: 'Personalised matching', copy: 'Tell us your goals and we match you with tutors who actually fit your subject, level, and schedule.' },
-  { icon: '🛡️', title: 'Verified profiles', copy: 'Every tutor on Learning Hub passes an identity and background check before they can teach.' },
+  { icon: '🛡️', title: 'Verified profiles', copy: 'Every tutor on Nexus Tuitions passes an identity and background check before they can teach.' },
   { icon: '💳', title: 'Transparent pricing', copy: 'You see the rate up front and agree on it directly with your tutor. No hidden platform fees.' },
   { icon: '🗓️', title: 'Flexible scheduling', copy: 'Book sessions around school, work, or family life — mornings, evenings, or weekends.' },
   { icon: '🎧', title: 'Real human support', copy: 'Our team is on hand to help you find the right fit, not just a chatbot and a FAQ page.' },
@@ -37,8 +36,9 @@ const VALUES = [
 /* ---------------------------------------------------------------------- */
 
 export default function Home() {
-  // CHANGE THIS URL to your downloaded local image path (e.g., "/my-photo.jpg")
-  const HERO_IMAGE_URL = "/1.png"; // Replace with your local image path  
+  // Update these paths to your local image paths inside the public folder
+  const HERO_IMAGE_URL = "/1.png"; 
+  const LOGO_IMAGE_URL = "/2.png"; // Replace with your logo path
 
   // Utility function to handle routing and scrolling to top
   const handleNavigation = () => {
@@ -62,16 +62,15 @@ export default function Home() {
       {/* --- NAV --- */}
       <nav className="sticky top-0 z-50 border-b border-[var(--line)]/60 bg-[var(--paper)]/90 backdrop-blur-md">
         <div className="mx-auto flex max-w-[1300px] items-center justify-between px-4 py-3 sm:px-6 sm:py-4 lg:px-8">
+          
           {/* Logo Area */}
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--chalk)] font-sans text-lg font-bold text-white shadow-sm">
-              LH
-            </div>
-            <div className="hidden flex-col sm:flex">
-              <span className="text-xl font-extrabold leading-none tracking-tight text-[var(--ink)]">Learning Hub</span>
-              <span className="mt-0.5 text-[10px] font-medium text-[var(--ink)]/60">Learn Today. Lead Tomorrow.</span>
-            </div>
-          </div>
+          <Link to="/" onClick={handleNavigation} className="flex items-center gap-3">
+            <img 
+              src={LOGO_IMAGE_URL} 
+              alt="Nexus Tuitions Logo" 
+              className="h-10 w-auto object-contain"
+            />
+          </Link>
 
           {/* Center Links */}
           <div className="hidden items-center gap-8 text-[15px] font-medium text-[var(--ink)] lg:flex">
@@ -94,7 +93,7 @@ export default function Home() {
                 🎓 Trusted by Families & Students Across India
               </div>
               
-              <h1 className="mt-6 font-serif text-4xl font-black leading-[1.25] tracking-tight text-[var(--ink)] break-words sm:text-5xl sm:leading-[1.15] md:text-6xl lg:text-7xl">
+              <h1 className="mt-6 break-words font-serif text-4xl font-black leading-[1.25] tracking-tight text-[var(--ink)] sm:text-5xl sm:leading-[1.15] md:text-6xl lg:text-7xl">
                 Unlock Your <br />
                 <span className="relative inline-block text-[var(--rust)]">
                   Learning
@@ -147,29 +146,29 @@ export default function Home() {
               <img 
                 src={HERO_IMAGE_URL}
                 alt="Tutor helping a student" 
-                className="relative z-10 w-full object-contain rounded-2xl drop-shadow-2xl" 
+                className="relative z-10 w-full rounded-2xl object-contain drop-shadow-2xl" 
               />
 
-              {/* Floating Badges - Now with responsive mobile scaling (scale-[0.65]) */}
-              <div className="absolute -left-2 top-2 z-20 flex flex-col items-center rounded-2xl bg-white p-4 shadow-xl scale-[0.65] origin-top-left sm:scale-100 sm:-left-6 sm:top-10">
+              {/* Floating Badges */}
+              <div className="absolute -left-2 top-2 z-20 flex origin-top-left scale-[0.65] flex-col items-center rounded-2xl bg-white p-4 shadow-xl sm:-left-6 sm:top-10 sm:scale-100">
                 <div className="flex text-yellow-400">★★★★★</div>
                 <div className="mt-1 text-xl font-black text-[var(--ink)]">4.9/5</div>
                 <div className="text-xs font-medium text-gray-500">Average Rating</div>
               </div>
 
-              <div className="absolute -right-2 top-2 z-20 flex flex-col items-center rounded-2xl bg-white p-4 shadow-xl scale-[0.65] origin-top-right sm:scale-100 sm:-right-6 sm:top-10">
+              <div className="absolute -right-2 top-2 z-20 flex origin-top-right scale-[0.65] flex-col items-center rounded-2xl bg-white p-4 shadow-xl sm:-right-6 sm:top-10 sm:scale-100">
                 <span className="mb-1 text-2xl">📊</span>
                 <div className="text-xl font-black text-[var(--ink)]">1,500+</div>
                 <div className="text-xs font-medium text-gray-500">Happy Students</div>
               </div>
 
-              <div className="absolute -left-2 bottom-6 z-20 flex flex-col items-center rounded-2xl bg-white p-4 shadow-xl scale-[0.65] origin-bottom-left sm:scale-100 sm:-left-10 sm:bottom-20">
+              <div className="absolute -left-2 bottom-6 z-20 flex origin-bottom-left scale-[0.65] flex-col items-center rounded-2xl bg-white p-4 shadow-xl sm:-left-10 sm:bottom-20 sm:scale-100">
                 <span className="mb-1 text-2xl">🧑‍🏫</span>
                 <div className="text-xl font-black text-[var(--ink)]">500+</div>
                 <div className="text-xs font-medium text-gray-500">Verified Tutors</div>
               </div>
 
-              <div className="absolute -right-2 bottom-12 z-20 flex flex-col items-center rounded-2xl bg-white p-4 shadow-xl scale-[0.65] origin-bottom-right sm:scale-100 sm:-right-10 sm:bottom-32">
+              <div className="absolute -right-2 bottom-12 z-20 flex origin-bottom-right scale-[0.65] flex-col items-center rounded-2xl bg-white p-4 shadow-xl sm:-right-10 sm:bottom-32 sm:scale-100">
                 <span className="mb-1 text-2xl">🎓</span>
                 <div className="text-xl font-black text-[var(--ink)]">50+</div>
                 <div className="text-xs font-medium text-gray-500">Subjects</div>
@@ -216,7 +215,7 @@ export default function Home() {
         <section id="why" className="border-y border-[var(--line)]/50 bg-white py-16 sm:py-20 md:py-24">
           <div className="mx-auto max-w-[1200px] px-4 sm:px-6 md:px-10">
             <div className="mx-auto max-w-2xl text-center">
-              <p className="mb-3 font-mono text-[11px] font-bold uppercase tracking-widest text-[var(--marigold)]">Why Learning Hub</p>
+              <p className="mb-3 font-mono text-[11px] font-bold uppercase tracking-widest text-[var(--marigold)]">Why Nexus Tuitions</p>
               <h2 className="font-serif text-3xl font-black tracking-tight text-[var(--ink)] sm:text-4xl">
                 Built to work for both sides of the desk
               </h2>
@@ -273,10 +272,10 @@ export default function Home() {
             <div className="mx-auto max-w-2xl text-center">
               <p className="mb-3 font-mono text-[11px] font-bold uppercase tracking-widest text-[var(--marigold)]">What we believe</p>
               <h2 className="font-serif text-3xl font-black tracking-tight text-[var(--ink)] sm:text-4xl">
-                Why we built Learning Hub
+                Why we built Nexus Tuitions
               </h2>
               <p className="mt-4 text-base font-medium leading-relaxed text-[var(--ink)]/60">
-                We started Learning Hub because finding a tutor you can trust — or building a
+                We started Nexus Tuitions because finding a tutor you can trust — or building a
                 tutoring business you can rely on — took far too much luck. It shouldn't.
               </p>
             </div>
@@ -328,8 +327,9 @@ export default function Home() {
         </section>
       </main>
 
+      {/* --- FOOTER --- */}
       <footer className="py-6 text-center font-mono text-[11px] font-medium uppercase tracking-widest text-[var(--ink)]/35">
-        Learning Hub — connecting educators and students, one lesson at a time.
+        nexus. tuitions — connecting educators and students, one lesson at a time.
       </footer>
     </div>
   );
