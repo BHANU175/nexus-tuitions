@@ -63,12 +63,16 @@ export default function Home() {
       <nav className="sticky top-0 z-50 border-b border-[var(--line)]/60 bg-[var(--paper)]/90 backdrop-blur-md">
         <div className="mx-auto flex max-w-[1300px] items-center justify-between px-4 py-3 sm:px-6 sm:py-4 lg:px-8">
           
-         {/* Logo Area */}
-<Link to="/" onClick={handleNavigation} className="flex items-center overflow-hidden h-12">
+      {/* Logo Area */}
+<Link 
+  to="/" 
+  onClick={handleNavigation} 
+  className="relative flex h-12 w-44 sm:w-52 items-center justify-center overflow-hidden"
+>
   <img 
     src={LOGO_IMAGE_URL} 
     alt="Nexus Tuitions Logo" 
-    className="h-32 sm:h-40 w-auto object-contain scale-[2.5] origin-left ml-2"
+    className="absolute left-1/2 top-1/2 h-auto w-[360%] max-w-none -translate-x-1/2 -translate-y-1/2 mix-blend-multiply pointer-events-none"
   />
 </Link>
 
