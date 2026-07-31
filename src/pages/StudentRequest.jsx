@@ -340,16 +340,15 @@ export default function StudentRequest() {
   return (
    <div
       style={{
-        /* Clean, Crisp SaaS Theme */
-        '--chalk': '#f83b0c',     /* Slate 800 - Main dark color */
-        '--paper': '#F8FAFC',     /* Slate 50 - Very light grey background */
-        '--ink': '#e63c0d',       /* Slate 900 - Text color */
-        '--card': '#FFFFFF',      /* Pure White */
-        '--marigold': '#f26f28',  /* Blue 500 - Primary accent */
-        '--rust': '#fc5d07',      /* Indigo 500 - Secondary accent */
-        '--line': '#E2E8F0',      /* Slate 200 - Borders */
-        '--good': '#10B981',      /* Emerald 500 - Success states */
-      }}
+  '--chalk': '#0E382C',     /* Deep Forest Green (Primary buttons) */
+  '--paper': '#FDF9F1',     /* Warm Cream Background */
+  '--ink': '#1C201E',       /* Near Black / Deep Ink text */
+  '--card': '#FFFFFF',      /* Card Background */
+  '--marigold': '#D25427',  /* Burnt Orange / Rust Accent */
+  '--rust': '#B8431B',      /* Darker Rust Accent */
+  '--line': '#E6DFD3',      /* Soft Cream Border Line */
+  '--good': '#10B981',      /* Success Green */
+}}
       className="relative flex min-h-screen scroll-smooth flex-col bg-[var(--paper)] font-sans text-[var(--ink)] selection:bg-[var(--marigold)]/30"
     >
       
