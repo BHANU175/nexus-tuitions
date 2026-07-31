@@ -139,41 +139,41 @@ export default function Home() {
             </div>
 
             {/* Right Content / Image Area */}
-            <div className="relative mx-auto mt-10 w-full max-w-md lg:mt-0 lg:max-w-none">
-              <div className="absolute inset-0 right-4 top-4 -z-10 rounded-full bg-[#F6C280] opacity-50 blur-3xl"></div>
-              <div className="absolute left-1/2 top-1/2 -z-10 h-[450px] w-[450px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#F3B770]"></div>
-              
-              <img 
-                src={HERO_IMAGE_URL}
-                alt="Tutor helping a student" 
-                className="relative z-10 w-full rounded-2xl object-contain drop-shadow-2xl" 
-              />
+<div className="relative mx-auto mt-10 w-full max-w-lg lg:mt-0 lg:max-w-xl xl:max-w-2xl">
+  <div className="absolute inset-0 right-4 top-4 -z-10 rounded-full bg-[#F6C280] opacity-50 blur-3xl"></div>
+  <div className="absolute left-1/2 top-1/2 -z-10 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#F3B770]"></div>
+  
+  <img 
+    src={HERO_IMAGE_URL}
+    alt="Tutor helping a student" 
+    className="relative z-10 w-full scale-105 rounded-2xl object-contain drop-shadow-2xl" 
+  />
 
-              {/* Floating Badges */}
-              <div className="absolute -left-2 top-2 z-20 flex origin-top-left scale-[0.65] flex-col items-center rounded-2xl bg-white p-4 shadow-xl sm:-left-6 sm:top-10 sm:scale-100">
-                <div className="flex text-yellow-400">★★★★★</div>
-                <div className="mt-1 text-xl font-black text-[var(--ink)]">4.9/5</div>
-                <div className="text-xs font-medium text-gray-500">Average Rating</div>
-              </div>
+  {/* Floating Badges */}
+  <div className="absolute -left-4 top-2 z-20 flex origin-top-left scale-[0.75] flex-col items-center rounded-2xl bg-white p-4 shadow-xl sm:-left-8 sm:top-10 sm:scale-100">
+    <div className="flex text-yellow-400">★★★★★</div>
+    <div className="mt-1 text-xl font-black text-[var(--ink)]">4.9/5</div>
+    <div className="text-xs font-medium text-gray-500">Average Rating</div>
+  </div>
 
-              <div className="absolute -right-2 top-2 z-20 flex origin-top-right scale-[0.65] flex-col items-center rounded-2xl bg-white p-4 shadow-xl sm:-right-6 sm:top-10 sm:scale-100">
-                <span className="mb-1 text-2xl">📊</span>
-                <div className="text-xl font-black text-[var(--ink)]">1,500+</div>
-                <div className="text-xs font-medium text-gray-500">Happy Students</div>
-              </div>
+  <div className="absolute -right-4 top-2 z-20 flex origin-top-right scale-[0.75] flex-col items-center rounded-2xl bg-white p-4 shadow-xl sm:-right-8 sm:top-10 sm:scale-100">
+    <span className="mb-1 text-2xl">📊</span>
+    <div className="text-xl font-black text-[var(--ink)]">1,500+</div>
+    <div className="text-xs font-medium text-gray-500">Happy Students</div>
+  </div>
 
-              <div className="absolute -left-2 bottom-6 z-20 flex origin-bottom-left scale-[0.65] flex-col items-center rounded-2xl bg-white p-4 shadow-xl sm:-left-10 sm:bottom-20 sm:scale-100">
-                <span className="mb-1 text-2xl">🧑‍🏫</span>
-                <div className="text-xl font-black text-[var(--ink)]">500+</div>
-                <div className="text-xs font-medium text-gray-500">Verified Tutors</div>
-              </div>
+  <div className="absolute -left-4 bottom-6 z-20 flex origin-bottom-left scale-[0.75] flex-col items-center rounded-2xl bg-white p-4 shadow-xl sm:-left-12 sm:bottom-20 sm:scale-100">
+    <span className="mb-1 text-2xl">🧑‍🏫</span>
+    <div className="text-xl font-black text-[var(--ink)]">500+</div>
+    <div className="text-xs font-medium text-gray-500">Verified Tutors</div>
+  </div>
 
-              <div className="absolute -right-2 bottom-12 z-20 flex origin-bottom-right scale-[0.65] flex-col items-center rounded-2xl bg-white p-4 shadow-xl sm:-right-10 sm:bottom-32 sm:scale-100">
-                <span className="mb-1 text-2xl">🎓</span>
-                <div className="text-xl font-black text-[var(--ink)]">50+</div>
-                <div className="text-xs font-medium text-gray-500">Subjects</div>
-              </div>
-            </div>
+  <div className="absolute -right-4 bottom-12 z-20 flex origin-bottom-right scale-[0.75] flex-col items-center rounded-2xl bg-white p-4 shadow-xl sm:-right-12 sm:bottom-32 sm:scale-100">
+    <span className="mb-1 text-2xl">🎓</span>
+    <div className="text-xl font-black text-[var(--ink)]">50+</div>
+    <div className="text-xs font-medium text-gray-500">Subjects</div>
+  </div>
+</div>
           </div>
         </section>
 
