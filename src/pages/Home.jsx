@@ -63,19 +63,15 @@ export default function Home() {
       <nav className="sticky top-0 z-50 border-b border-[var(--line)]/60 bg-[var(--paper)]/90 backdrop-blur-md">
         <div className="mx-auto flex max-w-[1300px] items-center justify-between px-4 py-3 sm:px-6 sm:py-4 lg:px-8">
           
-      {/* Logo Area */}
-<Link 
-  to="/" 
-  onClick={handleNavigation} 
-  className="relative flex h-12 w-44 sm:w-52 items-center justify-center overflow-hidden"
->
-  <img 
-    src={LOGO_IMAGE_URL} 
-    alt="Nexus Tuitions Logo" 
-    className="absolute left-1/2 top-1/2 h-auto w-[360%] max-w-none -translate-x-1/2 -translate-y-1/2 mix-blend-multiply pointer-events-none"
-  />
+     {/* Logo Area */}
+<Link to="/" onClick={handleNavigation} className="flex flex-col justify-center select-none py-1">
+  <span className="font-sans text-3xl font-black tracking-tighter text-black leading-none">
+    nexus<span className="text-black">.</span>
+  </span>
+  <span className="font-sans text-[10px] font-medium tracking-[0.42em] text-black lowercase mt-0.5 pl-[2px]">
+    tuitions
+  </span>
 </Link>
-
           {/* Center Links */}
           <div className="hidden items-center gap-8 text-[15px] font-medium text-[var(--ink)] lg:flex">
             <a href="#why" className="transition-colors hover:text-[var(--marigold)]">Why Us</a>
