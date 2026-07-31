@@ -345,8 +345,8 @@ export default function StudentRequest() {
         '--paper': '#F8FAFC',     /* Slate 50 - Very light grey background */
         '--ink': '#0F172A',       /* Slate 900 - Text color */
         '--card': '#FFFFFF',      /* Pure White */
-        '--marigold': '#3B82F6',  /* Blue 500 - Primary accent */
-        '--rust': '#6366F1',      /* Indigo 500 - Secondary accent */
+        '--marigold': '#f26f28',  /* Blue 500 - Primary accent */
+        '--rust': '#fc5d07',      /* Indigo 500 - Secondary accent */
         '--line': '#E2E8F0',      /* Slate 200 - Borders */
         '--good': '#10B981',      /* Emerald 500 - Success states */
       }}
