@@ -353,28 +353,29 @@ export default function StudentRequest() {
     >
       
       {/* --- NAV --- */}
-      <nav className="sticky top-0 z-50 border-b border-[var(--line)] bg-white/90 backdrop-blur-md">
-        <div className="mx-auto flex max-w-[1200px] items-center justify-between px-4 py-3 sm:px-6 sm:py-4 md:px-10">
-          <div className="flex items-center gap-3 text-lg font-black tracking-tight">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--marigold)] font-mono text-sm text-white shadow-sm">
-              LH
-            </div>
-            <span className="hidden sm:inline">Learning Hub</span>
-          </div>
-          <div className="hidden items-center gap-8 font-mono text-[13px] font-bold uppercase tracking-wide text-[var(--ink)]/60 md:flex">
-            <Link to="/" className="transition-colors hover:text-[var(--ink)]">Home</Link>
-            <Link to="/request-tutor" className="text-[var(--marigold)]">Find a tutor</Link>
-            <Link to="/apply-teacher" className="transition-colors hover:text-[var(--ink)]">Become a tutor</Link>
-          </div>
-          <Link
-            to="/apply-teacher"
-            className="rounded-xl border-2 border-[var(--line)] bg-white px-5 py-2.5 text-xs font-bold text-[var(--ink)] transition-all hover:border-[var(--chalk)] hover:bg-[var(--chalk)] hover:text-white sm:px-6 sm:text-sm"
-          >
-            Teach with us
-          </Link>
-        </div>
-      </nav>
+<nav className="sticky top-0 z-50 border-b border-[var(--line)] bg-[var(--paper)]/90 backdrop-blur-md">
+  <div className="mx-auto flex max-w-[1200px] items-center justify-between px-4 py-4 sm:px-6 md:px-10">
+    
+    {/* Nexus Tuitions Logo */}
+    <Link to="/" className="flex flex-col justify-center select-none">
+      <span className="font-sans text-3xl font-black tracking-tighter text-[var(--ink)] leading-none">
+        nexus<span className="text-[var(--ink)]">.</span>
+      </span>
+      <span className="font-sans text-[10px] font-semibold tracking-[0.42em] text-[var(--ink)]/80 lowercase mt-0.5 pl-[2px]">
+        tuitions
+      </span>
+    </Link>
 
+    {/* Header Navigation Links */}
+    <div className="hidden items-center gap-8 font-sans text-sm font-semibold text-[var(--ink)] md:flex">
+      <Link to="/" className="transition-colors hover:opacity-70">Why Us</Link>
+      <Link to="/request-tutor" className="transition-colors hover:opacity-70">Find a Tutor</Link>
+      <Link to="/apply-teacher" className="transition-colors hover:opacity-70">Become a Tutor</Link>
+      <Link to="/about" className="transition-colors hover:opacity-70">About</Link>
+    </div>
+
+  </div>
+</nav>
       {/* --- UNIFIED HERO SECTION --- */}
       <header className="relative pt-12 pb-16 sm:pt-20 sm:pb-24 lg:pt-24 lg:pb-28">
         <div className="relative mx-auto max-w-[1200px] px-4 sm:px-6 md:px-10">
