@@ -736,7 +736,7 @@ export default function StudentRequest() {
       </section>
 
       {/* --- FOOTER --- */}
-      <footer className="py-6 text-center font-mono text-[11px] font-medium uppercase tracking-widest text-[var(--ink)]/35">
+      <footer className="mt-auto bg-[var(--chalk)] py-10 text-center font-mono text-[12px] font-medium uppercase tracking-widest text-[var(--line)]/50">
         nexus. tuitions — connecting educators and students, one lesson at a time.
       </footer>
     </div>

@@ -6,7 +6,7 @@ import axios from 'axios';
 /*  Static data                                                           */
 /* ---------------------------------------------------------------------- */
 
-const CITIES = ['Jaipur', 'Delhi', 'Mumbai', 'Bangalore', 'Other'];
+const CITIES = ['Jaipur'];
 
 const TEACHING_MODES = [
   { id: 'online', label: 'Remote / Online', icon: '💻' },
@@ -424,7 +424,7 @@ export default function TeacherApply() {
     <div
       style={{
         '--chalk': '#16302A',
-        '--paper': '#EEEFE4',
+        '--paper': '#FDF9F1',
         '--ink': '#1C2420',
         '--card': '#FCFBF6',
         '--marigold': '#E7A23D',
@@ -435,28 +435,33 @@ export default function TeacherApply() {
       className="scroll-smooth bg-[var(--paper)] font-sans text-[var(--ink)] selection:bg-[var(--marigold)]/30"
     >
       {/* --- NAV --- */}
-      <nav className="sticky top-0 z-50 border-b border-[var(--line)]/60 bg-[var(--paper)]/90 backdrop-blur-md">
-        <div className="mx-auto flex max-w-[1200px] items-center justify-between px-4 py-3 sm:px-6 sm:py-4 md:px-10">
-          <div className="flex items-center gap-2.5 text-lg font-black tracking-tight">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--chalk)] font-mono text-sm text-[var(--paper)] sm:h-10 sm:w-10">
-              LH
-            </div>
-            <span className="hidden sm:inline">Learning Hub</span>
-          </div>
-          <div className="hidden items-center gap-8 font-mono text-[13px] font-bold uppercase tracking-wide text-[var(--ink)]/55 md:flex">
-            <Link to="/" className="transition-colors hover:text-[var(--ink)]">Platform</Link>
-            <a href="#why" className="transition-colors hover:text-[var(--ink)]">Why us</a>
-            <Link to="/request-tutor" className="transition-colors hover:text-[var(--ink)]">Hire a tutor</Link>
-          </div>
-          <a
-            href="#apply"
-            className="rounded-lg bg-[var(--chalk)] px-3.5 py-2 text-xs font-bold text-[var(--paper)] transition-colors hover:bg-[var(--rust)] sm:px-5 sm:py-2.5 sm:text-sm"
-          >
-            Apply to teach
-          </a>
-        </div>
-      </nav>
+<nav className="sticky top-0 z-50 border-b border-[var(--line)]/60 bg-[var(--paper)]/90 backdrop-blur-md">
+  <div className="mx-auto flex max-w-[1200px] items-center justify-between px-4 py-3 sm:px-6 sm:py-4 md:px-10">
+    
+    {/* nexus. tuitions Logo */}
+    <Link to="/" className="flex flex-col justify-center select-none">
+      <span className="font-sans text-2xl font-black tracking-tighter text-[var(--ink)] leading-none sm:text-3xl">
+        nexus<span className="text-[var(--rust)]">.</span>
+      </span>
+      <span className="font-sans text-[9px] font-bold tracking-[0.38em] text-[var(--ink)]/70 lowercase mt-0.5 pl-[2px] sm:text-[10px]">
+        tuitions
+      </span>
+    </Link>
 
+    <div className="hidden items-center gap-8 font-mono text-[13px] font-bold uppercase tracking-wide text-[var(--ink)]/55 md:flex">
+      <Link to="/" className="transition-colors hover:text-[var(--ink)]">Platform</Link>
+      <a href="#why" className="transition-colors hover:text-[var(--ink)]">Why us</a>
+      <Link to="/request-tutor" className="transition-colors hover:text-[var(--ink)]">Hire a tutor</Link>
+    </div>
+
+    <a
+      href="#apply"
+      className="rounded-lg bg-[var(--chalk)] px-3.5 py-2 text-xs font-bold text-[var(--paper)] transition-colors hover:bg-[var(--rust)] sm:px-5 sm:py-2.5 sm:text-sm"
+    >
+      Apply to teach
+    </a>
+  </div>
+</nav>
       {/* --- ROTATING BANNER --- */}
       <div className="mx-auto max-w-[1200px] px-4 pt-8 sm:px-6 sm:pt-10 md:px-10">
         <HeroBanner />
@@ -780,7 +785,7 @@ export default function TeacherApply() {
       </section>
 
       <footer className="bg-[var(--chalk)] py-6 text-center font-mono text-[11px] font-medium uppercase tracking-widest text-[var(--paper)]/40">
-        Learning Hub — connecting educators and students, one lesson at a time.
+       nexus. tuitions — connecting educators and students, one lesson at a time. 
       </footer>
     </div>
   );
