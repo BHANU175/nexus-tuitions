@@ -142,36 +142,35 @@ function HeroBanner() {
     <div
       onMouseEnter={() => { pausedRef.current = true; }}
       onMouseLeave={() => { pausedRef.current = false; }}
-      className="relative w-full overflow-hidden rounded-3xl bg-[var(--chalk)] shadow-2xl shadow-[var(--chalk)]/20 lg:h-full lg:min-h-[400px]"
+      className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-[var(--marigold)] to-[var(--rust)] sm:rounded-[2.5rem]"
     >
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 opacity-10"
-        style={{ backgroundImage: 'radial-gradient(circle, #FFFFFF 1.5px, transparent 1.5px)', backgroundSize: '24px 24px' }}
+        className="pointer-events-none absolute inset-0 opacity-[0.12]"
+        style={{ backgroundImage: 'radial-gradient(circle, var(--ink) 1.5px, transparent 1.5px)', backgroundSize: '24px 24px' }}
       />
-      <div className="relative flex h-full flex-col justify-center px-6 py-12 sm:px-10 lg:p-14">
-        <div className="flex w-full items-center justify-between gap-6">
-          <div className="hidden sm:block">
-             <NotebookIllustration />
+      <div className="relative grid grid-cols-1 items-center gap-8 px-6 py-10 sm:px-10 sm:py-12 md:grid-cols-[1fr_auto_auto] md:gap-10 md:px-14 md:py-14">
+        {/* Card showing student text inside the orange banner */}
+        <div className="mx-auto w-full max-w-[240px] -rotate-2 rounded-2xl bg-[var(--card)] p-5 shadow-xl md:mx-0">
+          <p key={active} className="animate-in fade-in font-serif text-base font-bold leading-snug text-[var(--ink)] duration-500">
+            {BANNER_SLIDES[active].note}
+          </p>
+          <div className="mt-4 flex gap-1.5">
+            {BANNER_SLIDES.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setActive(i)}
+                aria-label={`Show message ${i + 1}`}
+                className={`h-1.5 rounded-full transition-all ${i === active ? 'w-6 bg-[var(--marigold)]' : 'w-1.5 bg-[var(--ink)]/20'}`}
+              />
+            ))}
           </div>
-          <div className="z-10 mx-auto w-full max-w-[260px] -rotate-2 rounded-2xl bg-white p-7 shadow-xl transition-transform hover:rotate-0 lg:mx-0">
-            <p key={active} className="animate-in fade-in font-serif text-base font-bold leading-snug text-[var(--ink)] duration-500">
-              {BANNER_SLIDES[active].note}
-            </p>
-            <div className="mt-6 flex gap-2">
-              {BANNER_SLIDES.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setActive(i)}
-                  aria-label={`Show message ${i + 1}`}
-                  className={`h-2 rounded-full transition-all ${i === active ? 'w-8 bg-[var(--marigold)]' : 'w-2 bg-[var(--line)] hover:bg-[var(--line)]/70'}`}
-                />
-              ))}
-            </div>
-          </div>
-          <div className="hidden xl:block">
-            <MentorBadgeIllustration />
-          </div>
+        </div>
+        <div className="hidden justify-self-center md:block">
+          <NotebookIllustration />
+        </div>
+        <div className="hidden justify-self-center md:block">
+          <MentorBadgeIllustration />
         </div>
       </div>
     </div>
