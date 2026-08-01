@@ -1,4 +1,6 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { supabase } from './supabaseClient'; // Adjust path to your Supabase client as needed
 
 /* ---------------------------------------------------------------------- */
 /*  Static data                                                           */
@@ -36,6 +38,30 @@ const VALUES = [
 /* ---------------------------------------------------------------------- */
 
 export default function Home() {
+  const [isMaintenance, setIsMaintenance] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function checkMaintenance() {
+      try {
+        const { data, error } = await supabase
+          .from('app_settings')
+          .select('maintenance_mode')
+          .single();
+
+        if (data && !error) {
+          setIsMaintenance(data.maintenance_mode);
+        }
+      } catch (err) {
+        console.error('Failed to fetch app settings:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    checkMaintenance();
+  }, []);
+
   // Update these paths to your local image paths inside the public folder
   const HERO_IMAGE_URL = "/1.png"; 
   const LOGO_IMAGE_URL = "/2.png"; // Replace with your logo path
@@ -44,6 +70,50 @@ export default function Home() {
   const handleNavigation = () => {
     window.scrollTo(0, 0);
   };
+
+  // Loading Screen
+  if (loading) {
+    return (
+      <div
+        style={{
+          '--paper': '#FDF9F1',
+          '--ink': '#1C2420',
+        }}
+        className="flex min-h-screen items-center justify-center bg-[var(--paper)] font-sans text-[var(--ink)]"
+      >
+        <p className="text-sm font-semibold tracking-wide text-[var(--ink)]/60">Loading...</p>
+      </div>
+    );
+  }
+
+  // Maintenance Screen
+  if (isMaintenance) {
+    return (
+      <div
+        style={{
+          '--paper': '#FDF9F1',
+          '--ink': '#1C2420',
+          '--marigold': '#F38C35',
+        }}
+        className="flex min-h-screen flex-col items-center justify-center bg-[var(--paper)] px-4 text-center font-sans text-[var(--ink)]"
+      >
+        <div className="mb-8 flex flex-col justify-center select-none">
+          <span className="font-sans text-4xl font-black tracking-tighter text-black leading-none">
+            nexus<span className="text-black">.</span>
+          </span>
+          <span className="font-sans text-[12px] font-medium tracking-[0.42em] text-black lowercase mt-1 pl-[2px]">
+            tuitions
+          </span>
+        </div>
+        <h1 className="font-serif text-4xl font-black tracking-tight text-[var(--ink)] sm:text-5xl">
+          We'll be right back
+        </h1>
+        <p className="mt-4 max-w-md text-base font-medium leading-relaxed text-[var(--ink)]/70">
+          Nexus Tuitions is currently undergoing scheduled maintenance. Please check back soon.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -63,15 +133,16 @@ export default function Home() {
       <nav className="sticky top-0 z-50 border-b border-[var(--line)]/60 bg-[var(--paper)]/90 backdrop-blur-md">
         <div className="mx-auto flex max-w-[1300px] items-center justify-between px-4 py-3 sm:px-6 sm:py-4 lg:px-8">
           
-     {/* Logo Area */}
-<Link to="/" onClick={handleNavigation} className="flex flex-col justify-center select-none py-1">
-  <span className="font-sans text-3xl font-black tracking-tighter text-black leading-none">
-    nexus<span className="text-black">.</span>
-  </span>
-  <span className="font-sans text-[10px] font-medium tracking-[0.42em] text-black lowercase mt-0.5 pl-[2px]">
-    tuitions
-  </span>
-</Link>
+          {/* Logo Area */}
+          <Link to="/" onClick={handleNavigation} className="flex flex-col justify-center select-none py-1">
+            <span className="font-sans text-3xl font-black tracking-tighter text-black leading-none">
+              nexus<span className="text-black">.</span>
+            </span>
+            <span className="font-sans text-[10px] font-medium tracking-[0.42em] text-black lowercase mt-0.5 pl-[2px]">
+              tuitions
+            </span>
+          </Link>
+          
           {/* Center Links */}
           <div className="hidden items-center gap-8 text-[15px] font-medium text-[var(--ink)] lg:flex">
             <a href="#why" className="transition-colors hover:text-[var(--marigold)]">Why Us</a>
@@ -139,41 +210,41 @@ export default function Home() {
             </div>
 
             {/* Right Content / Image Area */}
-<div className="relative mx-auto mt-10 w-full max-w-lg lg:mt-0 lg:max-w-xl xl:max-w-2xl">
-  <div className="absolute inset-0 right-4 top-4 -z-10 rounded-full bg-[#F6C280] opacity-50 blur-3xl"></div>
-  <div className="absolute left-1/2 top-1/2 -z-10 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#F3B770]"></div>
-  
-  <img 
-    src={HERO_IMAGE_URL}
-    alt="Tutor helping a student" 
-    className="relative z-10 w-full scale-105 rounded-2xl object-contain drop-shadow-2xl" 
-  />
+            <div className="relative mx-auto mt-10 w-full max-w-lg lg:mt-0 lg:max-w-xl xl:max-w-2xl">
+              <div className="absolute inset-0 right-4 top-4 -z-10 rounded-full bg-[#F6C280] opacity-50 blur-3xl"></div>
+              <div className="absolute left-1/2 top-1/2 -z-10 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#F3B770]"></div>
+              
+              <img 
+                src={HERO_IMAGE_URL}
+                alt="Tutor helping a student" 
+                className="relative z-10 w-full scale-105 rounded-2xl object-contain drop-shadow-2xl" 
+              />
 
-  {/* Floating Badges */}
-  <div className="absolute -left-4 top-2 z-20 flex origin-top-left scale-[0.75] flex-col items-center rounded-2xl bg-white p-4 shadow-xl sm:-left-8 sm:top-10 sm:scale-100">
-    <div className="flex text-yellow-400">★★★★★</div>
-    <div className="mt-1 text-xl font-black text-[var(--ink)]">4.9/5</div>
-    <div className="text-xs font-medium text-gray-500">Average Rating</div>
-  </div>
+              {/* Floating Badges */}
+              <div className="absolute -left-4 top-2 z-20 flex origin-top-left scale-[0.75] flex-col items-center rounded-2xl bg-white p-4 shadow-xl sm:-left-8 sm:top-10 sm:scale-100">
+                <div className="flex text-yellow-400">★★★★★</div>
+                <div className="mt-1 text-xl font-black text-[var(--ink)]">4.9/5</div>
+                <div className="text-xs font-medium text-gray-500">Average Rating</div>
+              </div>
 
-  <div className="absolute -right-4 top-2 z-20 flex origin-top-right scale-[0.75] flex-col items-center rounded-2xl bg-white p-4 shadow-xl sm:-right-8 sm:top-10 sm:scale-100">
-    <span className="mb-1 text-2xl">📊</span>
-    <div className="text-xl font-black text-[var(--ink)]">1,500+</div>
-    <div className="text-xs font-medium text-gray-500">Happy Students</div>
-  </div>
+              <div className="absolute -right-4 top-2 z-20 flex origin-top-right scale-[0.75] flex-col items-center rounded-2xl bg-white p-4 shadow-xl sm:-right-8 sm:top-10 sm:scale-100">
+                <span className="mb-1 text-2xl">📊</span>
+                <div className="text-xl font-black text-[var(--ink)]">1,500+</div>
+                <div className="text-xs font-medium text-gray-500">Happy Students</div>
+              </div>
 
-  <div className="absolute -left-4 bottom-6 z-20 flex origin-bottom-left scale-[0.75] flex-col items-center rounded-2xl bg-white p-4 shadow-xl sm:-left-12 sm:bottom-20 sm:scale-100">
-    <span className="mb-1 text-2xl">🧑‍🏫</span>
-    <div className="text-xl font-black text-[var(--ink)]">500+</div>
-    <div className="text-xs font-medium text-gray-500">Verified Tutors</div>
-  </div>
+              <div className="absolute -left-4 bottom-6 z-20 flex origin-bottom-left scale-[0.75] flex-col items-center rounded-2xl bg-white p-4 shadow-xl sm:-left-12 sm:bottom-20 sm:scale-100">
+                <span className="mb-1 text-2xl">🧑‍🏫</span>
+                <div className="text-xl font-black text-[var(--ink)]">500+</div>
+                <div className="text-xs font-medium text-gray-500">Verified Tutors</div>
+              </div>
 
-  <div className="absolute -right-4 bottom-12 z-20 flex origin-bottom-right scale-[0.75] flex-col items-center rounded-2xl bg-white p-4 shadow-xl sm:-right-12 sm:bottom-32 sm:scale-100">
-    <span className="mb-1 text-2xl">🎓</span>
-    <div className="text-xl font-black text-[var(--ink)]">50+</div>
-    <div className="text-xs font-medium text-gray-500">Subjects</div>
-  </div>
-</div>
+              <div className="absolute -right-4 bottom-12 z-20 flex origin-bottom-right scale-[0.75] flex-col items-center rounded-2xl bg-white p-4 shadow-xl sm:-right-12 sm:bottom-32 sm:scale-100">
+                <span className="mb-1 text-2xl">🎓</span>
+                <div className="text-xl font-black text-[var(--ink)]">50+</div>
+                <div className="text-xs font-medium text-gray-500">Subjects</div>
+              </div>
+            </div>
           </div>
         </section>
 
