@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback, memo } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import { supabase } from './supabaseClient'; // 1. Added Supabase import (adjust path if needed)
 
 /* ---------------------------------------------------------------------- */
 /* Static data                                                            */
@@ -195,6 +196,32 @@ const INITIAL_FORM = {
 };
 
 export default function StudentRequest() {
+  // 2. Added maintenance mode state
+  const [isMaintenance, setIsMaintenance] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  // 3. Maintenance mode check effect
+  useEffect(() => {
+    async function checkMaintenance() {
+      try {
+        const { data, error } = await supabase
+          .from('app_settings')
+          .select('maintenance_mode')
+          .single();
+
+        if (data && !error) {
+          setIsMaintenance(data.maintenance_mode);
+        }
+      } catch (err) {
+        console.error('Failed to fetch app settings:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    checkMaintenance();
+  }, []);
+
   const [formData, setFormData] = useState(INITIAL_FORM);
   const [subjectInput, setSubjectInput] = useState('');
   const [errors, setErrors] = useState({});
@@ -203,7 +230,7 @@ export default function StudentRequest() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
   
-  // New State for Multi-Step Form
+  // State for Multi-Step Form
   const [currentStep, setCurrentStep] = useState(1);
 
   const clearError = useCallback((name) => {
@@ -273,7 +300,7 @@ export default function StudentRequest() {
     );
   }, []);
 
-  // Updated Step-by-Step Validation Logic
+  // Step-by-Step Validation Logic
   const validateStep = useCallback((step) => {
     const e = {};
     if (step === 1) {
@@ -335,6 +362,50 @@ export default function StudentRequest() {
       setIsSubmitting(false);
     }
   };
+
+  // 4. Loading Screen
+  if (loading) {
+    return (
+      <div
+        style={{
+          '--paper': '#FDF9F1',
+          '--ink': '#1C2420',
+        }}
+        className="flex min-h-screen items-center justify-center bg-[var(--paper)] font-sans text-[var(--ink)]"
+      >
+        <p className="text-sm font-semibold tracking-wide text-[var(--ink)]/60">Loading...</p>
+      </div>
+    );
+  }
+
+  // 4. Maintenance Screen
+  if (isMaintenance) {
+    return (
+      <div
+        style={{
+          '--paper': '#FDF9F1',
+          '--ink': '#1C2420',
+          '--marigold': '#F38C35',
+        }}
+        className="flex min-h-screen flex-col items-center justify-center bg-[var(--paper)] px-4 text-center font-sans text-[var(--ink)]"
+      >
+        <div className="mb-8 flex flex-col justify-center select-none">
+          <span className="font-sans text-4xl font-black tracking-tighter text-black leading-none">
+            nexus<span className="text-black">.</span>
+          </span>
+          <span className="font-sans text-[12px] font-medium tracking-[0.42em] text-black lowercase mt-1 pl-[2px]">
+            tuitions
+          </span>
+        </div>
+        <h1 className="font-serif text-4xl font-black tracking-tight text-[var(--ink)] sm:text-5xl">
+          We'll be right back
+        </h1>
+        <p className="mt-4 max-w-md text-base font-medium leading-relaxed text-[var(--ink)]/70">
+          Nexus Tuitions is currently undergoing scheduled maintenance. Please check back soon.
+        </p>
+      </div>
+    );
+  }
 
   return (
    <div
