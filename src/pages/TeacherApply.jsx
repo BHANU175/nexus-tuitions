@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import { supabase } from './supabaseClient'; // 1. Added Supabase import (adjust path if needed)
 
 /* ---------------------------------------------------------------------- */
 /*  Static data                                                           */
@@ -167,7 +168,7 @@ function FileUploadZone({ id, label, hint, file, previewUrl, accept, onFile, err
 }
 
 /* ---------------------------------------------------------------------- */
-/*  Decorative illustrations + rotating banner (same as the Home page)     */
+/*  Decorative illustrations + rotating banner                             */
 /* ---------------------------------------------------------------------- */
 
 function NotebookIllustration() {
@@ -262,6 +263,31 @@ function HeroBanner() {
 /* ---------------------------------------------------------------------- */
 
 export default function TeacherApply() {
+  // 2. Added state and useEffect for maintenance mode check
+  const [isMaintenance, setIsMaintenance] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function checkMaintenance() {
+      try {
+        const { data, error } = await supabase
+          .from('app_settings')
+          .select('maintenance_mode')
+          .single();
+
+        if (data && !error) {
+          setIsMaintenance(data.maintenance_mode);
+        }
+      } catch (err) {
+        console.error('Failed to fetch app settings:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    checkMaintenance();
+  }, []);
+
   const [textData, setTextData] = useState({
     fullName: '',
     email: '',
@@ -420,6 +446,50 @@ export default function TeacherApply() {
     }
   };
 
+  // 3. Added Loading Screen render
+  if (loading) {
+    return (
+      <div
+        style={{
+          '--paper': '#FDF9F1',
+          '--ink': '#1C2420',
+        }}
+        className="flex min-h-screen items-center justify-center bg-[var(--paper)] font-sans text-[var(--ink)]"
+      >
+        <p className="text-sm font-semibold tracking-wide text-[var(--ink)]/60">Loading...</p>
+      </div>
+    );
+  }
+
+  // 3. Added Maintenance Screen render
+  if (isMaintenance) {
+    return (
+      <div
+        style={{
+          '--paper': '#FDF9F1',
+          '--ink': '#1C2420',
+          '--marigold': '#F38C35',
+        }}
+        className="flex min-h-screen flex-col items-center justify-center bg-[var(--paper)] px-4 text-center font-sans text-[var(--ink)]"
+      >
+        <div className="mb-8 flex flex-col justify-center select-none">
+          <span className="font-sans text-4xl font-black tracking-tighter text-black leading-none">
+            nexus<span className="text-black">.</span>
+          </span>
+          <span className="font-sans text-[12px] font-medium tracking-[0.42em] text-black lowercase mt-1 pl-[2px]">
+            tuitions
+          </span>
+        </div>
+        <h1 className="font-serif text-4xl font-black tracking-tight text-[var(--ink)] sm:text-5xl">
+          We'll be right back
+        </h1>
+        <p className="mt-4 max-w-md text-base font-medium leading-relaxed text-[var(--ink)]/70">
+          Nexus Tuitions is currently undergoing scheduled maintenance. Please check back soon.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div
       style={{
@@ -435,33 +505,34 @@ export default function TeacherApply() {
       className="scroll-smooth bg-[var(--paper)] font-sans text-[var(--ink)] selection:bg-[var(--marigold)]/30"
     >
       {/* --- NAV --- */}
-<nav className="sticky top-0 z-50 border-b border-[var(--line)]/60 bg-[var(--paper)]/90 backdrop-blur-md">
-  <div className="mx-auto flex max-w-[1200px] items-center justify-between px-4 py-3 sm:px-6 sm:py-4 md:px-10">
-    
-    {/* nexus. tuitions Logo */}
-    <Link to="/" className="flex flex-col justify-center select-none">
-      <span className="font-sans text-2xl font-black tracking-tighter text-[var(--ink)] leading-none sm:text-3xl">
-        nexus<span className="text-[var(--rust)]">.</span>
-      </span>
-      <span className="font-sans text-[9px] font-bold tracking-[0.38em] text-[var(--ink)]/70 lowercase mt-0.5 pl-[2px] sm:text-[10px]">
-        tuitions
-      </span>
-    </Link>
+      <nav className="sticky top-0 z-50 border-b border-[var(--line)]/60 bg-[var(--paper)]/90 backdrop-blur-md">
+        <div className="mx-auto flex max-w-[1200px] items-center justify-between px-4 py-3 sm:px-6 sm:py-4 md:px-10">
+          
+          {/* nexus. tuitions Logo */}
+          <Link to="/" className="flex flex-col justify-center select-none">
+            <span className="font-sans text-2xl font-black tracking-tighter text-[var(--ink)] leading-none sm:text-3xl">
+              nexus<span className="text-[var(--rust)]">.</span>
+            </span>
+            <span className="font-sans text-[9px] font-bold tracking-[0.38em] text-[var(--ink)]/70 lowercase mt-0.5 pl-[2px] sm:text-[10px]">
+              tuitions
+            </span>
+          </Link>
 
-    <div className="hidden items-center gap-8 font-mono text-[13px] font-bold uppercase tracking-wide text-[var(--ink)]/55 md:flex">
-      <Link to="/" className="transition-colors hover:text-[var(--ink)]">Platform</Link>
-      <a href="#why" className="transition-colors hover:text-[var(--ink)]">Why us</a>
-      <Link to="/request-tutor" className="transition-colors hover:text-[var(--ink)]">Hire a tutor</Link>
-    </div>
+          <div className="hidden items-center gap-8 font-mono text-[13px] font-bold uppercase tracking-wide text-[var(--ink)]/55 md:flex">
+            <Link to="/" className="transition-colors hover:text-[var(--ink)]">Platform</Link>
+            <a href="#why" className="transition-colors hover:text-[var(--ink)]">Why us</a>
+            <Link to="/request-tutor" className="transition-colors hover:text-[var(--ink)]">Hire a tutor</Link>
+          </div>
 
-    <a
-      href="#apply"
-      className="rounded-lg bg-[var(--chalk)] px-3.5 py-2 text-xs font-bold text-[var(--paper)] transition-colors hover:bg-[var(--rust)] sm:px-5 sm:py-2.5 sm:text-sm"
-    >
-      Apply to teach
-    </a>
-  </div>
-</nav>
+          <a
+            href="#apply"
+            className="rounded-lg bg-[var(--chalk)] px-3.5 py-2 text-xs font-bold text-[var(--paper)] transition-colors hover:bg-[var(--rust)] sm:px-5 sm:py-2.5 sm:text-sm"
+          >
+            Apply to teach
+          </a>
+        </div>
+      </nav>
+
       {/* --- ROTATING BANNER --- */}
       <div className="mx-auto max-w-[1200px] px-4 pt-8 sm:px-6 sm:pt-10 md:px-10">
         <HeroBanner />
