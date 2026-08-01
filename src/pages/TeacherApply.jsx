@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { supabase } from './supabaseClient'; // 1. Added Supabase import (adjust path if needed)
+import { supabase } from './supabaseClient';
 
 /* ---------------------------------------------------------------------- */
 /*  Static data                                                           */
@@ -25,8 +25,6 @@ const BANNER_SLIDES = [
   { note: 'Get paid for the sessions you actually run.' },
 ];
 
-// Cycled across the benefit cards below so the section reads as more than
-// one flat gray-green tone.
 const ICON_TINTS = ['bg-[var(--marigold)]/10', 'bg-[var(--rust)]/10', 'bg-[var(--good)]/10', 'bg-[var(--chalk)]/8'];
 
 const BENEFITS = [
@@ -52,8 +50,6 @@ const MAX_FILE_BYTES = 8 * 1024 * 1024;
 /*  Helpers                                                                */
 /* ---------------------------------------------------------------------- */
 
-// Downscales + re-encodes an image client-side so uploads are smaller and
-// faster over slow connections, without a visible quality hit.
 function compressImage(file, maxWidth = 1280, quality = 0.85) {
   return new Promise((resolve) => {
     if (!file.type.startsWith('image/')) return resolve(file);
@@ -85,7 +81,7 @@ function compressImage(file, maxWidth = 1280, quality = 0.85) {
 }
 
 /* ---------------------------------------------------------------------- */
-/*  Small building blocks                                                  */
+/*  Building Blocks                                                        */
 /* ---------------------------------------------------------------------- */
 
 function Field({ label, error, hint, children }) {
@@ -168,7 +164,7 @@ function FileUploadZone({ id, label, hint, file, previewUrl, accept, onFile, err
 }
 
 /* ---------------------------------------------------------------------- */
-/*  Decorative illustrations + rotating banner                             */
+/*  Illustrations + Hero Banner                                            */
 /* ---------------------------------------------------------------------- */
 
 function NotebookIllustration() {
@@ -259,24 +255,28 @@ function HeroBanner() {
 }
 
 /* ---------------------------------------------------------------------- */
-/*  Main component                                                         */
+/*  Main Component                                                         */
 /* ---------------------------------------------------------------------- */
 
 export default function TeacherApply() {
-  // 2. Added state and useEffect for maintenance mode check
   const [isMaintenance, setIsMaintenance] = useState(false);
+  const [docUploadEnabled, setDocUploadEnabled] = useState(true);
   const [loading, setLoading] = useState(true);
 
+  // Fetch both maintenance_mode AND enable_doc_upload settings from Supabase
   useEffect(() => {
-    async function checkMaintenance() {
+    async function checkAppSettings() {
       try {
         const { data, error } = await supabase
           .from('app_settings')
-          .select('maintenance_mode')
+          .select('maintenance_mode, enable_doc_upload')
           .single();
 
         if (data && !error) {
-          setIsMaintenance(data.maintenance_mode);
+          setIsMaintenance(Boolean(data.maintenance_mode));
+          if (typeof data.enable_doc_upload === 'boolean') {
+            setDocUploadEnabled(data.enable_doc_upload);
+          }
         }
       } catch (err) {
         console.error('Failed to fetch app settings:', err);
@@ -285,7 +285,7 @@ export default function TeacherApply() {
       }
     }
 
-    checkMaintenance();
+    checkAppSettings();
   }, []);
 
   const [textData, setTextData] = useState({
@@ -312,7 +312,6 @@ export default function TeacherApply() {
   const [isLocating, setIsLocating] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
 
-  // Release object URLs when they're replaced or the component unmounts.
   useEffect(() => () => { if (profilePhotoPreview) URL.revokeObjectURL(profilePhotoPreview); }, [profilePhotoPreview]);
   useEffect(() => () => { if (idProofPreview) URL.revokeObjectURL(idProofPreview); }, [idProofPreview]);
 
@@ -392,8 +391,11 @@ export default function TeacherApply() {
       if (teachingModes.length === 0) e.teachingModes = 'Select at least one teaching mode.';
     }
     if (s === 2) {
-      if (!profilePhoto) e.profilePhoto = 'A profile photo is required.';
-      if (!idProof) e.idProof = 'An ID proof is required.';
+      // ONLY enforce required files if doc uploads are enabled globally
+      if (docUploadEnabled) {
+        if (!profilePhoto) e.profilePhoto = 'A profile photo is required.';
+        if (!idProof) e.idProof = 'An ID proof is required.';
+      }
     }
     return e;
   };
@@ -408,8 +410,10 @@ export default function TeacherApply() {
     const formData = new FormData();
     Object.entries(textData).forEach(([k, v]) => formData.append(k, v));
     formData.append('teachingModes', JSON.stringify(teachingModes));
-    formData.append('profilePhoto', profilePhoto);
-    formData.append('idProof', idProof);
+    
+    // Append files only if selected
+    if (profilePhoto) formData.append('profilePhoto', profilePhoto);
+    if (idProof) formData.append('idProof', idProof);
 
     try {
       await axios.post('https://learning-hub-backend-one.vercel.app/api/public/teacher-apply', formData, {
@@ -446,14 +450,10 @@ export default function TeacherApply() {
     }
   };
 
-  // 3. Added Loading Screen render
   if (loading) {
     return (
       <div
-        style={{
-          '--paper': '#FDF9F1',
-          '--ink': '#1C2420',
-        }}
+        style={{ '--paper': '#FDF9F1', '--ink': '#1C2420' }}
         className="flex min-h-screen items-center justify-center bg-[var(--paper)] font-sans text-[var(--ink)]"
       >
         <p className="text-sm font-semibold tracking-wide text-[var(--ink)]/60">Loading...</p>
@@ -461,15 +461,10 @@ export default function TeacherApply() {
     );
   }
 
-  // 3. Added Maintenance Screen render
   if (isMaintenance) {
     return (
       <div
-        style={{
-          '--paper': '#FDF9F1',
-          '--ink': '#1C2420',
-          '--marigold': '#F38C35',
-        }}
+        style={{ '--paper': '#FDF9F1', '--ink': '#1C2420', '--marigold': '#F38C35' }}
         className="flex min-h-screen flex-col items-center justify-center bg-[var(--paper)] px-4 text-center font-sans text-[var(--ink)]"
       >
         <div className="mb-8 flex flex-col justify-center select-none">
@@ -507,8 +502,6 @@ export default function TeacherApply() {
       {/* --- NAV --- */}
       <nav className="sticky top-0 z-50 border-b border-[var(--line)]/60 bg-[var(--paper)]/90 backdrop-blur-md">
         <div className="mx-auto flex max-w-[1200px] items-center justify-between px-4 py-3 sm:px-6 sm:py-4 md:px-10">
-          
-          {/* nexus. tuitions Logo */}
           <Link to="/" className="flex flex-col justify-center select-none">
             <span className="font-sans text-2xl font-black tracking-tighter text-[var(--ink)] leading-none sm:text-3xl">
               nexus<span className="text-[var(--rust)]">.</span>
@@ -769,18 +762,29 @@ export default function TeacherApply() {
 
                   {step === 2 && (
                     <div className="space-y-5">
-                      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                        <FileUploadZone
-                          id="profilePhoto" label="Profile photo" hint="JPG or PNG, under 8MB"
-                          file={profilePhoto} previewUrl={profilePhotoPreview} accept="image/*"
-                          onFile={handleProfilePhoto} error={errors.profilePhoto}
-                        />
-                        <FileUploadZone
-                          id="idProof" label="Govt. ID proof" hint="PAN, Aadhaar, or passport"
-                          file={idProof} previewUrl={idProofPreview} accept="image/*,application/pdf"
-                          onFile={handleIdProof} error={errors.idProof}
-                        />
-                      </div>
+                      {docUploadEnabled ? (
+                        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                          <FileUploadZone
+                            id="profilePhoto" label="Profile photo" hint="JPG or PNG, under 8MB"
+                            file={profilePhoto} previewUrl={profilePhotoPreview} accept="image/*"
+                            onFile={handleProfilePhoto} error={errors.profilePhoto}
+                          />
+                          <FileUploadZone
+                            id="idProof" label="Govt. ID proof" hint="PAN, Govt ID, or passport"
+                            file={idProof} previewUrl={idProofPreview} accept="image/*,application/pdf"
+                            onFile={handleIdProof} error={errors.idProof}
+                          />
+                        </div>
+                      ) : (
+                        <div className="rounded-2xl border border-[var(--marigold)]/30 bg-[var(--marigold)]/10 p-5 text-center">
+                          <p className="text-xs font-bold text-[var(--ink)]">
+                            Document uploads are currently disabled by administration.
+                          </p>
+                          <p className="mt-1 text-xs text-[var(--ink)]/60">
+                            You can proceed directly by clicking <strong>Submit application</strong>.
+                          </p>
+                        </div>
+                      )}
                       <p className="rounded-xl bg-[var(--chalk)]/5 px-4 py-3 text-[11px] font-medium leading-relaxed text-[var(--ink)]/60">
                         Your documents are used only to verify your identity and are never shared publicly.
                       </p>
@@ -856,7 +860,7 @@ export default function TeacherApply() {
       </section>
 
       <footer className="bg-[var(--chalk)] py-6 text-center font-mono text-[11px] font-medium uppercase tracking-widest text-[var(--paper)]/40">
-       nexus. tuitions — connecting educators and students, one lesson at a time. 
+        nexus. tuitions — connecting educators and students, one lesson at a time.
       </footer>
     </div>
   );
