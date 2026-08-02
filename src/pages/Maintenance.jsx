@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from 'react';
 
+/**
+ * Nexus Tuitions — Maintenance Mode
+ * Shared component. Import this into any page instead of hardcoding
+ * a maintenance screen inline — update it once, it updates everywhere.
+ */
+
 const STATUS_MESSAGES = [
   'calibrating lesson plans',
   'reconnecting tutors to students',
@@ -75,30 +81,57 @@ export default function Maintenance() {
           opacity: 0.3; pointer-events: none; filter: blur(4px);
         }
 
+        /* --- entrance: robot assembles itself, part by part --- */
+        @keyframes nx-drop {
+          0% { opacity: 0; transform: translateY(-22px) scale(0.92); }
+          65% { opacity: 1; }
+          100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .nx-part { animation: nx-drop 0.62s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+        .nx-p-feet { animation-delay: 0s; }
+        .nx-p-legs { animation-delay: .08s; }
+        .nx-p-torso { animation-delay: .18s; }
+        .nx-p-arm-l { animation-delay: .30s; }
+        .nx-p-arm-r { animation-delay: .30s; }
+        .nx-p-neck { animation-delay: .42s; }
+        .nx-p-head { animation-delay: .50s; }
+        .nx-p-antenna { animation-delay: .62s; }
+
+        @keyframes nx-power { 0% { fill: var(--ink); } 100% { fill: var(--marigold); } }
+        .nx-eye { animation: nx-power .3s .92s ease-out both; }
+
+        @keyframes nx-spark {
+          0% { opacity: 0; transform: scale(0.5); }
+          35% { opacity: 1; transform: scale(1); }
+          100% { opacity: 0; transform: scale(1.35); }
+        }
+        .nx-spark { transform-box: fill-box; transform-origin: center; animation: nx-spark .9s .86s ease-out both; }
+
+        /* --- idle: settles into a gentle tinkering loop --- */
         @keyframes nx-float {
           0%, 100% { transform: translateY(0); }
           50% { transform: translateY(-6px); }
         }
-        .nx-idle { animation: nx-float 4.6s ease-in-out infinite; }
+        .nx-idle { animation: nx-float 4.6s ease-in-out infinite; animation-delay: 1.3s; }
 
         @keyframes nx-blink {
           0%, 90%, 100% { transform: scaleY(1); }
           95% { transform: scaleY(0.1); }
         }
-        .nx-blink { transform-box: fill-box; transform-origin: center; animation: nx-blink 5.4s ease-in-out infinite; }
+        .nx-blink { transform-box: fill-box; transform-origin: center; animation: nx-blink 5.4s ease-in-out infinite; animation-delay: 2s; }
 
         @keyframes nx-wrench {
           0%, 100% { transform: rotate(-10deg); }
           50% { transform: rotate(16deg); }
         }
-        .nx-wrench { transform-box: fill-box; transform-origin: 0% 50%; animation: nx-wrench 2.1s ease-in-out infinite; }
+        .nx-wrench { transform-box: fill-box; transform-origin: 0% 50%; animation: nx-wrench 2.1s ease-in-out infinite; animation-delay: 1.4s; }
 
         @keyframes nx-pulse {
           0%, 100% { opacity: 0.55; transform: scale(1); }
           50% { opacity: 1; transform: scale(1.15); }
         }
-        .nx-antenna-dot { transform-box: fill-box; transform-origin: center; animation: nx-pulse 2s ease-in-out infinite; }
-        .nx-chest { transform-box: fill-box; transform-origin: center; animation: nx-pulse 2.6s ease-in-out infinite; }
+        .nx-antenna-dot { transform-box: fill-box; transform-origin: center; animation: nx-pulse 2s ease-in-out infinite; animation-delay: 1s; }
+        .nx-chest { transform-box: fill-box; transform-origin: center; animation: nx-pulse 2.6s ease-in-out infinite; animation-delay: 1.1s; }
 
         @keyframes nx-fade {
           from { opacity: 0; transform: translateY(4px); }
@@ -114,6 +147,13 @@ export default function Maintenance() {
         .nx-scan-bar { animation: nx-scan 1.9s ease-in-out infinite; }
 
         .nx-focus:focus-visible { outline: 2px solid var(--marigold); outline-offset: 2px; }
+
+        @media (prefers-reduced-motion: reduce) {
+          .nx-part, .nx-idle, .nx-blink, .nx-wrench, .nx-antenna-dot, .nx-chest, .nx-spark, .nx-scan-bar, .nx-fade {
+            animation: none !important;
+          }
+          .nx-eye { fill: var(--marigold) !important; }
+        }
       `}</style>
 
       <div className="nx-bg-glow" aria-hidden="true" />
@@ -133,50 +173,59 @@ export default function Maintenance() {
           </span>
         </div>
 
-        {/* Robot Graphic */}
+        {/* Robot */}
         <div className="w-36 sm:w-44">
-          <svg viewBox="0 0 220 240" className="nx-idle h-auto w-full" role="img" aria-label="Animated robot tinkering">
+          <svg viewBox="0 0 220 240" className="nx-idle h-auto w-full" role="img" aria-label="Animated robot assembling itself and tinkering, representing scheduled maintenance">
             <g>
-              {/* Feet */}
-              <rect x="72" y="212" width="26" height="12" rx="6" fill="var(--paper)" stroke="var(--ink)" strokeWidth="4" />
-              <rect x="122" y="212" width="26" height="12" rx="6" fill="var(--paper)" stroke="var(--ink)" strokeWidth="4" />
-              
-              {/* Legs */}
-              <rect x="80" y="184" width="12" height="30" rx="5" fill="var(--paper)" stroke="var(--ink)" strokeWidth="4" />
-              <rect x="128" y="184" width="12" height="30" rx="5" fill="var(--paper)" stroke="var(--ink)" strokeWidth="4" />
-              
-              {/* Torso */}
-              <rect x="58" y="112" width="104" height="78" rx="20" fill="var(--paper)" stroke="var(--ink)" strokeWidth="5" />
-              <circle className="nx-chest" cx="110" cy="151" r="9" fill="var(--marigold)" />
-              
-              {/* Left Arm */}
-              <rect x="34" y="122" width="16" height="52" rx="8" fill="var(--paper)" stroke="var(--ink)" strokeWidth="4" />
-              
-              {/* Right Arm & Wrench Group */}
-              <rect x="170" y="122" width="16" height="52" rx="8" fill="var(--paper)" stroke="var(--ink)" strokeWidth="4" />
-              <g className="nx-wrench" transform="translate(178, 160)">
-                <rect x="0" y="0" width="24" height="7" rx="3.5" fill="var(--ink)" transform="rotate(35)" />
-                <circle cx="18" cy="12" r="7" fill="var(--paper)" stroke="var(--ink)" strokeWidth="3" />
+              <g className="nx-part nx-p-feet">
+                <rect x="72" y="212" width="26" height="12" rx="6" fill="var(--paper)" stroke="var(--ink)" strokeWidth="4" />
+                <rect x="122" y="212" width="26" height="12" rx="6" fill="var(--paper)" stroke="var(--ink)" strokeWidth="4" />
               </g>
-
-              {/* Neck & Head */}
-              <rect x="98" y="96" width="24" height="18" rx="5" fill="var(--paper)" stroke="var(--ink)" strokeWidth="4" />
-              <rect x="62" y="34" width="96" height="66" rx="22" fill="var(--paper)" stroke="var(--ink)" strokeWidth="5" />
-              
-              {/* Eyes */}
-              <g className="nx-blink">
-                <circle cx="92" cy="66" r="7" fill="var(--marigold)" />
-                <circle cx="128" cy="66" r="7" fill="var(--marigold)" />
+              <g className="nx-part nx-p-legs">
+                <rect x="80" y="184" width="12" height="30" rx="5" fill="var(--paper)" stroke="var(--ink)" strokeWidth="4" />
+                <rect x="128" y="184" width="12" height="30" rx="5" fill="var(--paper)" stroke="var(--ink)" strokeWidth="4" />
               </g>
-
-              {/* Antenna */}
-              <line x1="110" y1="34" x2="110" y2="14" stroke="var(--ink)" strokeWidth="4" strokeLinecap="round" />
-              <circle className="nx-antenna-dot" cx="110" cy="10" r="6" fill="var(--mint)" />
+              <g className="nx-part nx-p-torso">
+                <rect x="58" y="112" width="104" height="78" rx="20" fill="var(--paper)" stroke="var(--ink)" strokeWidth="5" />
+                <circle className="nx-chest" cx="110" cy="151" r="9" fill="var(--marigold)" />
+              </g>
+              <g className="nx-part nx-p-arm-l">
+                <rect x="34" y="122" width="16" height="52" rx="8" fill="var(--paper)" stroke="var(--ink)" strokeWidth="4" />
+              </g>
+              <g className="nx-part nx-p-arm-r">
+                <rect x="170" y="122" width="16" height="52" rx="8" fill="var(--paper)" stroke="var(--ink)" strokeWidth="4" />
+                <g className="nx-wrench" transform="translate(178, 160)">
+                  <rect x="0" y="0" width="24" height="7" rx="3.5" fill="var(--ink)" transform="rotate(35)" />
+                  <circle cx="18" cy="12" r="7" fill="var(--paper)" stroke="var(--ink)" strokeWidth="3" />
+                </g>
+              </g>
+              <g className="nx-part nx-p-neck">
+                <rect x="98" y="96" width="24" height="18" rx="5" fill="var(--paper)" stroke="var(--ink)" strokeWidth="4" />
+              </g>
+              <g className="nx-part nx-p-head">
+                <rect x="62" y="34" width="96" height="66" rx="22" fill="var(--paper)" stroke="var(--ink)" strokeWidth="5" />
+                <g className="nx-blink">
+                  <circle className="nx-eye" cx="92" cy="66" r="7" fill="var(--ink)" />
+                  <circle className="nx-eye" cx="128" cy="66" r="7" fill="var(--ink)" />
+                </g>
+              </g>
+              <g className="nx-part nx-p-antenna">
+                <line x1="110" y1="34" x2="110" y2="14" stroke="var(--ink)" strokeWidth="4" strokeLinecap="round" />
+                <circle className="nx-antenna-dot" cx="110" cy="10" r="6" fill="var(--mint)" />
+              </g>
+              <g className="nx-spark" aria-hidden="true">
+                <line x1="110" y1="66" x2="110" y2="26" stroke="var(--marigold)" strokeWidth="3" strokeLinecap="round" />
+                <line x1="110" y1="66" x2="110" y2="26" stroke="var(--marigold)" strokeWidth="3" strokeLinecap="round" transform="rotate(60 110 66)" />
+                <line x1="110" y1="66" x2="110" y2="26" stroke="var(--mint)" strokeWidth="3" strokeLinecap="round" transform="rotate(120 110 66)" />
+                <line x1="110" y1="66" x2="110" y2="26" stroke="var(--marigold)" strokeWidth="3" strokeLinecap="round" transform="rotate(180 110 66)" />
+                <line x1="110" y1="66" x2="110" y2="26" stroke="var(--mint)" strokeWidth="3" strokeLinecap="round" transform="rotate(240 110 66)" />
+                <line x1="110" y1="66" x2="110" y2="26" stroke="var(--marigold)" strokeWidth="3" strokeLinecap="round" transform="rotate(300 110 66)" />
+              </g>
             </g>
           </svg>
         </div>
 
-        {/* Status Readout */}
+        {/* Status readout */}
         <div className="nx-mono mt-2 flex h-6 items-center justify-center text-[11px] tracking-wide" style={{ color: 'var(--ink-soft)' }} aria-live="polite">
           <span key={statusIndex} className="nx-fade">
             <span style={{ color: 'var(--marigold)' }}>{'> '}</span>
@@ -192,14 +241,14 @@ export default function Maintenance() {
           We're tuning up systems behind every lesson so things load faster. Back shortly.
         </p>
 
-        {/* Scan Bar */}
+        {/* Scan bar */}
         <div className="mt-6 w-full max-w-xs">
           <div className="h-[5px] w-full overflow-hidden rounded-full" style={{ background: 'var(--paper-deep)', border: '1px solid var(--line)' }}>
             <div className="nx-scan-bar relative h-full rounded-full" style={{ background: 'var(--marigold)' }} />
           </div>
         </div>
 
-        {/* Subscription Form */}
+        {/* Notify me */}
         <div className="mt-6 w-full max-w-sm">
           {subscribed ? (
             <p className="nx-mono text-[13px]" style={{ color: 'var(--mint)' }}>
