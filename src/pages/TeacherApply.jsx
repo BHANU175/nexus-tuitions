@@ -264,13 +264,15 @@ export default function TeacherApply() {
   const [loading, setLoading] = useState(true);
 
   // Fetch both maintenance_mode AND enable_doc_upload settings from Supabase
+  // Fetch and sync app settings from Supabase
   useEffect(() => {
     async function checkAppSettings() {
       try {
         const { data, error } = await supabase
           .from('app_settings')
           .select('maintenance_mode, enable_doc_upload')
-          .single();
+          .eq('id', 1)
+          .maybeSingle();
 
         if (data && !error) {
           setIsMaintenance(Boolean(data.maintenance_mode));
@@ -286,6 +288,23 @@ export default function TeacherApply() {
     }
 
     checkAppSettings();
+
+    // Realtime listener so toggles apply instantly without refreshing
+    const channel = supabase
+      .channel('teacher-apply-settings')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'app_settings' }, (payload) => {
+        if (payload.new) {
+          setIsMaintenance(Boolean(payload.new.maintenance_mode));
+          if (typeof payload.new.enable_doc_upload === 'boolean') {
+            setDocUploadEnabled(payload.new.enable_doc_upload);
+          }
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const [textData, setTextData] = useState({
