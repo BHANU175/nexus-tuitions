@@ -263,24 +263,40 @@ export default function TeacherApply() {
   const [docUploadEnabled, setDocUploadEnabled] = useState(true);
   const [loading, setLoading] = useState(true);
 
-  // Fetch both maintenance_mode AND enable_doc_upload settings from Supabase
   // Fetch and sync app settings from Supabase
   useEffect(() => {
     async function checkAppSettings() {
       try {
+        console.log("📡 Fetching app_settings from Supabase...");
+        
         const { data, error } = await supabase
           .from('app_settings')
-          .select('maintenance_mode, enable_doc_upload')
+          .select('*') // Selecting all to see what actually exists
           .eq('id', 1)
           .maybeSingle();
 
-        if (data && !error) {
+        console.log("📦 Supabase Response:", { data, error });
+
+        if (error) {
+          console.error("❌ Supabase Error:", error.message);
+        }
+
+        if (data) {
           setIsMaintenance(Boolean(data.maintenance_mode));
-          const isUploadEnabled = data.enable_doc_upload === true || data.enable_doc_upload === 'true';
+          
+          // More resilient boolean check handling tinyints (1/0), strings, or booleans
+          const isUploadEnabled = 
+            data.enable_doc_upload === true || 
+            String(data.enable_doc_upload).toLowerCase() === 'true' || 
+            data.enable_doc_upload === 1;
+            
+          console.log("⚙️ Evaluated docUploadEnabled:", isUploadEnabled);
           setDocUploadEnabled(isUploadEnabled);
+        } else {
+          console.warn("⚠️ No data returned! Is there a row with id=1? Or is RLS blocking it?");
         }
       } catch (err) {
-        console.error('Failed to fetch app settings:', err);
+        console.error('🔥 Failed to fetch app settings:', err);
       } finally {
         setLoading(false);
       }
@@ -288,17 +304,25 @@ export default function TeacherApply() {
 
     checkAppSettings();
 
-    // Realtime listener so toggles apply instantly without refreshing
+    // Realtime listener
     const channel = supabase
       .channel('teacher-apply-settings')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'app_settings' }, (payload) => {
+        console.log("🔄 Realtime Update Received:", payload.new);
         if (payload.new) {
           setIsMaintenance(Boolean(payload.new.maintenance_mode));
-          const isUploadEnabled = payload.new.enable_doc_upload === true || payload.new.enable_doc_upload === 'true';
+          
+          const isUploadEnabled = 
+            payload.new.enable_doc_upload === true || 
+            String(payload.new.enable_doc_upload).toLowerCase() === 'true' || 
+            payload.new.enable_doc_upload === 1;
+            
           setDocUploadEnabled(isUploadEnabled);
         }
       })
-      .subscribe();
+      .subscribe((status) => {
+        console.log("🔌 Realtime Connection Status:", status);
+      });
 
     return () => {
       supabase.removeChannel(channel);
