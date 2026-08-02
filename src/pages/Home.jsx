@@ -64,8 +64,8 @@ export default function Home() {
   }, []);
 
   // Update these paths to your local image paths inside the public folder
-  const HERO_IMAGE_URL = "/1.png"; 
-  const LOGO_IMAGE_URL = "/2.png"; // Replace with your logo path
+  const HERO_IMAGE_URL = "/1.png";
+  const LOGO_IMAGE_URL = "/logo.png"; // Served from /public/logo.png
 
   // Utility function to handle routing and scrolling to top
   const handleNavigation = () => {
@@ -111,13 +111,14 @@ export default function Home() {
         <div className="mx-auto flex max-w-[1300px] items-center justify-between px-4 py-3 sm:px-6 sm:py-4 lg:px-8">
           
           {/* Logo Area */}
-          <Link to="/" onClick={handleNavigation} className="flex flex-col justify-center select-none py-1">
-            <span className="font-sans text-3xl font-black tracking-tighter text-black leading-none">
-              nexus<span className="text-black">.</span>
-            </span>
-            <span className="font-sans text-[10px] font-medium tracking-[0.42em] text-black lowercase mt-0.5 pl-[2px]">
-              tuitions
-            </span>
+          <Link to="/" onClick={handleNavigation} className="flex items-center select-none py-1">
+            <img
+              src={LOGO_IMAGE_URL}
+              alt="Nexus Tuitions"
+              className="h-9 w-auto sm:h-10"
+              width={190}
+              height={65}
+            />
           </Link>
           
           {/* Center Links */}
