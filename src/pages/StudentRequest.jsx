@@ -441,7 +441,7 @@ export default function StudentRequest() {
       <Link to="/" className="transition-colors hover:opacity-70">Why Us</Link>
       <Link to="/request-tutor" className="transition-colors hover:opacity-70">Find a Tutor</Link>
       <Link to="/apply-teacher" className="transition-colors hover:opacity-70">Become a Tutor</Link>
-      <Link to="/about" className="transition-colors hover:opacity-70">About</Link>
+      
     </div>
 
   </div>
