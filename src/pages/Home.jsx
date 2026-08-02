@@ -148,7 +148,7 @@ export default function Home() {
             <a href="#why" className="transition-colors hover:text-[var(--marigold)]">Why Us</a>
             <Link to="/request-tutor" onClick={handleNavigation} className="transition-colors hover:text-[var(--marigold)]">Find a Tutor</Link>
             <Link to="/apply-teacher" onClick={handleNavigation} className="transition-colors hover:text-[var(--marigold)]">Become a Tutor</Link>
-            <Link to="/about" className="transition-colors hover:text-[var(--marigold)]">About</Link>
+            
           </div>
         </div>
       </nav>
