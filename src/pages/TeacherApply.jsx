@@ -276,9 +276,8 @@ export default function TeacherApply() {
 
         if (data && !error) {
           setIsMaintenance(Boolean(data.maintenance_mode));
-          if (typeof data.enable_doc_upload === 'boolean') {
-            setDocUploadEnabled(data.enable_doc_upload);
-          }
+          const isUploadEnabled = data.enable_doc_upload === true || data.enable_doc_upload === 'true';
+          setDocUploadEnabled(isUploadEnabled);
         }
       } catch (err) {
         console.error('Failed to fetch app settings:', err);
@@ -295,9 +294,8 @@ export default function TeacherApply() {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'app_settings' }, (payload) => {
         if (payload.new) {
           setIsMaintenance(Boolean(payload.new.maintenance_mode));
-          if (typeof payload.new.enable_doc_upload === 'boolean') {
-            setDocUploadEnabled(payload.new.enable_doc_upload);
-          }
+          const isUploadEnabled = payload.new.enable_doc_upload === true || payload.new.enable_doc_upload === 'true';
+          setDocUploadEnabled(isUploadEnabled);
         }
       })
       .subscribe();
