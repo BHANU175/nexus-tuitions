@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { supabase } from './supabaseClient'; // Adjust path to your Supabase client as needed
+import { supabase } from '../supabaseClient'; // Adjust path to your Supabase client as needed
 
 /* ---------------------------------------------------------------------- */
 /*  Static data                                                           */

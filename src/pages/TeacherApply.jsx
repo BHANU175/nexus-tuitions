@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { supabase } from './supabaseClient';
+import { supabase } from '../supabaseClient';
 
 /* ---------------------------------------------------------------------- */
 /*  Static data                                                           */
