@@ -47,6 +47,9 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_RE = /^(\+91[\s-]?)?[6-9]\d{9}$/;
 const MAX_FILE_BYTES = 8 * 1024 * 1024;
 
+// Served from /public/logo.png
+const LOGO_URL = "/logo.png";
+
 /* ---------------------------------------------------------------------- */
 /*  Helpers                                                                */
 /* ---------------------------------------------------------------------- */
@@ -524,13 +527,14 @@ export default function TeacherApply() {
       {/* --- NAV --- */}
       <nav className="sticky top-0 z-50 border-b border-[var(--line)]/60 bg-[var(--paper)]/90 backdrop-blur-md">
         <div className="mx-auto flex max-w-[1200px] items-center justify-between px-4 py-3 sm:px-6 sm:py-4 md:px-10">
-          <Link to="/" className="flex flex-col justify-center select-none">
-            <span className="font-sans text-2xl font-black tracking-tighter text-[var(--ink)] leading-none sm:text-3xl">
-              nexus<span className="text-[var(--rust)]">.</span>
-            </span>
-            <span className="font-sans text-[9px] font-bold tracking-[0.38em] text-[var(--ink)]/70 lowercase mt-0.5 pl-[2px] sm:text-[10px]">
-              tuitions
-            </span>
+          <Link to="/" className="flex items-center select-none">
+            <img
+              src={LOGO_URL}
+              alt="Nexus Tuitions"
+              className="h-8 w-auto sm:h-9"
+              width={190}
+              height={65}
+            />
           </Link>
 
           <div className="hidden items-center gap-8 font-mono text-[13px] font-bold uppercase tracking-wide text-[var(--ink)]/55 md:flex">
