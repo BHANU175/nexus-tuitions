@@ -47,6 +47,9 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_RE = /^(\+91[\s-]?)?[6-9]\d{9}$/;
 const MAX_FILE_BYTES = 8 * 1024 * 1024;
 
+const SUBJECT_SUGGESTIONS = ['Mathematics', 'Physics', 'Chemistry', 'Biology', 'English', 'Hindi', 'Computer Science', 'Economics'];
+const MAX_SUBJECTS = 8;
+
 // Served from /public/logo.png
 const LOGO_URL = "/logo.png";
 
@@ -84,19 +87,53 @@ function compressImage(file, maxWidth = 1280, quality = 0.85) {
   });
 }
 
+function formatPhone(value) {
+  const digits = value.replace(/\D/g, '').slice(0, 10);
+  return digits.length > 5 ? `${digits.slice(0, 5)} ${digits.slice(5)}` : digits;
+}
+
+// Single source of truth for field validity, shared by per-field blur checks and step-level gating.
+function validateField(name, value, extra = {}) {
+  switch (name) {
+    case 'fullName':
+      return value.trim() ? '' : 'Enter your full name.';
+    case 'email':
+      return EMAIL_RE.test(value.trim()) ? '' : 'Enter a valid email address.';
+    case 'contactNumber':
+      return PHONE_RE.test(value.replace(/\s/g, '')) ? '' : 'Enter a valid 10-digit phone number.';
+    case 'subjects':
+      return (extra.subjects || []).length > 0 ? '' : 'Add at least one subject.';
+    case 'specificArea':
+      return value.trim() ? '' : 'Enter your area or locality.';
+    case 'teachingModes':
+      return (extra.teachingModes || []).length > 0 ? '' : 'Select at least one teaching mode.';
+    default:
+      return '';
+  }
+}
+
 /* ---------------------------------------------------------------------- */
 /*  Building Blocks                                                        */
 /* ---------------------------------------------------------------------- */
 
-function Field({ label, error, hint, children }) {
+function Field({ id, label, error, hint, valid, children }) {
   return (
     <div className="space-y-1.5">
-      <label className="block font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--ink)]/55">
-        {label}
-      </label>
+      <div className="flex items-center justify-between gap-2">
+        <label htmlFor={id} className="block font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--ink)]/55">
+          {label}
+        </label>
+        {valid && !error && (
+          <svg width="13" height="13" viewBox="0 0 20 20" fill="none" aria-hidden="true" className="shrink-0 text-[var(--good)]">
+            <path d="M4 10.5 8 14.5 16 5.5" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        )}
+      </div>
       {children}
       {error ? (
-        <p className="font-mono text-[11px] font-semibold text-[var(--rust)]">{error}</p>
+        <p id={id ? `${id}-error` : undefined} role="alert" className="font-mono text-[11px] font-semibold text-[var(--rust)]">
+          {error}
+        </p>
       ) : hint ? (
         <p className="text-[11px] text-[var(--ink)]/40">{hint}</p>
       ) : null}
@@ -104,12 +141,16 @@ function Field({ label, error, hint, children }) {
   );
 }
 
-const inputClass = (hasError) =>
-  `w-full rounded-xl border bg-white px-4 py-3 text-sm font-semibold text-[var(--ink)] placeholder-[var(--ink)]/30 transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--marigold)]/40 ${
-    hasError ? 'border-[var(--rust)]' : 'border-[var(--line)] focus:border-[var(--marigold)]'
+const inputClass = (hasError, isValid) =>
+  `w-full rounded-xl border bg-white px-4 py-3 text-sm font-semibold text-[var(--ink)] placeholder-[var(--ink)]/30 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-[var(--marigold)]/40 ${
+    hasError
+      ? 'border-[var(--rust)] focus:border-[var(--rust)]'
+      : isValid
+      ? 'border-[var(--good)]/50 focus:border-[var(--marigold)]'
+      : 'border-[var(--line)] focus:border-[var(--marigold)]'
   }`;
 
-function FileUploadZone({ id, label, hint, file, previewUrl, accept, onFile, error }) {
+function FileUploadZone({ id, label, hint, file, previewUrl, accept, onFile, onRemove, error }) {
   const inputRef = useRef(null);
   const [dragOver, setDragOver] = useState(false);
 
@@ -129,23 +170,37 @@ function FileUploadZone({ id, label, hint, file, previewUrl, accept, onFile, err
         onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
         onDragLeave={() => setDragOver(false)}
         onDrop={handleDrop}
-        className={`flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed p-5 text-center transition-colors sm:p-6 ${
+        className={`flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed p-5 text-center transition-all duration-150 sm:p-6 ${
           dragOver
-            ? 'border-[var(--marigold)] bg-[var(--marigold)]/10'
+            ? 'scale-[1.01] border-[var(--marigold)] bg-[var(--marigold)]/10'
             : file
             ? 'border-[var(--good)] bg-[var(--good)]/5'
             : 'border-[var(--line)] bg-white hover:border-[var(--ink)]/30'
         }`}
       >
         {previewUrl ? (
-          <img src={previewUrl} alt="" className="h-16 w-16 rounded-full object-cover ring-2 ring-white shadow" />
+          <div className="relative">
+            <img src={previewUrl} alt="" className="h-16 w-16 rounded-full object-cover ring-2 ring-white shadow" />
+            {onRemove && (
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); onRemove(); }}
+                aria-label={`Remove ${label.toLowerCase()}`}
+                className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-[var(--rust)] text-[11px] font-bold leading-none text-white shadow transition-transform hover:scale-110"
+              >
+                ×
+              </button>
+            )}
+          </div>
         ) : (
           <div className="text-2xl">{file ? '📄' : '📎'}</div>
         )}
         <span className="max-w-full truncate text-xs font-bold text-[var(--ink)]">
           {file ? file.name : 'Drop a file or browse'}
         </span>
-        {!file && <span className="font-mono text-[10px] text-[var(--ink)]/40">{hint}</span>}
+        <span className="font-mono text-[10px] text-[var(--ink)]/40">
+          {file ? `${(file.size / 1024).toFixed(0)} KB` : hint}
+        </span>
         <input
           ref={inputRef}
           id={id}
@@ -154,15 +209,26 @@ function FileUploadZone({ id, label, hint, file, previewUrl, accept, onFile, err
           onChange={(e) => e.target.files[0] && onFile(e.target.files[0])}
           className="hidden"
         />
-        <button
-          type="button"
-          onClick={() => inputRef.current?.click()}
-          className="mt-1 rounded-full border border-[var(--ink)]/15 px-3 py-1 text-[11px] font-bold text-[var(--ink)]/70 transition-colors hover:border-[var(--ink)]/40"
-        >
-          {file ? 'Replace' : 'Browse files'}
-        </button>
+        <div className="mt-1 flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => inputRef.current?.click()}
+            className="rounded-full border border-[var(--ink)]/15 px-3 py-1 text-[11px] font-bold text-[var(--ink)]/70 transition-colors hover:border-[var(--ink)]/40"
+          >
+            {file ? 'Replace' : 'Browse files'}
+          </button>
+          {file && onRemove && (
+            <button
+              type="button"
+              onClick={onRemove}
+              className="rounded-full border border-[var(--rust)]/25 px-3 py-1 text-[11px] font-bold text-[var(--rust)] transition-colors hover:bg-[var(--rust)]/10"
+            >
+              Remove
+            </button>
+          )}
+        </div>
       </div>
-      {error && <p className="font-mono text-[11px] font-semibold text-[var(--rust)]">{error}</p>}
+      {error && <p role="alert" className="font-mono text-[11px] font-semibold text-[var(--rust)]">{error}</p>}
     </div>
   );
 }
@@ -258,6 +324,66 @@ function HeroBanner() {
   );
 }
 
+function Stepper({ steps, current, onStepClick }) {
+  return (
+    <div className="mb-8">
+      <div className="flex items-center">
+        {steps.map((label, i) => {
+          const isDone = i < current;
+          const isActive = i === current;
+          const clickable = i < current;
+          return (
+            <div key={label} className="flex flex-1 items-center last:flex-none">
+              <button
+                type="button"
+                onClick={() => clickable && onStepClick(i)}
+                disabled={!clickable}
+                aria-current={isActive ? 'step' : undefined}
+                className={`group flex flex-col items-center gap-2 ${clickable ? 'cursor-pointer' : 'cursor-default'}`}
+              >
+                <span
+                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full font-mono text-xs font-bold transition-all duration-200 ${
+                    isDone
+                      ? 'bg-[var(--good)] text-white'
+                      : isActive
+                      ? 'bg-[var(--chalk)] text-white ring-4 ring-[var(--marigold)]/25'
+                      : 'bg-[var(--line)]/40 text-[var(--ink)]/40'
+                  } ${clickable ? 'group-hover:scale-105' : ''}`}
+                >
+                  {isDone ? (
+                    <svg width="14" height="14" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                      <path d="M4 10.5 8 14.5 16 5.5" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  ) : (
+                    i + 1
+                  )}
+                </span>
+                <span
+                  className={`hidden font-mono text-[10px] font-bold uppercase tracking-wider sm:block ${
+                    isActive ? 'text-[var(--ink)]' : 'text-[var(--ink)]/40'
+                  }`}
+                >
+                  {label}
+                </span>
+              </button>
+              {i < steps.length - 1 && (
+                <span
+                  className={`mx-2 h-px flex-1 transition-colors duration-300 sm:mx-3 ${
+                    isDone ? 'bg-[var(--good)]' : 'bg-[var(--line)]/50'
+                  }`}
+                />
+              )}
+            </div>
+          );
+        })}
+      </div>
+      <p className="mt-3 text-center font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--ink)]/40 sm:hidden">
+        Step {current + 1} of {steps.length} — {steps[current]}
+      </p>
+    </div>
+  );
+}
+
 /* ---------------------------------------------------------------------- */
 /*  Main Component                                                         */
 /* ---------------------------------------------------------------------- */
@@ -337,12 +463,13 @@ export default function TeacherApply() {
     fullName: '',
     email: '',
     contactNumber: '',
-    subjects: '',
     city: 'Jaipur',
     specificArea: '',
     locationCoords: '',
   });
 
+  const [subjects, setSubjects] = useState([]);
+  const [subjectInput, setSubjectInput] = useState('');
   const [teachingModes, setTeachingModes] = useState([]);
   const [profilePhoto, setProfilePhoto] = useState(null);
   const [idProof, setIdProof] = useState(null);
@@ -350,12 +477,26 @@ export default function TeacherApply() {
   const [idProofPreview, setIdProofPreview] = useState('');
 
   const [step, setStep] = useState(0);
+  const [touched, setTouched] = useState({});
   const [errors, setErrors] = useState({});
   const [gpsError, setGpsError] = useState('');
   const [statusMessage, setStatusMessage] = useState({ text: '', type: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [submitted, setSubmitted] = useState(false);
+  const [lastApplicant, setLastApplicant] = useState({ name: '', email: '' });
+
+  const stepRef = useRef(null);
+  const didMountRef = useRef(false);
+
+  // Move focus to the new step's first field for keyboard and screen-reader users,
+  // but skip on initial mount so the page doesn't yank focus down on load.
+  useEffect(() => {
+    if (!didMountRef.current) { didMountRef.current = true; return; }
+    const el = stepRef.current?.querySelector('input:not([type="file"]), select, textarea, button');
+    el?.focus({ preventScroll: true });
+  }, [step]);
 
   useEffect(() => () => { if (profilePhotoPreview) URL.revokeObjectURL(profilePhotoPreview); }, [profilePhotoPreview]);
   useEffect(() => () => { if (idProofPreview) URL.revokeObjectURL(idProofPreview); }, [idProofPreview]);
@@ -371,7 +512,62 @@ export default function TeacherApply() {
   const handleTextChange = (e) => {
     const { name, value } = e.target;
     setTextData((prev) => ({ ...prev, [name]: value }));
-    clearError(name);
+    if (touched[name]) {
+      const msg = validateField(name, value);
+      setErrors((prev) => {
+        const next = { ...prev };
+        if (msg) next[name] = msg; else delete next[name];
+        return next;
+      });
+    } else {
+      clearError(name);
+    }
+  };
+
+  const handlePhoneChange = (e) => {
+    const formatted = formatPhone(e.target.value);
+    setTextData((prev) => ({ ...prev, contactNumber: formatted }));
+    if (touched.contactNumber) {
+      const msg = validateField('contactNumber', formatted);
+      setErrors((prev) => {
+        const next = { ...prev };
+        if (msg) next.contactNumber = msg; else delete next.contactNumber;
+        return next;
+      });
+    } else {
+      clearError('contactNumber');
+    }
+  };
+
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    setTouched((t) => ({ ...t, [name]: true }));
+    const msg = validateField(name, value);
+    setErrors((prev) => {
+      const next = { ...prev };
+      if (msg) next[name] = msg; else delete next[name];
+      return next;
+    });
+  };
+
+  const addSubject = (value) => {
+    const v = (value ?? subjectInput).trim();
+    if (!v || subjects.length >= MAX_SUBJECTS) return;
+    if (subjects.some((s) => s.toLowerCase() === v.toLowerCase())) { setSubjectInput(''); return; }
+    setSubjects((prev) => [...prev, v]);
+    setSubjectInput('');
+    clearError('subjects');
+  };
+
+  const removeSubject = (value) => setSubjects((prev) => prev.filter((s) => s !== value));
+
+  const handleSubjectKeyDown = (e) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      addSubject();
+    } else if (e.key === 'Backspace' && !subjectInput && subjects.length) {
+      removeSubject(subjects[subjects.length - 1]);
+    }
   };
 
   const handleCheckboxChange = (e) => {
@@ -379,6 +575,8 @@ export default function TeacherApply() {
     setTeachingModes((prev) => (prev.includes(value) ? prev.filter((m) => m !== value) : [...prev, value]));
     clearError('teachingModes');
   };
+
+  const handleStepClick = (i) => { if (i < step) setStep(i); };
 
   const handleGetLocation = () => {
     if (!navigator.geolocation) {
@@ -423,17 +621,31 @@ export default function TeacherApply() {
     clearError('idProof');
   };
 
+  const handleRemoveProfilePhoto = () => {
+    setProfilePhotoPreview((prev) => { if (prev) URL.revokeObjectURL(prev); return ''; });
+    setProfilePhoto(null);
+  };
+
+  const handleRemoveIdProof = () => {
+    setIdProofPreview((prev) => { if (prev) URL.revokeObjectURL(prev); return ''; });
+    setIdProof(null);
+  };
+
   const validateStep = (s) => {
     const e = {};
     if (s === 0) {
-      if (!textData.fullName.trim()) e.fullName = 'Enter your full name.';
-      if (!EMAIL_RE.test(textData.email)) e.email = 'Enter a valid email address.';
-      if (!PHONE_RE.test(textData.contactNumber.replace(/\s/g, ''))) e.contactNumber = 'Enter a valid 10-digit phone number.';
-      if (!textData.subjects.trim()) e.subjects = 'List at least one subject.';
+      ['fullName', 'email', 'contactNumber'].forEach((k) => {
+        const msg = validateField(k, textData[k]);
+        if (msg) e[k] = msg;
+      });
+      const subjectsErr = validateField('subjects', '', { subjects });
+      if (subjectsErr) e.subjects = subjectsErr;
     }
     if (s === 1) {
-      if (!textData.specificArea.trim()) e.specificArea = 'Enter your area or locality.';
-      if (teachingModes.length === 0) e.teachingModes = 'Select at least one teaching mode.';
+      const areaErr = validateField('specificArea', textData.specificArea);
+      if (areaErr) e.specificArea = areaErr;
+      const modesErr = validateField('teachingModes', '', { teachingModes });
+      if (modesErr) e.teachingModes = modesErr;
     }
     if (s === 2) {
       // ONLY enforce required files if doc uploads are enabled globally
@@ -453,9 +665,12 @@ export default function TeacherApply() {
     setStatusMessage({ text: 'Uploading your application…', type: 'loading' });
 
     const formData = new FormData();
-    Object.entries(textData).forEach(([k, v]) => formData.append(k, v));
+    Object.entries(textData).forEach(([k, v]) => {
+      formData.append(k, k === 'contactNumber' ? v.replace(/\s/g, '') : v);
+    });
+    formData.append('subjects', subjects.join(', '));
     formData.append('teachingModes', JSON.stringify(teachingModes));
-    
+
     // Append files only if selected
     if (profilePhoto) formData.append('profilePhoto', profilePhoto);
     if (idProof) formData.append('idProof', idProof);
@@ -466,14 +681,20 @@ export default function TeacherApply() {
         onUploadProgress: (evt) => { if (evt.total) setUploadProgress(Math.round((evt.loaded * 100) / evt.total)); },
       });
 
-      setStatusMessage({ text: 'Application received. Our onboarding team will reach out within 24 hours.', type: 'success' });
-      setTextData({ fullName: '', email: '', contactNumber: '', subjects: '', city: 'Jaipur', specificArea: '', locationCoords: '' });
+      setLastApplicant({ name: textData.fullName, email: textData.email });
+      setStatusMessage({ text: '', type: '' });
+      setTextData({ fullName: '', email: '', contactNumber: '', city: 'Jaipur', specificArea: '', locationCoords: '' });
+      setSubjects([]);
+      setSubjectInput('');
       setTeachingModes([]);
       setProfilePhoto(null);
       setIdProof(null);
       setProfilePhotoPreview('');
       setIdProofPreview('');
+      setTouched({});
+      setErrors({});
       setStep(0);
+      setSubmitted(true);
     } catch (error) {
       console.error(error);
       setStatusMessage({ text: 'We could not reach the server. Please check your connection and try again.', type: 'error' });
@@ -486,7 +707,10 @@ export default function TeacherApply() {
     e.preventDefault();
     const stepErrors = validateStep(step);
     setErrors(stepErrors);
-    if (Object.keys(stepErrors).length > 0) return;
+    if (Object.keys(stepErrors).length > 0) {
+      setTouched((t) => ({ ...t, ...Object.fromEntries(Object.keys(stepErrors).map((k) => [k, true])) }));
+      return;
+    }
 
     if (step < STEPS.length - 1) {
       setStep((s) => s + 1);
@@ -667,205 +891,311 @@ export default function TeacherApply() {
               Apply to teach
             </h2>
             <p className="mt-3 text-sm font-medium text-[var(--ink)]/50">
-              Three short steps. Verification usually takes 12–24 hours.
+              {submitted ? 'You are all set — here is what happens next.' : 'Three short steps. Verification usually takes 12–24 hours.'}
             </p>
           </div>
 
-          <form onSubmit={onFormSubmit} noValidate>
-            <div className="overflow-hidden rounded-3xl border border-[var(--line)]/60 bg-[var(--card)] shadow-lg shadow-[var(--chalk)]/5">
-              <div className="h-1.5 w-full bg-[var(--marigold)]" />
-              <div className="p-6 sm:p-10">
-                {/* progress */}
-                <div className="mb-8 space-y-2.5">
-                  <div className="flex items-center justify-between font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--ink)]/50">
-                    <span>Step {step + 1} of {STEPS.length}</span>
-                    <span>{STEPS[step]}</span>
-                  </div>
-                  <div className="flex gap-1.5">
-                    {STEPS.map((_, i) => (
-                      <div
-                        key={i}
-                        className={`h-1.5 flex-1 rounded-full transition-colors ${i <= step ? 'bg-[var(--marigold)]' : 'bg-[var(--line)]/50'}`}
-                      />
+          <div className="overflow-hidden rounded-3xl border border-[var(--line)]/60 bg-[var(--card)] shadow-lg shadow-[var(--chalk)]/5">
+            <div className="h-1.5 w-full bg-[var(--marigold)]" />
+            <div className="p-6 sm:p-10">
+              {submitted ? (
+                <div className="motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-500 flex flex-col items-center py-4 text-center">
+                  <span className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--good)]/10 text-[var(--good)]">
+                    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M5 13l4 4L19 7" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </span>
+                  <h3 className="mt-5 font-serif text-2xl font-black text-[var(--ink)]">
+                    Application received{lastApplicant.name ? `, ${lastApplicant.name.split(' ')[0]}` : ''}!
+                  </h3>
+                  <p className="mt-2 max-w-sm text-sm font-medium leading-relaxed text-[var(--ink)]/60">
+                    Our onboarding team will verify your details and reach out within 24 hours
+                    {lastApplicant.email ? <> at <span className="font-bold text-[var(--ink)]">{lastApplicant.email}</span></> : ''}.
+                  </p>
+                  <div className="mt-6 grid w-full max-w-sm grid-cols-1 gap-2.5 text-left">
+                    {[
+                      'Our team reviews your subjects, area, and availability.',
+                      'We verify your ID and profile photo.',
+                      'You get an email once your profile is live.',
+                    ].map((line, i) => (
+                      <div key={line} className="flex items-start gap-3 rounded-xl bg-[var(--chalk)]/5 px-4 py-3">
+                        <span className="mt-0.5 font-mono text-[11px] font-bold text-[var(--marigold)]">0{i + 1}</span>
+                        <p className="text-xs font-medium leading-relaxed text-[var(--ink)]/70">{line}</p>
+                      </div>
                     ))}
                   </div>
-                </div>
-
-                {/* step content */}
-                <div className="min-h-[280px]">
-                  {step === 0 && (
-                    <div className="space-y-5">
-                      <Field label="Full name" error={errors.fullName}>
-                        <input
-                          name="fullName" type="text" autoComplete="name" placeholder="e.g. Aditi Sharma"
-                          value={textData.fullName} onChange={handleTextChange} className={inputClass(errors.fullName)}
-                        />
-                      </Field>
-                      <Field label="Email address" error={errors.email}>
-                        <input
-                          name="email" type="email" autoComplete="email" placeholder="you@example.com"
-                          value={textData.email} onChange={handleTextChange} className={inputClass(errors.email)}
-                        />
-                      </Field>
-                      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                        <Field label="Phone number" error={errors.contactNumber}>
-                          <input
-                            name="contactNumber" type="tel" autoComplete="tel" placeholder="98765 43210"
-                            value={textData.contactNumber} onChange={handleTextChange} className={inputClass(errors.contactNumber)}
-                          />
-                        </Field>
-                        <Field label="Subjects you teach" error={errors.subjects} hint="Separate multiple subjects with commas">
-                          <input
-                            name="subjects" type="text" placeholder="Calculus, Physics"
-                            value={textData.subjects} onChange={handleTextChange} className={inputClass(errors.subjects)}
-                          />
-                        </Field>
-                      </div>
-                    </div>
-                  )}
-
-                  {step === 1 && (
-                    <div className="space-y-6">
-                      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                        <Field label="City">
-                          <select
-                            name="city" value={textData.city} onChange={handleTextChange}
-                            className={`${inputClass(false)} cursor-pointer`}
-                          >
-                            {CITIES.map((c) => <option key={c} value={c}>{c}</option>)}
-                          </select>
-                        </Field>
-                        <Field label="Area / locality" error={errors.specificArea}>
-                          <div className="flex gap-2">
-                            <input
-                              name="specificArea" type="text" placeholder="e.g. Vaishali Nagar"
-                              value={textData.specificArea} onChange={handleTextChange}
-                              className={inputClass(errors.specificArea)}
-                            />
-                            <button
-                              type="button" onClick={handleGetLocation} disabled={isLocating}
-                              className={`shrink-0 rounded-xl border px-3 text-xs font-bold transition-colors ${
-                                textData.locationCoords
-                                  ? 'border-[var(--good)] bg-[var(--good)]/10 text-[var(--good)]'
-                                  : 'border-[var(--line)] bg-white text-[var(--ink)]/60 hover:border-[var(--ink)]/40'
-                              }`}
-                            >
-                              {isLocating ? '···' : textData.locationCoords ? '✓ Pinned' : '📍 GPS'}
-                            </button>
-                          </div>
-                          {gpsError && <p className="font-mono text-[11px] font-semibold text-[var(--rust)]">{gpsError}</p>}
-                        </Field>
-                      </div>
-
-                      <div className="space-y-3">
-                        <label className="block font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--ink)]/55">
-                          Teaching mode
-                        </label>
-                        <div className="flex flex-wrap gap-2.5">
-                          {TEACHING_MODES.map((mode) => (
-                            <label
-                              key={mode.id}
-                              className={`flex cursor-pointer items-center gap-2 rounded-xl border-2 px-4 py-2.5 text-xs font-bold transition-colors ${
-                                teachingModes.includes(mode.id)
-                                  ? 'border-[var(--marigold)] bg-[var(--marigold)]/10 text-[var(--ink)]'
-                                  : 'border-[var(--line)] bg-white text-[var(--ink)]/55 hover:border-[var(--ink)]/30'
-                              }`}
-                            >
-                              <input
-                                type="checkbox" value={mode.id} checked={teachingModes.includes(mode.id)}
-                                onChange={handleCheckboxChange} className="hidden"
-                              />
-                              <span>{mode.icon}</span>{mode.label}
-                            </label>
-                          ))}
-                        </div>
-                        {errors.teachingModes && (
-                          <p className="font-mono text-[11px] font-semibold text-[var(--rust)]">{errors.teachingModes}</p>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {step === 2 && (
-                    <div className="space-y-5">
-                      {docUploadEnabled ? (
-                        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                          <FileUploadZone
-                            id="profilePhoto" label="Profile photo" hint="JPG or PNG, under 8MB"
-                            file={profilePhoto} previewUrl={profilePhotoPreview} accept="image/*"
-                            onFile={handleProfilePhoto} error={errors.profilePhoto}
-                          />
-                          <FileUploadZone
-                            id="idProof" label="Govt. ID proof" hint="PAN, Govt ID, or passport"
-                            file={idProof} previewUrl={idProofPreview} accept="image/*,application/pdf"
-                            onFile={handleIdProof} error={errors.idProof}
-                          />
-                        </div>
-                      ) : (
-                        <div className="rounded-2xl border border-[var(--marigold)]/30 bg-[var(--marigold)]/10 p-5 text-center">
-                          <p className="text-xs font-bold text-[var(--ink)]">
-                            Document uploads are currently disabled by administration.
-                          </p>
-                          <p className="mt-1 text-xs text-[var(--ink)]/60">
-                            You can proceed directly by clicking <strong>Submit application</strong>.
-                          </p>
-                        </div>
-                      )}
-                      <p className="rounded-xl bg-[var(--chalk)]/5 px-4 py-3 text-[11px] font-medium leading-relaxed text-[var(--ink)]/60">
-                        Your documents are used only to verify your identity and are never shared publicly.
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                {/* status + progress */}
-                {statusMessage.text && (
-                  <div
-                    className={`mt-6 flex items-center gap-3 rounded-xl border px-4 py-3 text-sm font-semibold ${
-                      statusMessage.type === 'error'
-                        ? 'border-[var(--rust)]/30 bg-[var(--rust)]/8 text-[var(--rust)]'
-                        : statusMessage.type === 'success'
-                        ? 'border-[var(--good)]/30 bg-[var(--good)]/8 text-[var(--good)]'
-                        : 'border-[var(--marigold)]/30 bg-[var(--marigold)]/10 text-[var(--ink)]'
-                    }`}
-                  >
-                    {statusMessage.type === 'loading' && (
-                      <span className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-[var(--marigold)]/30 border-t-[var(--marigold)]" />
-                    )}
-                    <span className="flex-1">{statusMessage.text}</span>
-                  </div>
-                )}
-                {isSubmitting && (
-                  <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-[var(--line)]/40">
-                    <div
-                      className="h-full rounded-full bg-[var(--marigold)] transition-all duration-200"
-                      style={{ width: `${uploadProgress}%` }}
-                    />
-                  </div>
-                )}
-
-                {/* nav buttons */}
-                <div className="mt-7 flex items-center justify-between gap-3">
-                  {step > 0 ? (
-                    <button
-                      type="button" onClick={handleBack}
-                      className="rounded-xl border border-[var(--line)] px-5 py-3 text-xs font-bold uppercase tracking-wider text-[var(--ink)]/60 transition-colors hover:border-[var(--ink)]/40"
-                    >
-                      Back
-                    </button>
-                  ) : <span />}
                   <button
-                    type="submit" disabled={isSubmitting}
-                    className={`flex-1 rounded-xl py-3.5 text-xs font-black uppercase tracking-widest text-white transition-all disabled:cursor-not-allowed sm:flex-none sm:px-10 ${
-                      isSubmitting ? 'bg-[var(--ink)]/30' : 'bg-[var(--chalk)] hover:bg-[var(--rust)] active:scale-[0.98]'
-                    }`}
+                    type="button"
+                    onClick={() => setSubmitted(false)}
+                    className="mt-7 rounded-xl border border-[var(--line)] px-6 py-3 text-xs font-black uppercase tracking-widest text-[var(--ink)]/70 transition-colors hover:border-[var(--ink)]/40"
                   >
-                    {isSubmitting ? 'Submitting…' : step === STEPS.length - 1 ? 'Submit application' : 'Continue'}
+                    Submit another application
                   </button>
                 </div>
-              </div>
+              ) : (
+                <form onSubmit={onFormSubmit} noValidate>
+                  <Stepper steps={STEPS} current={step} onStepClick={handleStepClick} />
+
+                  {/* step content */}
+                  <div ref={stepRef} key={step} className="min-h-[280px] motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-300">
+                    {step === 0 && (
+                      <div className="space-y-5">
+                        <Field
+                          id="fullName" label="Full name" error={errors.fullName}
+                          valid={touched.fullName && !errors.fullName && !!textData.fullName.trim()}
+                        >
+                          <input
+                            id="fullName" name="fullName" type="text" autoComplete="name" placeholder="e.g. Aditi Sharma"
+                            value={textData.fullName} onChange={handleTextChange} onBlur={handleBlur}
+                            aria-invalid={!!errors.fullName} aria-describedby={errors.fullName ? 'fullName-error' : undefined}
+                            className={inputClass(errors.fullName, touched.fullName && !errors.fullName)}
+                          />
+                        </Field>
+                        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                          <Field
+                            id="email" label="Email address" error={errors.email}
+                            valid={touched.email && !errors.email && !!textData.email.trim()}
+                          >
+                            <input
+                              id="email" name="email" type="email" autoComplete="email" placeholder="you@example.com"
+                              value={textData.email} onChange={handleTextChange} onBlur={handleBlur}
+                              aria-invalid={!!errors.email} aria-describedby={errors.email ? 'email-error' : undefined}
+                              className={inputClass(errors.email, touched.email && !errors.email)}
+                            />
+                          </Field>
+                          <Field
+                            id="contactNumber" label="Phone number" error={errors.contactNumber}
+                            valid={touched.contactNumber && !errors.contactNumber && !!textData.contactNumber}
+                          >
+                            <input
+                              id="contactNumber" name="contactNumber" type="tel" inputMode="numeric" autoComplete="tel"
+                              placeholder="98765 43210" maxLength={11}
+                              value={textData.contactNumber} onChange={handlePhoneChange} onBlur={handleBlur}
+                              aria-invalid={!!errors.contactNumber} aria-describedby={errors.contactNumber ? 'contactNumber-error' : undefined}
+                              className={inputClass(errors.contactNumber, touched.contactNumber && !errors.contactNumber)}
+                            />
+                          </Field>
+                        </div>
+
+                        <div className="space-y-2.5">
+                          <div className="flex items-center justify-between gap-2">
+                            <label htmlFor="subjectInput" className="block font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--ink)]/55">
+                              Subjects you teach
+                            </label>
+                            <span className="font-mono text-[10px] font-medium text-[var(--ink)]/35">{subjects.length}/{MAX_SUBJECTS}</span>
+                          </div>
+
+                          {subjects.length > 0 && (
+                            <div className="flex flex-wrap gap-2">
+                              {subjects.map((s) => (
+                                <span
+                                  key={s}
+                                  className="flex items-center gap-1.5 rounded-full border border-[var(--marigold)]/40 bg-[var(--marigold)]/10 py-1.5 pl-3 pr-2 text-xs font-bold text-[var(--ink)]"
+                                >
+                                  {s}
+                                  <button
+                                    type="button" onClick={() => removeSubject(s)} aria-label={`Remove ${s}`}
+                                    className="flex h-4 w-4 items-center justify-center rounded-full text-[var(--ink)]/40 transition-colors hover:bg-[var(--ink)]/10 hover:text-[var(--ink)]"
+                                  >
+                                    ×
+                                  </button>
+                                </span>
+                              ))}
+                            </div>
+                          )}
+
+                          <div className="flex gap-2">
+                            <input
+                              id="subjectInput" type="text"
+                              placeholder={subjects.length ? 'Add another subject' : 'e.g. Calculus'}
+                              value={subjectInput} onChange={(e) => setSubjectInput(e.target.value)} onKeyDown={handleSubjectKeyDown}
+                              disabled={subjects.length >= MAX_SUBJECTS}
+                              aria-invalid={!!errors.subjects} aria-describedby={errors.subjects ? 'subjects-error' : undefined}
+                              className={inputClass(errors.subjects, subjects.length > 0)}
+                            />
+                            <button
+                              type="button" onClick={() => addSubject()}
+                              disabled={!subjectInput.trim() || subjects.length >= MAX_SUBJECTS}
+                              className="shrink-0 rounded-xl bg-[var(--chalk)] px-5 text-xs font-black uppercase tracking-wider text-white transition-all hover:bg-[var(--marigold)] disabled:cursor-not-allowed disabled:opacity-40"
+                            >
+                              + Add
+                            </button>
+                          </div>
+
+                          {subjects.length < MAX_SUBJECTS && (
+                            <div className="flex flex-wrap items-center gap-2 pt-1">
+                              <span className="mr-1 font-mono text-[10px] font-bold uppercase tracking-wider text-[var(--ink)]/35">Quick add:</span>
+                              {SUBJECT_SUGGESTIONS.filter((s) => !subjects.some((f) => f.toLowerCase() === s.toLowerCase())).map((s) => (
+                                <button
+                                  key={s} type="button" onClick={() => addSubject(s)}
+                                  className="rounded-full border border-[var(--line)] bg-white px-3 py-1 text-[11px] font-semibold text-[var(--ink)]/60 transition-colors hover:border-[var(--marigold)] hover:text-[var(--ink)]"
+                                >
+                                  + {s}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                          {errors.subjects && (
+                            <p id="subjects-error" role="alert" className="font-mono text-[11px] font-semibold text-[var(--rust)]">{errors.subjects}</p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {step === 1 && (
+                      <div className="space-y-6">
+                        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                          <Field id="city" label="City">
+                            <select
+                              id="city" name="city" value={textData.city} onChange={handleTextChange}
+                              className={`${inputClass(false)} cursor-pointer`}
+                            >
+                              {CITIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                            </select>
+                          </Field>
+                          <Field
+                            id="specificArea" label="Area / locality" error={errors.specificArea}
+                            valid={touched.specificArea && !errors.specificArea && !!textData.specificArea.trim()}
+                          >
+                            <div className="flex gap-2">
+                              <input
+                                id="specificArea" name="specificArea" type="text" placeholder="e.g. Vaishali Nagar"
+                                value={textData.specificArea} onChange={handleTextChange} onBlur={handleBlur}
+                                aria-invalid={!!errors.specificArea} aria-describedby={errors.specificArea ? 'specificArea-error' : undefined}
+                                className={inputClass(errors.specificArea, touched.specificArea && !errors.specificArea)}
+                              />
+                              <button
+                                type="button" onClick={handleGetLocation} disabled={isLocating}
+                                className={`shrink-0 rounded-xl border px-3 text-xs font-bold transition-colors ${
+                                  textData.locationCoords
+                                    ? 'border-[var(--good)] bg-[var(--good)]/10 text-[var(--good)]'
+                                    : 'border-[var(--line)] bg-white text-[var(--ink)]/60 hover:border-[var(--ink)]/40'
+                                } ${isLocating ? 'animate-pulse' : ''}`}
+                              >
+                                {isLocating ? '···' : textData.locationCoords ? '✓ Pinned' : '📍 GPS'}
+                              </button>
+                            </div>
+                            {gpsError && <p role="alert" className="font-mono text-[11px] font-semibold text-[var(--rust)]">{gpsError}</p>}
+                          </Field>
+                        </div>
+
+                        <div className="space-y-3">
+                          <label className="block font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--ink)]/55">
+                            Teaching mode
+                          </label>
+                          <div className="flex flex-wrap gap-2.5">
+                            {TEACHING_MODES.map((mode) => (
+                              <label
+                                key={mode.id}
+                                className={`flex cursor-pointer items-center gap-2 rounded-xl border-2 px-4 py-2.5 text-xs font-bold transition-all active:scale-[0.97] ${
+                                  teachingModes.includes(mode.id)
+                                    ? 'border-[var(--marigold)] bg-[var(--marigold)]/10 text-[var(--ink)]'
+                                    : 'border-[var(--line)] bg-white text-[var(--ink)]/55 hover:border-[var(--ink)]/30'
+                                }`}
+                              >
+                                <input
+                                  type="checkbox" value={mode.id} checked={teachingModes.includes(mode.id)}
+                                  onChange={handleCheckboxChange} className="hidden"
+                                />
+                                <span>{mode.icon}</span>{mode.label}
+                              </label>
+                            ))}
+                          </div>
+                          {errors.teachingModes && (
+                            <p role="alert" className="font-mono text-[11px] font-semibold text-[var(--rust)]">{errors.teachingModes}</p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {step === 2 && (
+                      <div className="space-y-5">
+                        {docUploadEnabled ? (
+                          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                            <FileUploadZone
+                              id="profilePhoto" label="Profile photo" hint="JPG or PNG, under 8MB"
+                              file={profilePhoto} previewUrl={profilePhotoPreview} accept="image/*"
+                              onFile={handleProfilePhoto} onRemove={handleRemoveProfilePhoto} error={errors.profilePhoto}
+                            />
+                            <FileUploadZone
+                              id="idProof" label="Govt. ID proof" hint="PAN, Govt ID, or passport"
+                              file={idProof} previewUrl={idProofPreview} accept="image/*,application/pdf"
+                              onFile={handleIdProof} onRemove={handleRemoveIdProof} error={errors.idProof}
+                            />
+                          </div>
+                        ) : (
+                          <div className="rounded-2xl border border-[var(--marigold)]/30 bg-[var(--marigold)]/10 p-5 text-center">
+                            <p className="text-xs font-bold text-[var(--ink)]">
+                              Document uploads are currently disabled by administration.
+                            </p>
+                            <p className="mt-1 text-xs text-[var(--ink)]/60">
+                              You can proceed directly by clicking <strong>Submit application</strong>.
+                            </p>
+                          </div>
+                        )}
+                        <p className="rounded-xl bg-[var(--chalk)]/5 px-4 py-3 text-[11px] font-medium leading-relaxed text-[var(--ink)]/60">
+                          Your documents are used only to verify your identity and are never shared publicly.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* status + progress */}
+                  {statusMessage.text && (
+                    <div
+                      role="status" aria-live="polite"
+                      className={`mt-6 flex items-center gap-3 rounded-xl border px-4 py-3 text-sm font-semibold ${
+                        statusMessage.type === 'error'
+                          ? 'border-[var(--rust)]/30 bg-[var(--rust)]/8 text-[var(--rust)]'
+                          : statusMessage.type === 'success'
+                          ? 'border-[var(--good)]/30 bg-[var(--good)]/8 text-[var(--good)]'
+                          : 'border-[var(--marigold)]/30 bg-[var(--marigold)]/10 text-[var(--ink)]'
+                      }`}
+                    >
+                      {statusMessage.type === 'loading' && (
+                        <span className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-[var(--marigold)]/30 border-t-[var(--marigold)]" />
+                      )}
+                      <span className="flex-1">{statusMessage.text}</span>
+                    </div>
+                  )}
+                  {isSubmitting && (
+                    <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-[var(--line)]/40">
+                      <div
+                        className="h-full rounded-full bg-[var(--marigold)] transition-all duration-200"
+                        style={{ width: `${uploadProgress}%` }}
+                      />
+                    </div>
+                  )}
+
+                  {/* nav buttons */}
+                  <div className="mt-7 flex items-center justify-between gap-3">
+                    {step > 0 ? (
+                      <button
+                        type="button" onClick={handleBack}
+                        className="group flex items-center gap-1.5 rounded-xl border border-[var(--line)] px-5 py-3 text-xs font-bold uppercase tracking-wider text-[var(--ink)]/60 transition-colors hover:border-[var(--ink)]/40 hover:text-[var(--ink)]"
+                      >
+                        <svg width="12" height="12" viewBox="0 0 20 20" fill="none" aria-hidden="true" className="transition-transform group-hover:-translate-x-0.5">
+                          <path d="M12 4l-6 6 6 6" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                        Back
+                      </button>
+                    ) : <span />}
+                    <button
+                      type="submit" disabled={isSubmitting}
+                      className={`flex-1 rounded-xl py-3.5 text-xs font-black uppercase tracking-widest text-white transition-all disabled:cursor-not-allowed sm:flex-none sm:px-10 ${
+                        isSubmitting ? 'bg-[var(--ink)]/30' : 'bg-[var(--chalk)] hover:bg-[var(--rust)] active:scale-[0.98]'
+                      }`}
+                    >
+                      <span className="flex items-center justify-center gap-2">
+                        {isSubmitting && <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/30 border-t-white" />}
+                        {isSubmitting ? 'Submitting…' : step === STEPS.length - 1 ? 'Submit application' : 'Continue'}
+                      </span>
+                    </button>
+                  </div>
+                </form>
+              )}
             </div>
-          </form>
+          </div>
         </div>
       </section>
 
