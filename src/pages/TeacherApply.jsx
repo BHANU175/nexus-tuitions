@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import CustomBadge from '../components/CustomBadge';
 import axios from 'axios';
 import { supabase } from '../supabaseClient';
 import Maintenance from './Maintenance'; // Adjust path if Maintenance.jsx lives elsewhere

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import CustomBadge from '../components/CustomBadge';
 import { supabase } from '../supabaseClient'; // Adjust path to your Supabase client as needed
 import Maintenance from './Maintenance'; // Adjust path if Maintenance.jsx lives elsewhere
 
