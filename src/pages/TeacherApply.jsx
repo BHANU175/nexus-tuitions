@@ -19,23 +19,23 @@ const DEFAULT_TEACHING_MODES = [
 
 const STEPS = ['About you', 'Location & Mode', 'Verification'];
 
-const DEFAULT_TRUST_CHIPS = ['0% commission on sessions', 'Pre-verified student leads', 'Guaranteed weekly payouts'];
+const DEFAULT_TRUST_CHIPS = ['0% commission on sessions', 'Pre-verified student leads', 'Dedicated academic concierge'];
 
 const DEFAULT_BANNER_SLIDES = [
-  { note: 'Top Jaipur tutors earn ₹25,000+ monthly teaching part-time.' },
-  { note: 'Every student request is verified by our team before dispatch.' },
-  { note: 'You set your curriculum, rates, and schedule completely.' },
+  { note: 'Connect with high-intent students matched to your academic expertise.' },
+  { note: 'Every student request is rigorously verified by our team before dispatch.' },
+  { note: 'You retain complete autonomy over your curriculum, rates, and schedule.' },
 ];
 
 const ICON_TINTS = ['bg-[var(--marigold)]/10', 'bg-[var(--rust)]/10', 'bg-[var(--good)]/10', 'bg-[var(--chalk)]/8'];
 
 const DEFAULT_BENEFITS = [
-  { icon: '🎯', title: 'Zero Cold Prospecting', copy: 'Pre-qualified student leads delivered directly to your dashboard. Zero marketing hassle.' },
-  { icon: '💸', title: 'Keep 100% of Earnings', copy: 'No hidden platform fees or commissions taken from your agreed hourly/monthly session rates.' },
+  { icon: '🎯', title: 'Zero Cold Prospecting', copy: 'Pre-qualified student leads delivered directly to your dashboard with zero marketing friction.' },
   { icon: '⚖️', title: 'Absolute Autonomy', copy: 'Full control over your subjects, pricing tiers, travel radius, and working hours.' },
-  { icon: '🛡️', title: 'Trust & Safety First', copy: 'Rigorous ID checks on families and tutors guarantee a secure learning environment.' },
+  { icon: '🛡️', title: 'Trust & Safety First', copy: 'Rigorous checks on families and learners guarantee a secure, focused teaching environment.' },
   { icon: '🗓️', title: 'Smart Scheduling', copy: 'Syncs effortlessly with your personal calendar so you never double-book.' },
   { icon: '🤝', title: 'Dedicated Concierge Support', copy: 'Our onboarding team helps optimize your profile for maximum student match rates.' },
+  { icon: '📚', title: 'Academic Freedom', copy: 'Teach on your own terms using your proven methodologies and materials.' },
 ];
 
 const DEFAULT_JOIN_STEPS = [
@@ -516,10 +516,6 @@ export default function TeacherApply() {
   const [submitted, setSubmitted] = useState(false);
   const [lastApplicant, setLastApplicant] = useState({ name: '', email: '' });
 
-  // Interactive Earnings Estimator State (Business Feature)
-  const [estimatedHours, setEstimatedHours] = useState(15);
-  const [hourlyRate, setHourlyRate] = useState(600);
-
   const stepRef = useRef(null);
   const didMountRef = useRef(false);
 
@@ -680,8 +676,7 @@ export default function TeacherApply() {
     }
     if (s === 2) {
       if (docUploadEnabled) {
-        // Soft validation to prevent hard drop-offs, but strongly recommended
-        // If needed, we can make them required or optional based on business preference
+        // Optional/flexible
       }
     }
     return e;
@@ -790,7 +785,7 @@ export default function TeacherApply() {
           <div className="hidden items-center gap-8 font-mono text-[13px] font-bold uppercase tracking-wide text-[var(--ink)]/55 md:flex">
             <Link to="/" className="transition-colors hover:text-[var(--ink)]">Platform</Link>
             <a href="#why" className="transition-colors hover:text-[var(--ink)]">Benefits</a>
-            <a href="#estimator" className="transition-colors hover:text-[var(--ink)]">Earnings Calculator</a>
+            <a href="#how" className="transition-colors hover:text-[var(--ink)]">Process</a>
             <Link to="/request-tutor" className="transition-colors hover:text-[var(--ink)]">Hire a Tutor</Link>
           </div>
 
@@ -836,10 +831,10 @@ export default function TeacherApply() {
               Start Application
             </a>
             <a
-              href="#estimator"
+              href="#why"
               className="w-full rounded-xl border border-[var(--line)] bg-white px-8 py-3.5 text-sm font-black uppercase tracking-widest text-[var(--ink)]/70 transition-colors hover:border-[var(--ink)]/40 sm:w-auto"
             >
-              Calculate Earnings
+              Explore Benefits
             </a>
           </div>
           <div className="mt-9 flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
@@ -851,63 +846,6 @@ export default function TeacherApply() {
           </div>
         </div>
       </header>
-
-      {/* --- INTERACTIVE EARNINGS ESTIMATOR (Business/Brand Value Add) --- */}
-      <section id="estimator" className="border-b border-[var(--line)]/50 bg-[var(--card)] py-16 sm:py-20">
-        <div className="mx-auto max-w-[900px] px-4 sm:px-6 md:px-10">
-          <div className="mx-auto max-w-xl text-center mb-10">
-            <p className="mb-3 font-mono text-[11px] font-bold uppercase tracking-widest text-[var(--marigold)]">Income Potential</p>
-            <h2 className="font-serif text-3xl font-black tracking-tight text-[var(--ink)] sm:text-4xl">
-              Estimate your monthly tutoring revenue
-            </h2>
-            <p className="mt-2 text-sm text-[var(--ink)]/60">Adjust your expected weekly hours and rate to see your potential take-home pay.</p>
-          </div>
-
-          <div className="rounded-3xl border border-[var(--line)] bg-white p-6 sm:p-10 shadow-sm">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-              <div className="space-y-6">
-                <div>
-                  <div className="flex justify-between items-center mb-2">
-                    <label className="font-mono text-xs font-bold uppercase tracking-wider text-[var(--ink)]/70">Weekly Teaching Hours</label>
-                    <span className="font-mono text-sm font-bold text-[var(--chalk)]">{estimatedHours} hrs/week</span>
-                  </div>
-                  <input
-                    type="range" min="5" max="40" step="5" value={estimatedHours}
-                    onChange={(e) => setEstimatedHours(Number(e.target.value))}
-                    className="w-full accent-[var(--marigold)] cursor-pointer"
-                  />
-                </div>
-
-                <div>
-                  <div className="flex justify-between items-center mb-2">
-                    <label className="font-mono text-xs font-bold uppercase tracking-wider text-[var(--ink)]/70">Expected Hourly Rate</label>
-                    <span className="font-mono text-sm font-bold text-[var(--chalk)]">₹{hourlyRate} / hour</span>
-                  </div>
-                  <input
-                    type="range" min="300" max="1500" step="50" value={hourlyRate}
-                    onChange={(e) => setHourlyRate(Number(e.target.value))}
-                    className="w-full accent-[var(--marigold)] cursor-pointer"
-                  />
-                </div>
-              </div>
-
-              <div className="rounded-2xl bg-[var(--chalk)] p-6 text-center text-white flex flex-col justify-center items-center">
-                <span className="font-mono text-xs uppercase tracking-widest text-[var(--marigold)] mb-1">Estimated Monthly Earnings</span>
-                <div className="font-serif text-4xl sm:text-5xl font-black tracking-tight text-white my-2">
-                  ₹{(estimatedHours * hourlyRate * 4).toLocaleString('en-IN')}
-                </div>
-                <p className="text-xs text-white/60 mt-1">Based on 4 active weeks. 0% commission deducted.</p>
-                <a
-                  href="#apply"
-                  className="mt-5 inline-block rounded-xl bg-[var(--marigold)] px-6 py-2.5 text-xs font-black uppercase tracking-widest text-[var(--ink)] transition-transform hover:scale-105"
-                >
-                  Start Earning Now
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* --- WHY US --- */}
       <section id="why" className="border-b border-[var(--line)]/50 bg-white py-16 sm:py-20 md:py-24">
