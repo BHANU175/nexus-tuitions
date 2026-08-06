@@ -6,7 +6,7 @@ import Maintenance from './Maintenance';
 import CustomBadge from '../components/CustomBadge';
 
 /* ---------------------------------------------------------------------- */
-/* Static data                                                            */
+/* Static data & Configurations                                           */
 /* ---------------------------------------------------------------------- */
 
 const CLASS_LEVELS = [
@@ -19,9 +19,9 @@ const SUBJECT_SUGGESTIONS = ['Hindi', 'English', 'Mathematics', 'Science', 'Soci
 const MAX_SUBJECTS = 8;
 
 const MODES = [
-  { id: 'online', label: 'Online', icon: '💻' },
-  { id: 'offline', label: "At the tutor's place", icon: '🏫' },
-  { id: 'personal', label: 'At my home', icon: '🏠' },
+  { id: 'online', label: 'Online', icon: '💻', desc: 'Live 1-on-1 virtual classrooms' },
+  { id: 'offline', label: "At the tutor's place", icon: '🏫', desc: 'Structured learning studio' },
+  { id: 'personal', label: 'At my home', icon: '🏠', desc: 'Convenient doorstep tutoring' },
 ];
 
 const TRUST_BENEFITS = [
@@ -45,6 +45,12 @@ const BANNER_SLIDES = [
   { note: 'Get matched today with zero hidden placement fees.' },
 ];
 
+const PLATFORM_STATS = [
+  { label: 'Active Tutors in Jaipur', value: '450+' },
+  { label: 'Average Match Time', value: '< 18 hrs' },
+  { label: 'Parent Satisfaction', value: '4.9 / 5' },
+];
+
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_RE = /^(\+91[\s-]?)?[6-9]\d{9}$/;
 
@@ -65,7 +71,7 @@ function Field({ label, error, hint, children }) {
       </label>
       {children}
       {error ? (
-        <p className="font-mono text-[11px] font-semibold text-[var(--rust)] pl-1">{error}</p>
+        <p className="font-mono text-[11px] font-semibold text-[var(--rust)] pl-1 animate-shake">{error}</p>
       ) : hint ? (
         <p className="text-[11px] font-medium text-[var(--ink)]/40 pl-1">{hint}</p>
       ) : null}
@@ -147,7 +153,7 @@ function HeroBanner() {
     <div
       onMouseEnter={() => { pausedRef.current = true; }}
       onMouseLeave={() => { pausedRef.current = false; }}
-      className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-[var(--marigold)] to-[var(--rust)] sm:rounded-[2.5rem]"
+      className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-[var(--marigold)] to-[var(--rust)] sm:rounded-[2.5rem] shadow-xl"
     >
       <div
         aria-hidden="true"
@@ -155,7 +161,7 @@ function HeroBanner() {
         style={{ backgroundImage: 'radial-gradient(circle, var(--ink) 1.5px, transparent 1.5px)', backgroundSize: '24px 24px' }}
       />
       <div className="relative grid grid-cols-1 items-center gap-8 px-6 py-10 sm:px-10 sm:py-12 md:grid-cols-[1fr_auto_auto] md:gap-10 md:px-14 md:py-14">
-        <div className="mx-auto w-full max-w-[240px] -rotate-2 rounded-2xl bg-[var(--card)] p-5 shadow-xl md:mx-0">
+        <div className="mx-auto w-full max-w-[240px] -rotate-2 rounded-2xl bg-[var(--card)] p-5 shadow-lg md:mx-0">
           <p key={active} className="animate-in fade-in font-serif text-base font-bold leading-snug text-[var(--ink)] duration-500">
             {BANNER_SLIDES[active].note}
           </p>
@@ -187,7 +193,7 @@ function HeroBanner() {
 /* ---------------------------------------------------------------------- */
 
 const INITIAL_FORM = {
-  student_name: 'AA',
+  student_name: '',
   class_level: '',
   parent_name: '',
   email: '',
@@ -235,8 +241,9 @@ export default function StudentRequest() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
   
-  // State for Multi-Step Form
+  // State for Multi-Step Form & Success View
   const [currentStep, setCurrentStep] = useState(1);
+  const [isSuccess, setIsSuccess] = useState(false);
 
   const clearError = useCallback((name) => {
     setErrors((e) => {
@@ -356,10 +363,8 @@ export default function StudentRequest() {
         subjects: formData.subjects, 
       });
 
-      setStatusMessage({ text: 'Request received! An advisor will contact you shortly.', type: 'success' });
-      setFormData(INITIAL_FORM);
-      setSubjectInput('');
-      setCurrentStep(1);
+      setIsSuccess(true);
+      setStatusMessage({ text: '', type: '' });
     } catch (error) {
       console.error(error);
       setStatusMessage({ text: 'Could not connect. Please check your network and try again.', type: 'error' });
@@ -386,7 +391,10 @@ export default function StudentRequest() {
         }}
         className="flex min-h-screen items-center justify-center bg-[var(--paper)] font-sans text-[var(--ink)]"
       >
-        <p className="text-sm font-semibold tracking-wide text-[var(--ink)]/60">Loading...</p>
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-[var(--marigold)] border-t-transparent" />
+          <p className="text-sm font-semibold tracking-wide text-[var(--ink)]/60">Loading experience...</p>
+        </div>
       </div>
     );
   }
@@ -423,7 +431,7 @@ export default function StudentRequest() {
           </Link>
           <div className="hidden items-center gap-8 font-sans text-sm font-semibold text-[var(--ink)] md:flex">
             <Link to="/" className="transition-colors hover:opacity-70">Why Us</Link>
-            <Link to="/request-tutor" className="transition-colors hover:opacity-70">Find a Tutor</Link>
+            <Link to="/request-tutor" className="transition-colors hover:opacity-70 text-[var(--marigold)]">Find a Tutor</Link>
             <Link to="/apply-teacher" className="transition-colors hover:opacity-70">Become a Tutor</Link>
           </div>
         </div>
@@ -465,11 +473,21 @@ export default function StudentRequest() {
               <HeroBanner />
             </div>
           </div>
+
+          {/* --- PLATFORM STATS BAR --- */}
+          <div className="mt-16 grid grid-cols-1 gap-4 sm:grid-cols-3">
+            {PLATFORM_STATS.map((stat) => (
+              <div key={stat.label} className="flex items-center justify-between sm:justify-start sm:gap-6 rounded-2xl bg-white/70 border border-[var(--line)] px-6 py-5 shadow-sm">
+                <span className="font-serif text-3xl font-black text-[var(--marigold)]">{stat.value}</span>
+                <span className="text-xs font-bold uppercase tracking-wider text-[var(--ink)]/60">{stat.label}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </header>
 
       {/* --- WHY TRUST US --- */}
-      <section className="relative py-16 sm:py-24">
+      <section className="relative py-16 sm:py-24 bg-white/40 border-t border-[var(--line)]/50">
         <div className="mx-auto max-w-[1200px] px-4 sm:px-6 md:px-10">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="font-serif text-3xl font-black tracking-tight text-[var(--ink)] sm:text-4xl">
@@ -483,7 +501,7 @@ export default function StudentRequest() {
 
           <div className="mt-14 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {TRUST_BENEFITS.map((b) => (
-              <div key={b.title} className="group rounded-2xl bg-white border border-[var(--line)]/50 p-8 shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl hover:border-[var(--line)]">
+              <div key={b.title} className="group rounded-2xl bg-white border border-[var(--line)]/60 p-8 shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl hover:border-[var(--line)]">
                 <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--paper)] border border-[var(--line)] text-xl transition-transform group-hover:scale-110">
                   {b.icon}
                 </div>
@@ -519,8 +537,8 @@ export default function StudentRequest() {
         </div>
       </section>
 
-      {/* --- REQUEST FORM (MULTI-STEP) --- */}
-      <section id="request" className="relative pb-24 pt-16 sm:pt-24 border-t border-[var(--line)]/50">
+      {/* --- REQUEST FORM (MULTI-STEP & SUCCESS VIEW) --- */}
+      <section id="request" className="relative pb-24 pt-16 sm:pt-24 border-t border-[var(--line)]/50 bg-white/20">
         <div className="relative mx-auto max-w-[760px] px-4 sm:px-6 md:px-10">
           <div className="mb-12 text-center">
             <h2 className="font-serif text-3xl font-black tracking-tight text-[var(--ink)] sm:text-4xl">
@@ -532,248 +550,259 @@ export default function StudentRequest() {
           </div>
 
           {statusMessage.text && (
-            <div
-              className={`mb-8 flex items-center gap-4 rounded-2xl border px-6 py-5 text-sm font-bold ${
-                statusMessage.type === 'error'
-                  ? 'border-red-200 bg-red-50 text-red-700'
-                  : statusMessage.type === 'success'
-                  ? 'border-green-200 bg-green-50 text-green-700'
-                  : 'border-blue-200 bg-blue-50 text-blue-700'
-              }`}
-            >
-              {statusMessage.type === 'loading' && (
-                <span className="h-5 w-5 shrink-0 animate-spin rounded-full border-2 border-current border-t-transparent opacity-70" />
-              )}
+            <div className="mb-8 flex items-center gap-4 rounded-2xl border border-red-200 bg-red-50 px-6 py-5 text-sm font-bold text-red-700">
               <span className="flex-1 text-[15px]">{statusMessage.text}</span>
             </div>
           )}
 
           <div className="overflow-hidden rounded-2xl bg-white shadow-xl shadow-[var(--chalk)]/5 ring-1 ring-[var(--line)]">
-            <div className="flex h-1.5 w-full bg-[var(--line)]/50">
-              <div 
-                className="bg-[var(--marigold)] transition-all duration-300" 
-                style={{ width: `${(currentStep / 3) * 100}%` }} 
-              />
-            </div>
-
-            <div className="p-6 sm:p-10">
-              <div className="mb-8 flex justify-between text-xs font-bold uppercase tracking-widest text-[var(--ink)]/40">
-                <span className={currentStep >= 1 ? 'text-[var(--marigold)]' : ''}>1. Student</span>
-                <span className={currentStep >= 2 ? 'text-[var(--marigold)]' : ''}>2. Parent</span>
-                <span className={currentStep >= 3 ? 'text-[var(--marigold)]' : ''}>3. Details</span>
+            {isSuccess ? (
+              /* --- SUCCESS CARD SCREEN --- */
+              <div className="p-8 sm:p-14 text-center animate-in fade-in zoom-in-95 duration-500">
+                <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 text-3xl shadow-inner">
+                  ✓
+                </div>
+                <h3 className="font-serif text-3xl font-black text-[var(--ink)] mb-3">Request Received Successfully!</h3>
+                <p className="text-base font-medium text-[var(--ink)]/60 max-w-md mx-auto mb-8">
+                  Thank you. One of our senior learning advisors in Jaipur has received your criteria and is carefully vetting the ideal tutor match. You will hear from us within 24 hours.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsSuccess(false);
+                    setFormData(INITIAL_FORM);
+                    setCurrentStep(1);
+                  }}
+                  className="rounded-xl bg-[var(--chalk)] px-8 py-4 text-xs font-black uppercase tracking-widest text-white shadow-lg transition-all hover:bg-[var(--marigold)]"
+                >
+                  Submit Another Request
+                </button>
               </div>
+            ) : (
+              /* --- MULTI-STEP FORM --- */
+              <>
+                <div className="flex h-1.5 w-full bg-[var(--line)]/50">
+                  <div 
+                    className="bg-[var(--marigold)] transition-all duration-300" 
+                    style={{ width: `${(currentStep / 3) * 100}%` }} 
+                  />
+                </div>
 
-              <form onSubmit={handleFormSubmit} noValidate>
-                {/* --- STEP 1: STUDENT DETAILS --- */}
-                {currentStep === 1 && (
-                  <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-                    <SectionLabel>Student Details</SectionLabel>
-                    <div className="space-y-6">
-                      <Field label="Student's full name" error={errors.student_name}>
-                        <input
-                          name="student_name" type="text" autoComplete="name" placeholder="e.g. AA"
-                          value={formData.student_name} onChange={handleChange} className={inputClass(errors.student_name)}
-                        />
-                      </Field>
-                      <Field label="Class" error={errors.class_level} hint="Pre-Nursery to Class 8">
-                        <select
-                          name="class_level" value={formData.class_level} onChange={handleChange}
-                          className={selectClass(errors.class_level)}
-                        >
-                          <option value="" disabled>Select class</option>
-                          {CLASS_LEVELS.map((c) => <option key={c} value={c}>{c}</option>)}
-                        </select>
-                      </Field>
-                    </div>
+                <div className="p-6 sm:p-10">
+                  <div className="mb-8 flex justify-between text-xs font-bold uppercase tracking-widest text-[var(--ink)]/40">
+                    <span className={currentStep >= 1 ? 'text-[var(--marigold)]' : ''}>1. Student</span>
+                    <span className={currentStep >= 2 ? 'text-[var(--marigold)]' : ''}>2. Parent</span>
+                    <span className={currentStep >= 3 ? 'text-[var(--marigold)]' : ''}>3. Details</span>
                   </div>
-                )}
 
-                {/* --- STEP 2: PARENT DETAILS --- */}
-                {currentStep === 2 && (
-                  <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-                    <SectionLabel>Parent Details</SectionLabel>
-                    <div className="space-y-6">
-                      <Field label="Parent's full name" error={errors.parent_name}>
-                        <input
-                          name="parent_name" type="text" autoComplete="name" placeholder="e.g. Rohit Sharma"
-                          value={formData.parent_name} onChange={handleChange} className={inputClass(errors.parent_name)}
-                        />
-                      </Field>
-                      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                        <Field label="Parent email" error={errors.email}>
+                  <form onSubmit={handleFormSubmit} noValidate>
+                    {/* --- STEP 1: STUDENT DETAILS --- */}
+                    {currentStep === 1 && (
+                      <div className="animate-in fade-in slide-in-from-right-4 duration-300 space-y-6">
+                        <SectionLabel>Student Details</SectionLabel>
+                        <Field label="Student's full name" error={errors.student_name}>
                           <input
-                            name="email" type="email" autoComplete="email" placeholder="you@example.com"
-                            value={formData.email} onChange={handleChange} className={inputClass(errors.email)}
+                            name="student_name" type="text" autoComplete="name" placeholder="e.g. Aarav Sharma"
+                            value={formData.student_name} onChange={handleChange} className={inputClass(errors.student_name)}
                           />
                         </Field>
-                        <Field label="Contact number" error={errors.contact_number}>
-                          <input
-                            name="contact_number" type="tel" autoComplete="tel" placeholder="98765 43210"
-                            value={formData.contact_number} onChange={handleChange} className={inputClass(errors.contact_number)}
-                          />
-                        </Field>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* --- STEP 3: LEARNING NEEDS & LOCATION --- */}
-                {currentStep === 3 && (
-                  <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-                    <SectionLabel>Learning Needs & Location</SectionLabel>
-                    <div className="space-y-8">
-                      <Field
-                        label="Subjects"
-                        error={errors.subjects}
-                        hint={`Add each subject one at a time · up to ${MAX_SUBJECTS}`}
-                      >
-                        {formData.subjects.length > 0 && (
-                          <div className="mb-2 flex flex-wrap gap-2">
-                            {formData.subjects.map((subject) => (
-                              <span
-                                key={subject}
-                                className="inline-flex items-center gap-1.5 rounded-full bg-[var(--marigold)]/10 px-4 py-2 text-xs font-bold text-[var(--ink)] border border-[var(--marigold)]/20"
-                              >
-                                {subject}
-                                <button
-                                  type="button"
-                                  onClick={() => removeSubject(subject)}
-                                  aria-label={`Remove ${subject}`}
-                                  className="flex h-5 w-5 items-center justify-center rounded-full text-[var(--rust)] transition-colors hover:bg-[var(--rust)]/10"
-                                >
-                                  ×
-                                </button>
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                        <div className="flex gap-3">
-                          <input
-                            name="subject_input" type="text" placeholder="e.g. Mathematics"
-                            value={subjectInput}
-                            onChange={(e) => setSubjectInput(e.target.value)}
-                            onKeyDown={handleSubjectKeyDown}
-                            disabled={formData.subjects.length >= MAX_SUBJECTS}
-                            className={inputClass(errors.subjects)}
-                          />
-                          <button
-                            type="button"
-                            onClick={() => addSubject()}
-                            disabled={!subjectInput.trim() || formData.subjects.length >= MAX_SUBJECTS}
-                            className="shrink-0 rounded-xl bg-[var(--chalk)] px-6 text-xs font-black uppercase tracking-wider text-white transition-all hover:-translate-y-0.5 hover:bg-[var(--marigold)] hover:shadow-md disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:bg-[var(--chalk)] disabled:hover:shadow-none"
+                        <Field label="Class" error={errors.class_level} hint="Pre-Nursery to Class 8">
+                          <select
+                            name="class_level" value={formData.class_level} onChange={handleChange}
+                            className={selectClass(errors.class_level)}
                           >
-                            + Add
-                          </button>
-                        </div>
-                        {formData.subjects.length < MAX_SUBJECTS && (
-                          <div className="flex flex-wrap items-center gap-2 pt-2">
-                            <span className="mr-2 font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--ink)]/40">
-                              Quick add:
-                            </span>
-                            {SUBJECT_SUGGESTIONS
-                              .filter((s) => !formData.subjects.some((f) => f.toLowerCase() === s.toLowerCase()))
-                              .map((s) => (
-                                <button
-                                  key={s}
-                                  type="button"
-                                  onClick={() => addSubject(s)}
-                                  className="rounded-full border border-[var(--line)] bg-white px-3 py-1.5 text-xs font-semibold text-[var(--ink)]/70 transition-all hover:border-[var(--marigold)] hover:text-[var(--ink)]"
-                                >
-                                  + {s}
-                                </button>
-                              ))}
-                          </div>
-                        )}
-                      </Field>
+                            <option value="" disabled>Select class level</option>
+                            {CLASS_LEVELS.map((c) => <option key={c} value={c}>{c}</option>)}
+                          </select>
+                        </Field>
+                      </div>
+                    )}
 
-                      <div className="space-y-4">
-                        <label className="block font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--ink)]/70 pl-1">
-                          Preferred mode
-                        </label>
-                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                          {MODES.map((mode) => (
-                            <button
-                              type="button" key={mode.id} onClick={() => handleModeSelect(mode.id)}
-                              className={`flex flex-col items-center justify-center gap-3 rounded-xl border-2 p-5 text-center text-sm font-bold transition-all ${
-                                formData.preferred_mode === mode.id
-                                  ? 'border-[var(--marigold)] bg-[var(--marigold)]/5 text-[var(--ink)] shadow-sm'
-                                  : 'border-[var(--line)] bg-gray-50/50 text-[var(--ink)]/60 hover:bg-gray-50'
-                              }`}
-                            >
-                              <span className="text-3xl drop-shadow-sm">{mode.icon}</span>
-                              {mode.label}
-                            </button>
-                          ))}
+                    {/* --- STEP 2: PARENT DETAILS --- */}
+                    {currentStep === 2 && (
+                      <div className="animate-in fade-in slide-in-from-right-4 duration-300 space-y-6">
+                        <SectionLabel>Parent Details</SectionLabel>
+                        <Field label="Parent's full name" error={errors.parent_name}>
+                          <input
+                            name="parent_name" type="text" autoComplete="name" placeholder="e.g. Rajesh Sharma"
+                            value={formData.parent_name} onChange={handleChange} className={inputClass(errors.parent_name)}
+                          />
+                        </Field>
+                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                          <Field label="Parent email" error={errors.email}>
+                            <input
+                              name="email" type="email" autoComplete="email" placeholder="you@example.com"
+                              value={formData.email} onChange={handleChange} className={inputClass(errors.email)}
+                            />
+                          </Field>
+                          <Field label="Contact number" error={errors.contact_number}>
+                            <input
+                              name="contact_number" type="tel" autoComplete="tel" placeholder="98765 43210"
+                              value={formData.contact_number} onChange={handleChange} className={inputClass(errors.contact_number)}
+                            />
+                          </Field>
                         </div>
                       </div>
+                    )}
 
-                      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                        <Field label="City" hint="We currently serve Jaipur only">
-                          <div className="flex items-center gap-2 rounded-xl border-2 border-[var(--line)] bg-gray-50/50 px-5 py-4 text-sm font-semibold text-[var(--ink)]/70">
-                            <span aria-hidden="true">📍</span> Jaipur, Rajasthan
-                          </div>
-                        </Field>
-                        <Field label="Area / locality" error={errors.specific_area}>
+                    {/* --- STEP 3: LEARNING NEEDS & LOCATION --- */}
+                    {currentStep === 3 && (
+                      <div className="animate-in fade-in slide-in-from-right-4 duration-300 space-y-8">
+                        <SectionLabel>Learning Needs & Location</SectionLabel>
+                        <Field
+                          label="Subjects"
+                          error={errors.subjects}
+                          hint={`Add each subject one at a time · up to ${MAX_SUBJECTS}`}
+                        >
+                          {formData.subjects.length > 0 && (
+                            <div className="mb-2 flex flex-wrap gap-2">
+                              {formData.subjects.map((subject) => (
+                                <span
+                                  key={subject}
+                                  className="inline-flex items-center gap-1.5 rounded-full bg-[var(--marigold)]/10 px-4 py-2 text-xs font-bold text-[var(--ink)] border border-[var(--marigold)]/20 shadow-sm"
+                                >
+                                  {subject}
+                                  <button
+                                    type="button"
+                                    onClick={() => removeSubject(subject)}
+                                    aria-label={`Remove ${subject}`}
+                                    className="flex h-5 w-5 items-center justify-center rounded-full text-[var(--rust)] transition-colors hover:bg-[var(--rust)]/10"
+                                  >
+                                    ×
+                                  </button>
+                                </span>
+                              ))}
+                            </div>
+                          )}
                           <div className="flex gap-3">
                             <input
-                              name="specific_area" type="text" placeholder="e.g. Malviya Nagar"
-                              value={formData.specific_area} onChange={handleChange}
-                              className={inputClass(errors.specific_area)}
+                              name="subject_input" type="text" placeholder="e.g. Mathematics"
+                              value={subjectInput}
+                              onChange={(e) => setSubjectInput(e.target.value)}
+                              onKeyDown={handleSubjectKeyDown}
+                              disabled={formData.subjects.length >= MAX_SUBJECTS}
+                              className={inputClass(errors.subjects)}
                             />
                             <button
-                              type="button" onClick={handleGetLocation} disabled={isLocating}
-                              className={`shrink-0 rounded-xl border-2 px-5 text-xs font-bold transition-all ${
-                                formData.location_coords
-                                  ? 'border-[var(--good)] bg-[var(--good)] text-white shadow-sm'
-                                  : 'border-[var(--line)] bg-white text-[var(--ink)] hover:bg-gray-50'
-                              }`}
+                              type="button"
+                              onClick={() => addSubject()}
+                              disabled={!subjectInput.trim() || formData.subjects.length >= MAX_SUBJECTS}
+                              className="shrink-0 rounded-xl bg-[var(--chalk)] px-6 text-xs font-black uppercase tracking-wider text-white transition-all hover:-translate-y-0.5 hover:bg-[var(--marigold)] hover:shadow-md disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:bg-[var(--chalk)] disabled:hover:shadow-none"
                             >
-                              {isLocating ? '···' : formData.location_coords ? '✓ Pinned' : '📍 GPS'}
+                              + Add
                             </button>
                           </div>
-                          {gpsError && <p className="font-mono text-[11px] font-semibold text-[var(--rust)] pl-1 pt-1">{gpsError}</p>}
+                          {formData.subjects.length < MAX_SUBJECTS && (
+                            <div className="flex flex-wrap items-center gap-2 pt-2">
+                              <span className="mr-2 font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--ink)]/40">
+                                Quick add:
+                              </span>
+                              {SUBJECT_SUGGESTIONS
+                                .filter((s) => !formData.subjects.some((f) => f.toLowerCase() === s.toLowerCase()))
+                                .map((s) => (
+                                  <button
+                                    key={s}
+                                    type="button"
+                                    onClick={() => addSubject(s)}
+                                    className="rounded-full border border-[var(--line)] bg-white px-3 py-1.5 text-xs font-semibold text-[var(--ink)]/70 transition-all hover:border-[var(--marigold)] hover:text-[var(--ink)] shadow-xs"
+                                  >
+                                    + {s}
+                                  </button>
+                                ))}
+                            </div>
+                          )}
                         </Field>
-                      </div>
-                    </div>
-                  </div>
-                )}
 
-                {/* --- NAVIGATION BUTTONS --- */}
-                <div className="mt-12 flex gap-4 pt-6 border-t border-[var(--line)]/50">
-                  {currentStep > 1 && (
-                    <button
-                      type="button"
-                      onClick={handlePrevStep}
-                      className="rounded-xl border-2 border-[var(--line)] px-6 py-4 text-sm font-black uppercase tracking-widest text-[var(--ink)]/70 transition-all hover:bg-gray-50 hover:text-[var(--ink)]"
-                    >
-                      Back
-                    </button>
-                  )}
-                  
-                  {currentStep < 3 ? (
-                    <button
-                      type="button"
-                      onClick={handleNextStep}
-                      className="ml-auto rounded-xl bg-[var(--chalk)] px-8 py-4 text-sm font-black uppercase tracking-widest text-white shadow-lg shadow-[var(--chalk)]/20 transition-all hover:-translate-y-0.5 hover:bg-[var(--marigold)] hover:shadow-[var(--marigold)]/30 active:translate-y-0"
-                    >
-                      Next Step
-                    </button>
-                  ) : (
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className={`ml-auto rounded-xl px-8 py-4 text-sm font-black uppercase tracking-widest text-white transition-all disabled:cursor-not-allowed ${
-                        isSubmitting
-                          ? 'bg-[var(--ink)]/30'
-                          : 'bg-[var(--chalk)] shadow-lg shadow-[var(--chalk)]/20 hover:-translate-y-0.5 hover:bg-[var(--rust)] hover:shadow-[var(--rust)]/30 active:translate-y-0'
-                      }`}
-                    >
-                      {isSubmitting ? 'Sending…' : 'Submit Request'}
-                    </button>
-                  )}
+                        <div className="space-y-4">
+                          <label className="block font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--ink)]/70 pl-1">
+                            Preferred mode
+                          </label>
+                          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                            {MODES.map((mode) => (
+                              <button
+                                type="button" key={mode.id} onClick={() => handleModeSelect(mode.id)}
+                                className={`flex flex-col items-center justify-center gap-2 rounded-xl border-2 p-4 text-center transition-all ${
+                                  formData.preferred_mode === mode.id
+                                    ? 'border-[var(--marigold)] bg-[var(--marigold)]/5 text-[var(--ink)] shadow-sm'
+                                    : 'border-[var(--line)] bg-gray-50/50 text-[var(--ink)]/60 hover:bg-gray-50'
+                                }`}
+                              >
+                                <span className="text-3xl drop-shadow-sm">{mode.icon}</span>
+                                <span className="text-sm font-bold">{mode.label}</span>
+                                <span className="text-[11px] font-medium text-[var(--ink)]/40">{mode.desc}</span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                          <Field label="City" hint="We currently serve Jaipur only">
+                            <div className="flex items-center gap-2 rounded-xl border-2 border-[var(--line)] bg-gray-50/50 px-5 py-4 text-sm font-semibold text-[var(--ink)]/70">
+                              <span aria-hidden="true">📍</span> Jaipur, Rajasthan
+                            </div>
+                          </Field>
+                          <Field label="Area / locality" error={errors.specific_area}>
+                            <div className="flex gap-3">
+                              <input
+                                name="specific_area" type="text" placeholder="e.g. Malviya Nagar"
+                                value={formData.specific_area} onChange={handleChange}
+                                className={inputClass(errors.specific_area)}
+                              />
+                              <button
+                                type="button" onClick={handleGetLocation} disabled={isLocating}
+                                className={`shrink-0 rounded-xl border-2 px-5 text-xs font-bold transition-all ${
+                                  formData.location_coords
+                                    ? 'border-[var(--good)] bg-[var(--good)] text-white shadow-sm'
+                                    : 'border-[var(--line)] bg-white text-[var(--ink)] hover:bg-gray-50'
+                                }`}
+                              >
+                                {isLocating ? '···' : formData.location_coords ? '✓ Pinned' : '📍 GPS'}
+                              </button>
+                            </div>
+                            {gpsError && <p className="font-mono text-[11px] font-semibold text-[var(--rust)] pl-1 pt-1">{gpsError}</p>}
+                          </Field>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* --- NAVIGATION BUTTONS --- */}
+                    <div className="mt-12 flex gap-4 pt-6 border-t border-[var(--line)]/50">
+                      {currentStep > 1 && (
+                        <button
+                          type="button"
+                          onClick={handlePrevStep}
+                          className="rounded-xl border-2 border-[var(--line)] px-6 py-4 text-sm font-black uppercase tracking-widest text-[var(--ink)]/70 transition-all hover:bg-gray-50 hover:text-[var(--ink)]"
+                        >
+                          Back
+                        </button>
+                      )}
+                      
+                      {currentStep < 3 ? (
+                        <button
+                          type="button"
+                          onClick={handleNextStep}
+                          className="ml-auto rounded-xl bg-[var(--chalk)] px-8 py-4 text-sm font-black uppercase tracking-widest text-white shadow-lg shadow-[var(--chalk)]/20 transition-all hover:-translate-y-0.5 hover:bg-[var(--marigold)] hover:shadow-[var(--marigold)]/30 active:translate-y-0"
+                        >
+                          Next Step
+                        </button>
+                      ) : (
+                        <button
+                          type="submit"
+                          disabled={isSubmitting}
+                          className={`ml-auto rounded-xl px-8 py-4 text-sm font-black uppercase tracking-widest text-white transition-all disabled:cursor-not-allowed ${
+                            isSubmitting
+                              ? 'bg-[var(--ink)]/30'
+                              : 'bg-[var(--chalk)] shadow-lg shadow-[var(--chalk)]/20 hover:-translate-y-0.5 hover:bg-[var(--rust)] hover:shadow-[var(--rust)]/30 active:translate-y-0'
+                          }`}
+                        >
+                          {isSubmitting ? 'Sending…' : 'Submit Request'}
+                        </button>
+                      )}
+                    </div>
+                  </form>
                 </div>
-              </form>
-            </div>
+              </>
+            )}
           </div>
         </div>
       </section>
