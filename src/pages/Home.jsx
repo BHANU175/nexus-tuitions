@@ -5,7 +5,7 @@ import { supabase } from '../supabaseClient'; // Adjust path to your Supabase cl
 import Maintenance from './Maintenance'; // Adjust path if Maintenance.jsx lives elsewhere
 
 /* ---------------------------------------------------------------------- */
-/*  Static data                                                           */
+/*  Static data (Used as fallbacks if database is empty)                  */
 /* ---------------------------------------------------------------------- */
 
 const TRUST_INDICATORS = [
@@ -41,27 +41,33 @@ const VALUES = [
 
 export default function Home() {
   const [isMaintenance, setIsMaintenance] = useState(false);
+  const [pageContent, setPageContent] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function checkMaintenance() {
+    async function fetchInitialData() {
       try {
-        const { data, error } = await supabase
-          .from('app_settings')
-          .select('maintenance_mode')
-          .single();
+        // Fetch Maintenance Mode and Page Content in parallel
+        const [settingsRes, contentRes] = await Promise.all([
+          supabase.from('app_settings').select('maintenance_mode').single(),
+          supabase.from('page_content').select('data_json').eq('page_name', 'home').single()
+        ]);
 
-        if (data && !error) {
-          setIsMaintenance(data.maintenance_mode);
+        if (settingsRes.data && !settingsRes.error) {
+          setIsMaintenance(settingsRes.data.maintenance_mode);
+        }
+
+        if (contentRes.data && !contentRes.error) {
+          setPageContent(contentRes.data.data_json);
         }
       } catch (err) {
-        console.error('Failed to fetch app settings:', err);
+        console.error('Failed to fetch initial data:', err);
       } finally {
         setLoading(false);
       }
     }
 
-    checkMaintenance();
+    fetchInitialData();
   }, []);
 
   // Update these paths to your local image paths inside the public folder
@@ -72,6 +78,15 @@ export default function Home() {
   const handleNavigation = () => {
     window.scrollTo(0, 0);
   };
+
+  // Determine which data to show (Dynamic from DB or Fallback Static)
+  const currentTags = pageContent?.trustIndicators?.length > 0 
+    ? pageContent.trustIndicators 
+    : [{ title: 'Verified Tutors' }, { title: 'All Subjects' }, { title: 'Home & Online Classes' }];
+    
+  const currentBenefits = pageContent?.benefits?.length > 0 ? pageContent.benefits : BENEFITS;
+  const currentHowSteps = pageContent?.howSteps?.length > 0 ? pageContent.howSteps : HOW_STEPS;
+  const currentValues = pageContent?.values?.length > 0 ? pageContent.values : VALUES;
 
   // Loading Screen
   if (loading) {
@@ -147,28 +162,35 @@ export default function Home() {
                 🎓 Trusted by Families & Students Across India
               </div>
               
-              <h1 className="mt-6 break-words font-serif text-4xl font-black leading-[1.25] tracking-tight text-[var(--ink)] sm:text-5xl sm:leading-[1.15] md:text-6xl lg:text-7xl">
-                Unlock Your <br />
-                <span className="relative inline-block text-[var(--rust)]">
-                  Learning
-                  <svg className="absolute -bottom-2 left-0 w-full text-[var(--marigold)]" viewBox="0 0 200 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M3 9C60 -2 140 -2 197 9" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
-                  </svg>
-                </span> Potential
-              </h1>
+              {/* Dynamic Hero Title or Fallback */}
+              {pageContent?.heroTitle ? (
+                <h1 className="mt-6 break-words font-serif text-4xl font-black leading-[1.25] tracking-tight text-[var(--ink)] sm:text-5xl sm:leading-[1.15] md:text-6xl lg:text-7xl">
+                  {pageContent.heroTitle}
+                </h1>
+              ) : (
+                <h1 className="mt-6 break-words font-serif text-4xl font-black leading-[1.25] tracking-tight text-[var(--ink)] sm:text-5xl sm:leading-[1.15] md:text-6xl lg:text-7xl">
+                  Unlock Your <br />
+                  <span className="relative inline-block text-[var(--rust)]">
+                    Learning
+                    <svg className="absolute -bottom-2 left-0 w-full text-[var(--marigold)]" viewBox="0 0 200 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M3 9C60 -2 140 -2 197 9" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+                    </svg>
+                  </span> Potential
+                </h1>
+              )}
               
               <p className="mt-8 text-lg font-medium leading-relaxed text-[var(--ink)]/70">
                 Find verified tutors for every subject, every class and every learning goal — online or at your home.
               </p>
 
-              {/* Tags */}
+              {/* Dynamic Tags / Trust Indicators */}
               <div className="mt-8 flex flex-wrap gap-3">
-                {['Verified Tutors', 'All Subjects', 'Home & Online Classes'].map((tag, idx) => (
+                {currentTags.map((tag, idx) => (
                   <div key={idx} className="flex items-center gap-2 rounded-lg bg-[#F8EDD8] px-3.5 py-2 text-sm font-semibold text-[var(--ink)]">
                     <span className="text-[var(--marigold)]">
                       {idx === 0 ? '🛡️' : idx === 1 ? '📖' : '🏠'}
                     </span>
-                    {tag}
+                    {tag.title || tag}
                   </div>
                 ))}
               </div>
@@ -280,13 +302,13 @@ export default function Home() {
             </div>
 
             <div className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {BENEFITS.map((b) => (
+              {currentBenefits.map((b) => (
                 <div key={b.title} className="rounded-2xl border border-[var(--line)]/50 bg-[var(--paper)]/60 p-6 transition-colors hover:bg-[var(--paper)]">
                   <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--chalk)]/5 text-xl">
-                    {b.icon}
+                    {b.icon || '✨'}
                   </div>
                   <h3 className="mb-1.5 font-black text-[var(--ink)]">{b.title}</h3>
-                  <p className="text-sm font-medium leading-relaxed text-[var(--ink)]/55">{b.copy}</p>
+                  <p className="text-sm font-medium leading-relaxed text-[var(--ink)]/55">{b.copy || b.description}</p>
                 </div>
               ))}
             </div>
@@ -305,14 +327,14 @@ export default function Home() {
 
             <div className="relative mt-14 flex flex-col gap-10 md:flex-row md:justify-between md:gap-6">
               <div aria-hidden="true" className="absolute left-[16%] right-[16%] top-6 hidden h-px bg-[var(--line)] md:block" />
-              {HOW_STEPS.map((s, i) => (
+              {currentHowSteps.map((s, i) => (
                 <div key={s.title} className="relative z-10 flex items-start gap-4 md:w-1/3 md:flex-col md:items-center md:text-center">
                   <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[var(--chalk)] font-mono text-base font-bold text-[var(--paper)] shadow-sm">
                     0{i + 1}
                   </span>
                   <div>
                     <h3 className="font-black text-[var(--ink)]">{s.title}</h3>
-                    <p className="mt-1 max-w-[220px] text-sm font-medium leading-relaxed text-[var(--ink)]/55">{s.copy}</p>
+                    <p className="mt-1 max-w-[220px] text-sm font-medium leading-relaxed text-[var(--ink)]/55">{s.copy || s.description}</p>
                   </div>
                 </div>
               ))}
@@ -335,11 +357,11 @@ export default function Home() {
             </div>
 
             <div className="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-3">
-              {VALUES.map((v, i) => (
+              {currentValues.map((v, i) => (
                 <div key={v.title} className="border-t-2 border-[var(--marigold)] pt-5">
                   <span className="font-mono text-xs font-bold text-[var(--ink)]/40">0{i + 1}</span>
                   <h3 className="mt-2 font-serif text-lg font-black text-[var(--ink)]">{v.title}</h3>
-                  <p className="mt-2 text-sm font-medium leading-relaxed text-[var(--ink)]/55">{v.copy}</p>
+                  <p className="mt-2 text-sm font-medium leading-relaxed text-[var(--ink)]/55">{v.copy || v.description}</p>
                 </div>
               ))}
             </div>
