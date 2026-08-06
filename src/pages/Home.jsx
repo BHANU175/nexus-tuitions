@@ -5,7 +5,7 @@ import { supabase } from '../supabaseClient';
 import Maintenance from './Maintenance';
 
 /* ---------------------------------------------------------------------- */
-/*  DEFAULT CONTENT FALLBACK (The UI will never break if DB is empty)     */
+/*  DEFAULT CONTENT FALLBACK (The UI will never break if DB is empty)      */
 /* ---------------------------------------------------------------------- */
 const DEFAULT_CONTENT = {
   global: {
