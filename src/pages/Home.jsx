@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import CustomBadge from '../components/CustomBadge';
-import { supabase } from '../supabaseClient';
 import Maintenance from './Maintenance';
 
 /* ---------------------------------------------------------------------- */
-/*  DEFAULT CONTENT FALLBACK (The UI will never break if DB is empty)      */
+/*  DEFAULT CONTENT FALLBACK (The UI will never break if DB is empty)     */
 /* ---------------------------------------------------------------------- */
 const DEFAULT_CONTENT = {
   global: {
@@ -97,7 +96,7 @@ const DEFAULT_CONTENT = {
 };
 
 /* ---------------------------------------------------------------------- */
-/*  Main Component                                                        */
+/*  Main Component (MERN Stack Integrated with REST API Backend)           */
 /* ---------------------------------------------------------------------- */
 
 export default function Home() {
@@ -108,23 +107,24 @@ export default function Home() {
   useEffect(() => {
     async function fetchInitialData() {
       try {
+        // MERN Stack Backend API integration (Express / MongoDB REST endpoints)
         const [settingsRes, contentRes] = await Promise.all([
-          supabase.from('app_settings').select('maintenance_mode').single(),
-          supabase.from('page_content').select('data_json').eq('page_name', 'home').single()
+          fetch('/api/settings').then(res => res.json()).catch(() => null),
+          fetch('/api/content/home').then(res => res.json()).catch(() => null)
         ]);
 
-        if (settingsRes.data && !settingsRes.error) {
-          setIsMaintenance(settingsRes.data.maintenance_mode);
+        if (settingsRes && settingsRes.maintenance_mode !== undefined) {
+          setIsMaintenance(settingsRes.maintenance_mode);
         }
 
-        if (contentRes.data?.data_json) {
+        if (contentRes && contentRes.data_json) {
           setPageData({
             ...DEFAULT_CONTENT,
-            ...contentRes.data.data_json,
+            ...contentRes.data_json,
           });
         }
       } catch (err) {
-        console.error('Failed to fetch initial data:', err);
+        console.error('Failed to fetch initial data from MERN backend:', err);
       } finally {
         setLoading(false);
       }
@@ -165,13 +165,18 @@ export default function Home() {
       className="min-h-screen bg-[var(--paper)] font-sans text-[var(--ink)] selection:bg-[var(--marigold)]/30 scroll-smooth overflow-x-hidden"
     >
       {/* --- PREMIUM NAV --- */}
-      <nav className="fixed top-0 z-50 w-full border-b border-[var(--line)]/40 bg-[var(--paper)]/80 backdrop-blur-xl transition-all duration-300">
+      <nav className="fixed top-0 z-50 w-full border-b border-[var(--line)]/40 bg-[var(--paper)]/85 backdrop-blur-xl transition-all duration-300">
         <div className="mx-auto flex max-w-[1300px] items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-4">
-            <Link to="/" onClick={handleNavigation} className="flex select-none items-center py-1 transition-transform hover:scale-105 active:scale-95 duration-200">
-              <img src={global.logoUrl} alt="Nexus Tuitions" className="h-9 w-auto sm:h-10 drop-shadow-sm" />
+            <Link to="/" onClick={handleNavigation} className="flex select-none items-center py-1 group focus:outline-none">
+              <img src={global.logoUrl} alt="Nexus Tuitions" className="h-9 w-auto sm:h-10 object-contain bg-transparent border-0 outline-none shadow-none drop-shadow-none" />
             </Link>
-            <div className="hidden sm:block"><CustomBadge /></div>
+            <div className="hidden sm:block">
+              <span className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-semibold tracking-wide bg-[var(--chalk)]/5 text-[var(--chalk)] border border-[var(--chalk)]/10 select-none shadow-none">
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--good)]"></span>
+                Verified Platform
+              </span>
+            </div>
           </div>
           
           <div className="hidden items-center gap-8 text-[14px] font-bold tracking-wide text-[var(--ink)] lg:flex">
@@ -248,7 +253,6 @@ export default function Home() {
                 <img src={hero.imageUrl} alt="Hero illustration" className="w-full scale-105 rounded-2xl object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.15)] transition-transform duration-700 group-hover:scale-110" />
               </div>
 
-              {/* Dynamic Floating Stats - Enhanced Glassmorphism */}
               {hero.floatingStats.map((stat, idx) => {
                 const positions = {
                   "top-left": "absolute -left-2 top-0 sm:-left-12 sm:top-10 origin-top-left animate-[float_6s_ease-in-out_infinite]",
@@ -325,7 +329,6 @@ export default function Home() {
             </div>
 
             <div className="relative mt-20 flex flex-col gap-12 md:flex-row md:justify-between md:gap-8">
-              {/* Connector Line */}
               <div aria-hidden="true" className="absolute left-[5%] right-[5%] top-8 hidden h-[2px] bg-gradient-to-r from-[var(--chalk)]/10 via-[var(--chalk)]/40 to-[var(--chalk)]/10 md:block" />
               
               {howItWorks.steps.map((s, i) => (
@@ -345,7 +348,6 @@ export default function Home() {
 
         {/* --- WHAT WE BELIEVE --- */}
         <section className="relative overflow-hidden bg-[var(--ink)] py-20 text-white sm:py-28">
-          {/* Background texture pattern */}
           <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '32px 32px' }}></div>
           
           <div className="relative z-10 mx-auto max-w-[1100px] px-4 sm:px-6 lg:px-8">
@@ -370,7 +372,6 @@ export default function Home() {
         {/* --- DUAL CTA --- */}
         <section className="relative py-20 sm:py-28 bg-gradient-to-b from-[var(--paper)] to-white">
           <div className="mx-auto grid max-w-[1300px] grid-cols-1 gap-6 px-4 sm:px-6 md:grid-cols-2 lg:px-8">
-            {/* Family CTA */}
             <div className="group relative overflow-hidden rounded-3xl border border-[var(--line)]/60 bg-white p-10 sm:p-14 shadow-sm hover:shadow-xl transition-all duration-300">
               <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-[var(--marigold)]/10 blur-3xl transition-transform duration-500 group-hover:scale-150"></div>
               <div className="relative z-10">
@@ -383,7 +384,6 @@ export default function Home() {
               </div>
             </div>
             
-            {/* Educator CTA */}
             <div className="group relative overflow-hidden rounded-3xl bg-[var(--chalk)] p-10 sm:p-14 shadow-xl transition-all duration-300 hover:-translate-y-1">
               <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
               <div className="absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-[var(--good)] blur-3xl transition-transform duration-500 group-hover:scale-150"></div>
@@ -410,7 +410,6 @@ export default function Home() {
         </div>
       </footer>
       
-      {/* Required for simple custom animations defined inline */}
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes float {
           0%, 100% { transform: translateY(0); }
