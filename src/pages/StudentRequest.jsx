@@ -13,14 +13,18 @@ const CLASS_LEVELS = [
   'Pre-Nursery', 'Nursery', 'LKG', 'UKG',
   'Class 1', 'Class 2', 'Class 3', 'Class 4',
   'Class 5', 'Class 6', 'Class 7', 'Class 8',
+  'Class 9', 'Class 10', 'Class 11', 'Class 12',
 ];
 
-const SUBJECT_SUGGESTIONS = ['Hindi', 'English', 'Mathematics', 'Science', 'Social Studies', 'Sanskrit'];
+const SUBJECT_SUGGESTIONS = [
+  'Mathematics', 'Physics', 'Chemistry', 'Biology', 
+  'English', 'Accountancy', 'Economics', 'Science', 'Social Studies'
+];
 const MAX_SUBJECTS = 8;
 
 const MODES = [
-  { id: 'online', label: 'Online', icon: '💻', desc: 'Live 1-on-1 virtual classrooms' },
-  { id: 'offline', label: "At the tutor's place", icon: '🏫', desc: 'Structured learning studio' },
+  { id: 'online', label: 'Online', icon: '💻', desc: 'Live virtual 1-on-1 sessions' },
+  { id: 'offline', label: "At tutor's studio", icon: '🏫', desc: 'Structured local learning center' },
   { id: 'personal', label: 'At my home', icon: '🏠', desc: 'Convenient doorstep tutoring' },
 ];
 
@@ -40,15 +44,15 @@ const HOW_STEPS = [
 ];
 
 const BANNER_SLIDES = [
-  { note: 'Find the perfect tutor tailored to your specific learning style.' },
-  { note: 'Every educator is verified for safety, quality, and expertise.' },
+  { note: 'Find expert tutors for Classes 1 to 12 tailored to your board curriculum.' },
+  { note: 'Every educator is verified for safety, quality, and subject expertise.' },
   { note: 'Get matched today with zero hidden placement fees.' },
 ];
 
 const PLATFORM_STATS = [
-  { label: 'Active Tutors in Jaipur', value: '450+' },
-  { label: 'Average Match Time', value: '< 18 hrs' },
-  { label: 'Parent Satisfaction', value: '4.9 / 5' },
+  { label: 'Verified Tutors in Jaipur', value: '450+' },
+  { label: 'Average Match Window', value: '< 18 hrs' },
+  { label: 'Parent Satisfaction Score', value: '4.9 / 5' },
 ];
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -443,15 +447,14 @@ export default function StudentRequest() {
           <div className="grid grid-cols-1 items-center gap-16 lg:grid-cols-2 lg:gap-12">
             <div className="max-w-xl text-center lg:text-left">
               <div className="mb-6">
-                <CustomBadge text="For students & parents in Jaipur" variant="orange" />
+                <CustomBadge text="For students & parents in Jaipur (Classes 1-12)" variant="orange" />
               </div>
               <h1 className="font-serif text-4xl font-black leading-[1.1] tracking-tight text-[var(--ink)] sm:text-5xl md:text-6xl">
                 Find the right tutor,<br className="hidden sm:block lg:hidden xl:block" />
                 matched to <span className="text-[var(--marigold)]">your</span> child.
               </h1>
               <p className="mx-auto mt-6 text-base font-medium leading-relaxed text-[var(--ink)]/60 lg:mx-0 lg:text-lg">
-                Tell us what you're looking for. A learning advisor reviews every request personally
-                and introduces you to verified tutors who fit — usually within 24 hours.
+                From early fundamentals to senior secondary board exam prep, our learning advisors personally match your child with vetted educators in Jaipur.
               </p>
               <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row lg:justify-start">
                 <a
@@ -606,7 +609,7 @@ export default function StudentRequest() {
                             value={formData.student_name} onChange={handleChange} className={inputClass(errors.student_name)}
                           />
                         </Field>
-                        <Field label="Class" error={errors.class_level} hint="Pre-Nursery to Class 8">
+                        <Field label="Class" error={errors.class_level} hint="Pre-Nursery to Class 12 (All Streams)">
                           <select
                             name="class_level" value={formData.class_level} onChange={handleChange}
                             className={selectClass(errors.class_level)}
@@ -676,7 +679,7 @@ export default function StudentRequest() {
                           )}
                           <div className="flex gap-3">
                             <input
-                              name="subject_input" type="text" placeholder="e.g. Mathematics"
+                              name="subject_input" type="text" placeholder="e.g. Physics, Accountancy"
                               value={subjectInput}
                               onChange={(e) => setSubjectInput(e.target.value)}
                               onKeyDown={handleSubjectKeyDown}
