@@ -5,21 +5,22 @@ import TeacherApply from './pages/TeacherApply';
 
 function Navbar() {
   return (
-    <nav className="flex items-center justify-between px-6 py-3 bg-[#1e1f20] border-b border-gray-800 text-white">
+    /* Changed bg-[#1e1f20] to bg-[#FAF7F2] (or bg-transparent) and updated text/border colors */
+    <nav className="flex items-center justify-between px-6 py-3 bg-[#FAF7F2] border-b border-gray-200/60 text-gray-900">
       {/* Left side: Logo + Title */}
-      <Link to="/" className="flex items-center gap-2.5 text-white no-underline hover:opacity-90 transition-opacity">
+      <Link to="/" className="flex items-center gap-2.5 text-gray-900 no-underline hover:opacity-80 transition-opacity">
         <img 
           src="/n-badge.png" 
           alt="Logo" 
           className="w-6 h-6 object-contain" 
         />
-        <span className="font-semibold text-lg tracking-wide">NEXUS TUITIONS </span>
+        <span className="font-semibold text-lg tracking-wide uppercase">NEXUS TUITIONS</span>
       </Link>
 
-      {/* Right side: Optional Navigation Links */}
+      {/* Right side: Navigation Links */}
       <div className="flex gap-4 text-sm font-medium">
-        <Link to="/request-tutor" className="text-gray-300 hover:text-white transition-colors">Request Tutor</Link>
-        <Link to="/apply-teacher" className="text-gray-300 hover:text-white transition-colors">Apply Teacher</Link>
+        <Link to="/request-tutor" className="text-gray-700 hover:text-black transition-colors">Request Tutor</Link>
+        <Link to="/apply-teacher" className="text-gray-700 hover:text-black transition-colors">Apply Teacher</Link>
       </div>
     </nav>
   );
