@@ -13,7 +13,7 @@ function Navbar() {
           alt="Logo" 
           className="w-6 h-6 object-contain" 
         />
-        <span className="font-semibold text-lg tracking-wide">learning-hub-frontend</span>
+        <span className="font-semibold text-lg tracking-wide">NEXUS TUITIONS </span>
       </Link>
 
       {/* Right side: Optional Navigation Links */}
