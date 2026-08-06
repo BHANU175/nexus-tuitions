@@ -6,12 +6,12 @@ import { supabase } from '../supabaseClient';
 import Maintenance from './Maintenance';
 
 /* ---------------------------------------------------------------------- */
-/*  Static data                                                           */
+/*  Default Static data (Fallbacks for Site Content Changer)             */
 /* ---------------------------------------------------------------------- */
 
-const CITIES = ['Jaipur'];
+const DEFAULT_CITIES = ['Jaipur'];
 
-const TEACHING_MODES = [
+const DEFAULT_TEACHING_MODES = [
   { id: 'online', label: 'Remote / Online', icon: '💻' },
   { id: 'offline', label: "Tutor's location", icon: '🏫' },
   { id: 'personal', label: "Student's location", icon: '🏠' },
@@ -19,9 +19,9 @@ const TEACHING_MODES = [
 
 const STEPS = ['About you', 'Where you teach', 'Verify identity'];
 
-const TRUST_CHIPS = ['Verified tutor profiles', 'No listing fees', 'You set your own rates'];
+const DEFAULT_TRUST_CHIPS = ['Verified tutor profiles', 'No listing fees', 'You set your own rates'];
 
-const BANNER_SLIDES = [
+const DEFAULT_BANNER_SLIDES = [
   { note: 'Set your own rates and teach on your schedule.' },
   { note: 'Every lead is verified before it reaches you.' },
   { note: 'Get paid for the sessions you actually run.' },
@@ -29,7 +29,7 @@ const BANNER_SLIDES = [
 
 const ICON_TINTS = ['bg-[var(--marigold)]/10', 'bg-[var(--rust)]/10', 'bg-[var(--good)]/10', 'bg-[var(--chalk)]/8'];
 
-const BENEFITS = [
+const DEFAULT_BENEFITS = [
   { icon: '🎯', title: 'Pre-verified leads', copy: 'Every student request is checked by our team before it reaches your dashboard, so you spend time teaching, not screening.' },
   { icon: '💸', title: 'Keep what you earn', copy: 'What you agree with a student is exactly what you take home. No hidden commission on your sessions.' },
   { icon: '⚖️', title: 'Full autonomy', copy: 'Choose your own subjects, schedule, teaching modes, and how far you are willing to travel.' },
@@ -38,7 +38,7 @@ const BENEFITS = [
   { icon: '🤝', title: 'Real onboarding support', copy: 'Our team helps you set up a strong profile and answers questions as you get your first few students.' },
 ];
 
-const JOIN_STEPS = [
+const DEFAULT_JOIN_STEPS = [
   { title: 'Apply', copy: 'Share your subjects, availability, and where you teach.' },
   { title: 'Verify', copy: 'Our team checks your credentials and identity.' },
   { title: 'Match', copy: 'Get introduced to students who fit your style.' },
@@ -48,7 +48,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_RE = /^(\+91[\s-]?)?[6-9]\d{9}$/;
 const MAX_FILE_BYTES = 8 * 1024 * 1024;
 
-const SUBJECT_SUGGESTIONS = ['Mathematics', 'Physics', 'Chemistry', 'Biology', 'English', 'Hindi', 'Computer Science', 'Economics'];
+const DEFAULT_SUBJECT_SUGGESTIONS = ['Mathematics', 'Physics', 'Chemistry', 'Biology', 'English', 'Hindi', 'Computer Science', 'Economics'];
 const MAX_SUBJECTS = 8;
 
 const LOGO_URL = "/logo.png";
@@ -274,16 +274,16 @@ function MentorBadgeIllustration() {
   );
 }
 
-function HeroBanner() {
+function HeroBanner({ slides }) {
   const [active, setActive] = useState(0);
   const pausedRef = useRef(false);
 
   useEffect(() => {
     const id = setInterval(() => {
-      if (!pausedRef.current) setActive((a) => (a + 1) % BANNER_SLIDES.length);
+      if (!pausedRef.current) setActive((a) => (a + 1) % slides.length);
     }, 4500);
     return () => clearInterval(id);
-  }, []);
+  }, [slides.length]);
 
   return (
     <div
@@ -299,10 +299,10 @@ function HeroBanner() {
       <div className="relative grid grid-cols-1 items-center gap-8 px-6 py-10 sm:px-10 sm:py-12 md:grid-cols-[1fr_auto_auto] md:gap-10 md:px-14 md:py-14">
         <div className="mx-auto w-full max-w-[240px] -rotate-2 rounded-2xl bg-[var(--card)] p-5 shadow-xl md:mx-0">
           <p key={active} className="animate-in fade-in font-serif text-base font-bold leading-snug text-[var(--ink)] duration-500">
-            {BANNER_SLIDES[active].note}
+            {slides[active]?.note}
           </p>
           <div className="mt-4 flex gap-1.5">
-            {BANNER_SLIDES.map((_, i) => (
+            {slides.map((_, i) => (
               <button
                 key={i}
                 onClick={() => setActive(i)}
@@ -392,53 +392,104 @@ export default function TeacherApply() {
   const [docUploadEnabled, setDocUploadEnabled] = useState(true);
   const [loading, setLoading] = useState(true);
 
-  // Fetch and sync app settings from Supabase
+  // Fully dynamic content state powered by Site Content / App Settings
+  const [content, setContent] = useState({
+    heroBadge: 'Educator Network in Jaipur',
+    heroTitle: 'Teach on your terms.\nGrow your income.',
+    heroSubtitle: 'Learning Hub connects you with students who fit your subjects, your schedule, and your teaching style — we handle the marketing, lead verification, and logistics.',
+    trustChips: DEFAULT_TRUST_CHIPS,
+    bannerSlides: DEFAULT_BANNER_SLIDES,
+    benefits: DEFAULT_BENEFITS,
+    joinSteps: DEFAULT_JOIN_STEPS,
+    cities: DEFAULT_CITIES,
+    teachingModes: DEFAULT_TEACHING_MODES,
+    subjectSuggestions: DEFAULT_SUBJECT_SUGGESTIONS,
+  });
+
+  // Fetch and sync app settings & dynamic site content from Supabase
   useEffect(() => {
-    async function checkAppSettings() {
+    async function fetchSiteData() {
       try {
-        const { data, error } = await supabase
+        // Fetch App Settings (maintenance, doc upload)
+        const { data: settingsData, error: settingsError } = await supabase
           .from('app_settings')
           .select('*')
           .eq('id', 1)
           .maybeSingle();
 
-        if (error) {
-          console.error("❌ Supabase Error:", error.message);
+        if (settingsError) {
+          console.error("❌ Supabase Settings Error:", settingsError.message);
         }
 
-        if (data) {
-          setIsMaintenance(Boolean(data.maintenance_mode));
+        if (settingsData) {
+          setIsMaintenance(Boolean(settingsData.maintenance_mode));
           
           const isUploadEnabled = 
-            data.enable_doc_upload === true || 
-            String(data.enable_doc_upload).toLowerCase() === 'true' || 
-            data.enable_doc_upload === 1;
+            settingsData.enable_doc_upload === true || 
+            String(settingsData.enable_doc_upload).toLowerCase() === 'true' || 
+            settingsData.enable_doc_upload === 1;
             
           setDocUploadEnabled(isUploadEnabled);
         }
+
+        // Fetch Dynamic Site Content from 'site_content' table
+        const { data: contentData, error: contentError } = await supabase
+          .from('site_content')
+          .select('*');
+
+        if (!contentError && contentData && contentData.length > 0) {
+          const dynamicOverrides = {};
+          contentData.forEach((item) => {
+            if (item.key && item.value !== undefined) {
+              try {
+                dynamicOverrides[item.key] = 
+                  typeof item.value === 'string' && (item.value.startsWith('[') || item.value.startsWith('{'))
+                    ? JSON.parse(item.value)
+                    : item.value;
+              } catch {
+                dynamicOverrides[item.key] = item.value;
+              }
+            }
+          });
+
+          setContent((prev) => ({
+            ...prev,
+            heroBadge: dynamicOverrides.teacher_hero_badge || dynamicOverrides.heroBadge,
+            heroTitle: dynamicOverrides.teacher_hero_title || dynamicOverrides.heroTitle,
+            heroSubtitle: dynamicOverrides.teacher_hero_subtitle || dynamicOverrides.heroSubtitle,
+            trustChips: dynamicOverrides.teacher_trust_chips || prev.trustChips,
+            bannerSlides: dynamicOverrides.teacher_banner_slides || prev.bannerSlides,
+            benefits: dynamicOverrides.teacher_benefits || prev.benefits,
+            joinSteps: dynamicOverrides.teacher_join_steps || prev.joinSteps,
+            cities: dynamicOverrides.teacher_cities || prev.cities,
+            teachingModes: dynamicOverrides.teacher_teaching_modes || prev.teachingModes,
+            subjectSuggestions: dynamicOverrides.teacher_subject_suggestions || prev.subjectSuggestions,
+          }));
+        }
       } catch (err) {
-        console.error('🔥 Failed to fetch app settings:', err);
+        console.error('🔥 Failed to fetch site content and settings:', err);
       } finally {
         setLoading(false);
       }
     }
 
-    checkAppSettings();
+    fetchSiteData();
 
-    // Realtime listener
+    // Realtime listeners for both app settings and site content updates
     const channel = supabase
-      .channel('teacher-apply-settings')
+      .channel('teacher-apply-dynamic-sync')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'app_settings' }, (payload) => {
         if (payload.new) {
           setIsMaintenance(Boolean(payload.new.maintenance_mode));
-          
           const isUploadEnabled = 
             payload.new.enable_doc_upload === true || 
             String(payload.new.enable_doc_upload).toLowerCase() === 'true' || 
             payload.new.enable_doc_upload === 1;
-            
           setDocUploadEnabled(isUploadEnabled);
         }
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'site_content' }, () => {
+        fetchSiteData();
       })
       .subscribe();
 
@@ -451,7 +502,7 @@ export default function TeacherApply() {
     fullName: '',
     email: '',
     contactNumber: '',
-    city: 'Jaipur',
+    city: content.cities[0] || 'Jaipur',
     specificArea: '',
     locationCoords: '',
   });
@@ -667,7 +718,7 @@ export default function TeacherApply() {
 
       setLastApplicant({ name: textData.fullName, email: textData.email });
       setStatusMessage({ text: '', type: '' });
-      setTextData({ fullName: '', email: '', contactNumber: '', city: 'Jaipur', specificArea: '', locationCoords: '' });
+      setTextData({ fullName: '', email: '', contactNumber: '', city: content.cities[0] || 'Jaipur', specificArea: '', locationCoords: '' });
       setSubjects([]);
       setSubjectInput('');
       setTeachingModes([]);
@@ -762,7 +813,7 @@ export default function TeacherApply() {
 
       {/* --- ROTATING BANNER --- */}
       <div className="mx-auto max-w-[1200px] px-4 pt-8 sm:px-6 sm:pt-10 md:px-10">
-        <HeroBanner />
+        <HeroBanner slides={content.bannerSlides} />
       </div>
 
       {/* --- HERO --- */}
@@ -775,18 +826,15 @@ export default function TeacherApply() {
           }}
         />
         <div className="relative mx-auto max-w-[860px] px-4 py-14 text-center sm:px-6 sm:py-16 md:py-20">
-          {/* UPDATED: Integrated CustomBadge Component */}
           <div className="mb-6 flex justify-center">
-            <CustomBadge text="Educator Network in Jaipur" variant="orange" />
+            <CustomBadge text={content.heroBadge} variant="orange" />
           </div>
 
-          <h1 className="font-serif text-4xl font-black leading-[1.08] tracking-tight text-[var(--ink)] sm:text-5xl md:text-6xl">
-            Teach on your terms.<br />
-            <span className="italic text-[var(--rust)]">Grow</span> your income.
+          <h1 className="font-serif text-4xl font-black leading-[1.08] tracking-tight text-[var(--ink)] sm:text-5xl md:text-6xl whitespace-pre-line">
+            {content.heroTitle}
           </h1>
           <p className="mx-auto mt-5 max-w-xl text-base font-medium leading-relaxed text-[var(--ink)]/60 sm:text-lg">
-            Learning Hub connects you with students who fit your subjects, your schedule, and your
-            teaching style — we handle the marketing, lead verification, and logistics.
+            {content.heroSubtitle}
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <a
@@ -803,7 +851,7 @@ export default function TeacherApply() {
             </a>
           </div>
           <div className="mt-9 flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
-            {TRUST_CHIPS.map((chip) => (
+            {content.trustChips.map((chip) => (
               <span key={chip} className="flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--ink)]/45">
                 <span className="text-[var(--good)]">✓</span>{chip}
               </span>
@@ -827,7 +875,7 @@ export default function TeacherApply() {
           </div>
 
           <div className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {BENEFITS.map((b, i) => (
+            {content.benefits.map((b, i) => (
               <div key={b.title} className="rounded-2xl border border-[var(--line)]/50 bg-[var(--paper)]/60 p-6 transition-colors hover:bg-[var(--paper)]">
                 <div className={`mb-4 flex h-11 w-11 items-center justify-center rounded-xl text-xl ${ICON_TINTS[i % ICON_TINTS.length]}`}>
                   {b.icon}
@@ -852,7 +900,7 @@ export default function TeacherApply() {
 
           <div className="relative mt-14 flex flex-col gap-10 md:flex-row md:justify-between md:gap-6">
             <div aria-hidden="true" className="absolute left-[16%] right-[16%] top-6 hidden h-px bg-[var(--line)] md:block" />
-            {JOIN_STEPS.map((s, i) => (
+            {content.joinSteps.map((s, i) => (
               <div key={s.title} className="relative z-10 flex items-start gap-4 md:w-1/3 md:flex-col md:items-center md:text-center">
                 <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[var(--chalk)] font-mono text-base font-bold text-[var(--paper)] shadow-sm">
                   0{i + 1}
@@ -1009,7 +1057,7 @@ export default function TeacherApply() {
                           {subjects.length < MAX_SUBJECTS && (
                             <div className="flex flex-wrap items-center gap-2 pt-1">
                               <span className="mr-1 font-mono text-[10px] font-bold uppercase tracking-wider text-[var(--ink)]/35">Quick add:</span>
-                              {SUBJECT_SUGGESTIONS.filter((s) => !subjects.some((f) => f.toLowerCase() === s.toLowerCase())).map((s) => (
+                              {content.subjectSuggestions.filter((s) => !subjects.some((f) => f.toLowerCase() === s.toLowerCase())).map((s) => (
                                 <button
                                   key={s} type="button" onClick={() => addSubject(s)}
                                   className="rounded-full border border-[var(--line)] bg-white px-3 py-1 text-[11px] font-semibold text-[var(--ink)]/60 transition-colors hover:border-[var(--marigold)] hover:text-[var(--ink)]"
@@ -1034,7 +1082,7 @@ export default function TeacherApply() {
                               id="city" name="city" value={textData.city} onChange={handleTextChange}
                               className={`${inputClass(false)} cursor-pointer`}
                             >
-                              {CITIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                              {content.cities.map((c) => <option key={c} value={c}>{c}</option>)}
                             </select>
                           </Field>
                           <Field
@@ -1068,7 +1116,7 @@ export default function TeacherApply() {
                             Teaching mode
                           </label>
                           <div className="flex flex-wrap gap-2.5">
-                            {TEACHING_MODES.map((mode) => (
+                            {content.teachingModes.map((mode) => (
                               <label
                                 key={mode.id}
                                 className={`flex cursor-pointer items-center gap-2 rounded-xl border-2 px-4 py-2.5 text-xs font-bold transition-all active:scale-[0.97] ${

@@ -187,7 +187,7 @@ function HeroBanner() {
 /* ---------------------------------------------------------------------- */
 
 const INITIAL_FORM = {
-  student_name: '',
+  student_name: 'AA',
   class_level: '',
   parent_name: '',
   email: '',
