@@ -29,24 +29,24 @@ const MODES = [
 ];
 
 const TRUST_BENEFITS = [
-  { icon: '🛡️', title: 'Verified educators', copy: 'Every tutor is identity-checked and background-verified before they can teach on the platform.' },
-  { icon: '🔒', title: 'Private by default', copy: 'Your contact details go only to the tutors you are matched with — never sold, never spammed.' },
-  { icon: '⏱️', title: '24-hour response', copy: 'A learning advisor personally reviews every request and follows up within one business day.' },
-  { icon: '🎯', title: 'Matched, not listed', copy: 'We hand-pick tutors based on subject, level, and learning style, instead of leaving you to scroll profiles.' },
-  { icon: '📋', title: 'No obligation', copy: 'Requesting a match costs nothing and commits you to nothing until you choose to begin.' },
-  { icon: '📞', title: 'A real person to ask', copy: 'Questions before, during, or after matching go to an advisor — not a support ticket queue.' },
+  { icon: '🛡️', title: 'Verified educators', copy: 'Every tutor undergoes strict identity checks and background verification before onboarding.' },
+  { icon: '🔒', title: 'Private & secure', copy: 'Your contact details are shared exclusively with your assigned academic advisor.' },
+  { icon: '⏱️', title: 'Rapid 18hr turnaround', copy: 'An expert learning advisor reviews your criteria and matches profiles swiftly.' },
+  { icon: '🎯', title: 'Curated matching', copy: 'Hand-picked educators matched to your child’s learning pace and board curriculum.' },
+  { icon: '📋', title: 'Zero obligation', copy: 'Consultation and advisor matching are completely free with no hidden fees.' },
+  { icon: '📞', title: 'Dedicated support', copy: 'Direct access to human advisors throughout your tutoring journey.' },
 ];
 
 const HOW_STEPS = [
-  { title: 'Tell us what you need', copy: "Share your child's class, subjects, and preferred schedule." },
-  { title: 'Get matched', copy: 'An advisor reviews your request and introduces vetted tutors who fit.' },
-  { title: 'Start learning', copy: 'Choose your tutor and book the first session, online or in person.' },
+  { title: 'Define your needs', copy: "Share your child's class, target subjects, and preferred mode." },
+  { title: 'Advisor curation', copy: 'Our Jaipur education team hand-selects vetted local specialists.' },
+  { title: 'Begin sessions', copy: 'Meet your tutor, evaluate synergy, and start structured learning.' },
 ];
 
 const BANNER_SLIDES = [
-  { note: 'Find expert tutors for Classes 1 to 12 tailored to your board curriculum.' },
-  { note: 'Every educator is verified for safety, quality, and subject expertise.' },
-  { note: 'Get matched today with zero hidden placement fees.' },
+  { note: 'Expert private tutors for Classes 1 to 12 across all major school boards in Jaipur.' },
+  { note: 'Rigorous background verification for absolute safety and academic excellence.' },
+  { note: 'Zero placement fees. Get matched with top educators within 18 hours.' },
 ];
 
 const PLATFORM_STATS = [
@@ -70,7 +70,7 @@ const LOGO_URL = "/logo.png";
 function Field({ label, error, hint, children }) {
   return (
     <div className="space-y-2">
-      <label className="block font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--ink)]/70 pl-1">
+      <label className="block font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--ink)]/80 pl-1">
         {label}
       </label>
       {children}
@@ -84,17 +84,20 @@ function Field({ label, error, hint, children }) {
 }
 
 const inputClass = (hasError) =>
-  `w-full rounded-xl border-2 bg-gray-50/50 px-5 py-4 text-sm font-semibold text-[var(--ink)] placeholder-[var(--ink)]/30 transition-all focus:bg-white focus:outline-none focus:ring-4 focus:ring-[var(--marigold)]/20 ${
-    hasError ? 'border-[var(--rust)]/50 focus:border-[var(--rust)]' : 'border-[var(--line)] focus:border-[var(--marigold)]'
+  `w-full rounded-2xl border-2 bg-white px-5 py-4 text-sm font-semibold text-[var(--ink)] placeholder-[var(--ink)]/30 shadow-xs transition-all focus:bg-white focus:outline-none focus:ring-4 focus:ring-[var(--marigold)]/15 ${
+    hasError ? 'border-[var(--rust)] focus:border-[var(--rust)]' : 'border-[var(--line)] focus:border-[var(--marigold)]'
   }`;
 
 const selectClass = (hasError) =>
   `${inputClass(hasError)} cursor-pointer appearance-none bg-[url('${SELECT_ARROW_URL}')] bg-[length:12px_12px] bg-[right_1.25rem_center] bg-no-repeat`;
 
-function SectionLabel({ children }) {
+function SectionLabel({ children, stepNumber }) {
   return (
     <div className="mb-6 flex items-center gap-3">
-      <h3 className="font-serif text-2xl font-black text-[var(--ink)]">{children}</h3>
+      <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--marigold)]/10 font-mono text-xs font-bold text-[var(--marigold)]">
+        {stepNumber}
+      </span>
+      <h3 className="font-serif text-xl font-black text-[var(--ink)]">{children}</h3>
       <div className="h-px flex-1 bg-[var(--line)]/60" />
     </div>
   );
@@ -157,19 +160,19 @@ function HeroBanner() {
     <div
       onMouseEnter={() => { pausedRef.current = true; }}
       onMouseLeave={() => { pausedRef.current = false; }}
-      className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-[var(--marigold)] to-[var(--rust)] sm:rounded-[2.5rem] shadow-xl"
+      className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-[var(--marigold)] to-[var(--rust)] shadow-2xl p-2"
     >
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 opacity-[0.12]"
         style={{ backgroundImage: 'radial-gradient(circle, var(--ink) 1.5px, transparent 1.5px)', backgroundSize: '24px 24px' }}
       />
-      <div className="relative grid grid-cols-1 items-center gap-8 px-6 py-10 sm:px-10 sm:py-12 md:grid-cols-[1fr_auto_auto] md:gap-10 md:px-14 md:py-14">
-        <div className="mx-auto w-full max-w-[240px] -rotate-2 rounded-2xl bg-[var(--card)] p-5 shadow-lg md:mx-0">
+      <div className="relative grid grid-cols-1 items-center gap-6 px-6 py-10 sm:px-10 sm:py-12 md:grid-cols-[1fr_auto_auto] md:gap-8 md:px-12 md:py-12">
+        <div className="mx-auto w-full max-w-[260px] -rotate-1 rounded-2xl bg-[var(--card)] p-6 shadow-xl md:mx-0">
           <p key={active} className="animate-in fade-in font-serif text-base font-bold leading-snug text-[var(--ink)] duration-500">
             {BANNER_SLIDES[active].note}
           </p>
-          <div className="mt-4 flex gap-1.5">
+          <div className="mt-5 flex gap-1.5">
             {BANNER_SLIDES.map((_, i) => (
               <button
                 key={i}
@@ -321,16 +324,16 @@ export default function StudentRequest() {
     const e = {};
     if (step === 1) {
       if (!formData.student_name.trim()) e.student_name = "Enter the student's full name.";
-      if (!formData.class_level) e.class_level = 'Select a class.';
+      if (!formData.class_level) e.class_level = 'Select a class level.';
     }
     if (step === 2) {
       if (!formData.parent_name.trim()) e.parent_name = "Enter the parent's full name.";
       if (!EMAIL_RE.test(formData.email)) e.email = 'Enter a valid email address.';
-      if (!PHONE_RE.test(formData.contact_number.replace(/\s/g, ''))) e.contact_number = 'Enter a valid phone number.';
+      if (!PHONE_RE.test(formData.contact_number.replace(/\s/g, ''))) e.contact_number = 'Enter a valid 10-digit phone number.';
     }
     if (step === 3) {
-      if (formData.subjects.length === 0) e.subjects = 'Add at least one subject.';
-      if (!formData.specific_area.trim()) e.specific_area = 'Enter your area or locality.';
+      if (formData.subjects.length === 0) e.subjects = 'Add at least one subject requirement.';
+      if (!formData.specific_area.trim()) e.specific_area = 'Enter your specific locality in Jaipur.';
     }
     return e;
   }, [formData]);
@@ -359,7 +362,7 @@ export default function StudentRequest() {
     }
 
     setIsSubmitting(true);
-    setStatusMessage({ text: 'Submitting your request…', type: 'loading' });
+    setStatusMessage({ text: 'Submitting your request securely…', type: 'loading' });
 
     try {
       await axios.post('https://learning-hub-backend-one.vercel.app/api/public/student-request', {
@@ -371,7 +374,7 @@ export default function StudentRequest() {
       setStatusMessage({ text: '', type: '' });
     } catch (error) {
       console.error(error);
-      setStatusMessage({ text: 'Could not connect. Please check your network and try again.', type: 'error' });
+      setStatusMessage({ text: 'Connection error. Please verify your network and retry.', type: 'error' });
     } finally {
       setIsSubmitting(false);
     }
@@ -397,7 +400,7 @@ export default function StudentRequest() {
       >
         <div className="flex flex-col items-center gap-3">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-[var(--marigold)] border-t-transparent" />
-          <p className="text-sm font-semibold tracking-wide text-[var(--ink)]/60">Loading experience...</p>
+          <p className="text-sm font-semibold tracking-wide text-[var(--ink)]/60">Loading academic portal...</p>
         </div>
       </div>
     );
@@ -422,7 +425,7 @@ export default function StudentRequest() {
       className="relative flex min-h-screen scroll-smooth flex-col bg-[var(--paper)] font-sans text-[var(--ink)] selection:bg-[var(--marigold)]/30"
     >
       {/* --- NAV --- */}
-      <nav className="sticky top-0 z-50 border-b border-[var(--line)] bg-[var(--paper)]/90 backdrop-blur-md">
+      <nav className="sticky top-0 z-50 border-b border-[var(--line)] bg-[var(--paper)]/95 backdrop-blur-md">
         <div className="mx-auto flex max-w-[1200px] items-center justify-between px-4 py-4 sm:px-6 md:px-10">
           <Link to="/" className="flex items-center select-none">
             <img
@@ -435,37 +438,37 @@ export default function StudentRequest() {
           </Link>
           <div className="hidden items-center gap-8 font-sans text-sm font-semibold text-[var(--ink)] md:flex">
             <Link to="/" className="transition-colors hover:opacity-70">Why Us</Link>
-            <Link to="/request-tutor" className="transition-colors hover:opacity-70 text-[var(--marigold)]">Find a Tutor</Link>
+            <Link to="/request-tutor" className="transition-colors hover:opacity-70 text-[var(--marigold)] font-bold">Find a Tutor</Link>
             <Link to="/apply-teacher" className="transition-colors hover:opacity-70">Become a Tutor</Link>
           </div>
         </div>
       </nav>
 
       {/* --- HERO SECTION --- */}
-      <header className="relative pt-12 pb-16 sm:pt-20 sm:pb-24 lg:pt-24 lg:pb-28">
+      <header className="relative pt-12 pb-16 sm:pt-20 sm:pb-24 lg:pt-24 lg:pb-28 overflow-hidden">
         <div className="relative mx-auto max-w-[1200px] px-4 sm:px-6 md:px-10">
           <div className="grid grid-cols-1 items-center gap-16 lg:grid-cols-2 lg:gap-12">
             <div className="max-w-xl text-center lg:text-left">
-              <div className="mb-6">
-                <CustomBadge text="For students & parents in Jaipur (Classes 1-12)" variant="orange" />
+              <div className="mb-6 inline-block">
+                <CustomBadge text="Jaipur's Premier Academic Concierge (Classes 1-12)" variant="orange" />
               </div>
               <h1 className="font-serif text-4xl font-black leading-[1.1] tracking-tight text-[var(--ink)] sm:text-5xl md:text-6xl">
-                Find the right tutor,<br className="hidden sm:block lg:hidden xl:block" />
-                matched to <span className="text-[var(--marigold)]">your</span> child.
+                Find the ultimate tutor,<br className="hidden sm:block lg:hidden xl:block" />
+                expertly matched for <span className="text-[var(--marigold)]">your child</span>.
               </h1>
-              <p className="mx-auto mt-6 text-base font-medium leading-relaxed text-[var(--ink)]/60 lg:mx-0 lg:text-lg">
-                From early fundamentals to senior secondary board exam prep, our learning advisors personally match your child with vetted educators in Jaipur.
+              <p className="mx-auto mt-6 text-base font-medium leading-relaxed text-[var(--ink)]/70 lg:mx-0 lg:text-lg">
+                From foundational early classes to high-stakes Class 12 board exam preparation, our academic advisors personally curate verified educators across Jaipur.
               </p>
               <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row lg:justify-start">
                 <a
                   href="#request"
-                  className="w-full rounded-xl bg-[var(--chalk)] px-8 py-4 text-center text-sm font-black uppercase tracking-widest text-white shadow-lg shadow-[var(--chalk)]/20 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-[var(--chalk)]/30 sm:w-auto"
+                  className="w-full rounded-2xl bg-[var(--chalk)] px-8 py-4 text-center text-sm font-black uppercase tracking-widest text-white shadow-xl shadow-[var(--chalk)]/20 transition-all hover:-translate-y-0.5 hover:bg-[var(--marigold)] hover:shadow-2xl sm:w-auto"
                 >
                   Request a tutor
                 </a>
                 <a
                   href="#how"
-                  className="w-full rounded-xl border-2 border-[var(--line)] bg-white px-8 py-3.5 text-center text-sm font-black uppercase tracking-widest text-[var(--ink)]/70 transition-all hover:bg-gray-50 hover:border-gray-300 sm:w-auto"
+                  className="w-full rounded-2xl border-2 border-[var(--line)] bg-white px-8 py-3.5 text-center text-sm font-black uppercase tracking-widest text-[var(--ink)]/70 transition-all hover:bg-gray-50 hover:border-gray-300 sm:w-auto"
                 >
                   See how it works
                 </a>
@@ -480,7 +483,7 @@ export default function StudentRequest() {
           {/* --- PLATFORM STATS BAR --- */}
           <div className="mt-16 grid grid-cols-1 gap-4 sm:grid-cols-3">
             {PLATFORM_STATS.map((stat) => (
-              <div key={stat.label} className="flex items-center justify-between sm:justify-start sm:gap-6 rounded-2xl bg-white/70 border border-[var(--line)] px-6 py-5 shadow-sm">
+              <div key={stat.label} className="flex items-center justify-between sm:justify-start sm:gap-6 rounded-2xl bg-white/80 border border-[var(--line)] px-6 py-5 shadow-sm backdrop-blur-sm">
                 <span className="font-serif text-3xl font-black text-[var(--marigold)]">{stat.value}</span>
                 <span className="text-xs font-bold uppercase tracking-wider text-[var(--ink)]/60">{stat.label}</span>
               </div>
@@ -494,18 +497,17 @@ export default function StudentRequest() {
         <div className="mx-auto max-w-[1200px] px-4 sm:px-6 md:px-10">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="font-serif text-3xl font-black tracking-tight text-[var(--ink)] sm:text-4xl">
-              A process built for peace of mind
+              An advisory process built for total confidence
             </h2>
-            <p className="mt-4 text-base font-medium leading-relaxed text-[var(--ink)]/60">
-              Handing your child's learning to a stranger shouldn't feel like a leap of faith.
-              Here's what stands behind every match we make.
+            <p className="mt-4 text-base font-medium leading-relaxed text-[var(--ink)]/70">
+              Finding the right mentor shouldn't feel uncertain. Here's our operational standard for every match.
             </p>
           </div>
 
           <div className="mt-14 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {TRUST_BENEFITS.map((b) => (
-              <div key={b.title} className="group rounded-2xl bg-white border border-[var(--line)]/60 p-8 shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl hover:border-[var(--line)]">
-                <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--paper)] border border-[var(--line)] text-xl transition-transform group-hover:scale-110">
+              <div key={b.title} className="group rounded-3xl bg-white border border-[var(--line)]/60 p-8 shadow-xs transition-all hover:-translate-y-1 hover:shadow-xl hover:border-[var(--marigold)]/40">
+                <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--paper)] border border-[var(--line)] text-xl transition-transform group-hover:scale-110">
                   {b.icon}
                 </div>
                 <h3 className="mb-2 text-lg font-black text-[var(--ink)]">{b.title}</h3>
@@ -521,7 +523,7 @@ export default function StudentRequest() {
         <div className="mx-auto max-w-[1000px] px-4 sm:px-6 md:px-10">
           <div className="mx-auto max-w-xl text-center">
             <h2 className="font-serif text-3xl font-black tracking-tight text-[var(--ink)] sm:text-4xl">
-              Three steps to your first session
+              Three clear steps to your first session
             </h2>
           </div>
 
@@ -529,7 +531,7 @@ export default function StudentRequest() {
             <div aria-hidden="true" className="absolute left-[15%] right-[15%] top-7 hidden h-0.5 rounded-full bg-[var(--line)] md:block" />
             {HOW_STEPS.map((s, i) => (
               <div key={s.title} className="relative z-10 flex flex-1 flex-col items-center text-center">
-                <span className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--marigold)] font-mono text-lg font-black text-white shadow-lg shadow-[var(--marigold)]/20 ring-4 ring-[var(--paper)] transition-transform hover:scale-110">
+                <span className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--marigold)] font-mono text-lg font-black text-white shadow-lg shadow-[var(--marigold)]/25 ring-4 ring-[var(--paper)] transition-transform hover:scale-110">
                   0{i + 1}
                 </span>
                 <h3 className="mb-2 text-lg font-black text-[var(--ink)]">{s.title}</h3>
@@ -545,29 +547,29 @@ export default function StudentRequest() {
         <div className="relative mx-auto max-w-[760px] px-4 sm:px-6 md:px-10">
           <div className="mb-12 text-center">
             <h2 className="font-serif text-3xl font-black tracking-tight text-[var(--ink)] sm:text-4xl">
-              Ready to begin?
+              Request your tutor match
             </h2>
-            <p className="mt-3 text-base font-medium text-[var(--ink)]/60">
-              Fill out the details below. An advisor will review it today.
+            <p className="mt-3 text-base font-medium text-[var(--ink)]/70">
+              Complete the secure form below. An academic advisor will review your criteria today.
             </p>
           </div>
 
           {statusMessage.text && (
-            <div className="mb-8 flex items-center gap-4 rounded-2xl border border-red-200 bg-red-50 px-6 py-5 text-sm font-bold text-red-700">
+            <div className="mb-8 flex items-center gap-4 rounded-2xl border border-red-200 bg-red-50 px-6 py-5 text-sm font-bold text-red-700 shadow-xs">
               <span className="flex-1 text-[15px]">{statusMessage.text}</span>
             </div>
           )}
 
-          <div className="overflow-hidden rounded-2xl bg-white shadow-xl shadow-[var(--chalk)]/5 ring-1 ring-[var(--line)]">
+          <div className="overflow-hidden rounded-3xl bg-white shadow-2xl shadow-[var(--chalk)]/5 ring-1 ring-[var(--line)]">
             {isSuccess ? (
               /* --- SUCCESS CARD SCREEN --- */
               <div className="p-8 sm:p-14 text-center animate-in fade-in zoom-in-95 duration-500">
                 <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 text-3xl shadow-inner">
                   ✓
                 </div>
-                <h3 className="font-serif text-3xl font-black text-[var(--ink)] mb-3">Request Received Successfully!</h3>
-                <p className="text-base font-medium text-[var(--ink)]/60 max-w-md mx-auto mb-8">
-                  Thank you. One of our senior learning advisors in Jaipur has received your criteria and is carefully vetting the ideal tutor match. You will hear from us within 24 hours.
+                <h3 className="font-serif text-3xl font-black text-[var(--ink)] mb-3">Request Registered Successfully!</h3>
+                <p className="text-base font-medium text-[var(--ink)]/70 max-w-md mx-auto mb-8 leading-relaxed">
+                  Thank you. One of our senior learning advisors in Jaipur has received your criteria and is carefully vetting the ideal tutor match. You will hear from us within 18 hours.
                 </p>
                 <button
                   type="button"
@@ -576,7 +578,7 @@ export default function StudentRequest() {
                     setFormData(INITIAL_FORM);
                     setCurrentStep(1);
                   }}
-                  className="rounded-xl bg-[var(--chalk)] px-8 py-4 text-xs font-black uppercase tracking-widest text-white shadow-lg transition-all hover:bg-[var(--marigold)]"
+                  className="rounded-2xl bg-[var(--chalk)] px-8 py-4 text-xs font-black uppercase tracking-widest text-white shadow-lg transition-all hover:bg-[var(--marigold)]"
                 >
                   Submit Another Request
                 </button>
@@ -584,32 +586,32 @@ export default function StudentRequest() {
             ) : (
               /* --- MULTI-STEP FORM --- */
               <>
-                <div className="flex h-1.5 w-full bg-[var(--line)]/50">
+                <div className="flex h-2 w-full bg-[var(--line)]/50">
                   <div 
-                    className="bg-[var(--marigold)] transition-all duration-300" 
+                    className="bg-gradient-to-r from-[var(--marigold)] to-[var(--rust)] transition-all duration-500" 
                     style={{ width: `${(currentStep / 3) * 100}%` }} 
                   />
                 </div>
 
                 <div className="p-6 sm:p-10">
-                  <div className="mb-8 flex justify-between text-xs font-bold uppercase tracking-widest text-[var(--ink)]/40">
-                    <span className={currentStep >= 1 ? 'text-[var(--marigold)]' : ''}>1. Student</span>
-                    <span className={currentStep >= 2 ? 'text-[var(--marigold)]' : ''}>2. Parent</span>
-                    <span className={currentStep >= 3 ? 'text-[var(--marigold)]' : ''}>3. Details</span>
+                  <div className="mb-8 flex justify-between text-xs font-bold uppercase tracking-widest text-[var(--ink)]/40 border-b border-[var(--line)]/40 pb-4">
+                    <span className={currentStep >= 1 ? 'text-[var(--marigold)] font-black' : ''}>Step 1: Student</span>
+                    <span className={currentStep >= 2 ? 'text-[var(--marigold)] font-black' : ''}>Step 2: Parent</span>
+                    <span className={currentStep >= 3 ? 'text-[var(--marigold)] font-black' : ''}>Step 3: Location & Subjects</span>
                   </div>
 
                   <form onSubmit={handleFormSubmit} noValidate>
                     {/* --- STEP 1: STUDENT DETAILS --- */}
                     {currentStep === 1 && (
                       <div className="animate-in fade-in slide-in-from-right-4 duration-300 space-y-6">
-                        <SectionLabel>Student Details</SectionLabel>
+                        <SectionLabel stepNumber="1">Student Information</SectionLabel>
                         <Field label="Student's full name" error={errors.student_name}>
                           <input
                             name="student_name" type="text" autoComplete="name" placeholder="e.g. Aarav Sharma"
                             value={formData.student_name} onChange={handleChange} className={inputClass(errors.student_name)}
                           />
                         </Field>
-                        <Field label="Class" error={errors.class_level} hint="Pre-Nursery to Class 12 (All Streams)">
+                        <Field label="Class Selection (Classes 1 to 12 & Early Years)" error={errors.class_level} hint="Choose the precise current academic class level">
                           <select
                             name="class_level" value={formData.class_level} onChange={handleChange}
                             className={selectClass(errors.class_level)}
@@ -624,7 +626,7 @@ export default function StudentRequest() {
                     {/* --- STEP 2: PARENT DETAILS --- */}
                     {currentStep === 2 && (
                       <div className="animate-in fade-in slide-in-from-right-4 duration-300 space-y-6">
-                        <SectionLabel>Parent Details</SectionLabel>
+                        <SectionLabel stepNumber="2">Parent / Guardian Contact</SectionLabel>
                         <Field label="Parent's full name" error={errors.parent_name}>
                           <input
                             name="parent_name" type="text" autoComplete="name" placeholder="e.g. Rajesh Sharma"
@@ -632,13 +634,13 @@ export default function StudentRequest() {
                           />
                         </Field>
                         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                          <Field label="Parent email" error={errors.email}>
+                          <Field label="Parent email address" error={errors.email}>
                             <input
                               name="email" type="email" autoComplete="email" placeholder="you@example.com"
                               value={formData.email} onChange={handleChange} className={inputClass(errors.email)}
                             />
                           </Field>
-                          <Field label="Contact number" error={errors.contact_number}>
+                          <Field label="Contact phone number" error={errors.contact_number}>
                             <input
                               name="contact_number" type="tel" autoComplete="tel" placeholder="98765 43210"
                               value={formData.contact_number} onChange={handleChange} className={inputClass(errors.contact_number)}
@@ -651,18 +653,18 @@ export default function StudentRequest() {
                     {/* --- STEP 3: LEARNING NEEDS & LOCATION --- */}
                     {currentStep === 3 && (
                       <div className="animate-in fade-in slide-in-from-right-4 duration-300 space-y-8">
-                        <SectionLabel>Learning Needs & Location</SectionLabel>
+                        <SectionLabel stepNumber="3">Academic Requirements & Location</SectionLabel>
                         <Field
-                          label="Subjects"
+                          label="Subjects Required"
                           error={errors.subjects}
-                          hint={`Add each subject one at a time · up to ${MAX_SUBJECTS}`}
+                          hint={`Add each subject individually · up to ${MAX_SUBJECTS}`}
                         >
                           {formData.subjects.length > 0 && (
-                            <div className="mb-2 flex flex-wrap gap-2">
+                            <div className="mb-3 flex flex-wrap gap-2">
                               {formData.subjects.map((subject) => (
                                 <span
                                   key={subject}
-                                  className="inline-flex items-center gap-1.5 rounded-full bg-[var(--marigold)]/10 px-4 py-2 text-xs font-bold text-[var(--ink)] border border-[var(--marigold)]/20 shadow-sm"
+                                  className="inline-flex items-center gap-1.5 rounded-full bg-[var(--marigold)]/10 px-4 py-2 text-xs font-bold text-[var(--ink)] border border-[var(--marigold)]/20 shadow-xs"
                                 >
                                   {subject}
                                   <button
@@ -679,7 +681,7 @@ export default function StudentRequest() {
                           )}
                           <div className="flex gap-3">
                             <input
-                              name="subject_input" type="text" placeholder="e.g. Physics, Accountancy"
+                              name="subject_input" type="text" placeholder="e.g. Physics, Accountancy, Mathematics"
                               value={subjectInput}
                               onChange={(e) => setSubjectInput(e.target.value)}
                               onKeyDown={handleSubjectKeyDown}
@@ -690,15 +692,15 @@ export default function StudentRequest() {
                               type="button"
                               onClick={() => addSubject()}
                               disabled={!subjectInput.trim() || formData.subjects.length >= MAX_SUBJECTS}
-                              className="shrink-0 rounded-xl bg-[var(--chalk)] px-6 text-xs font-black uppercase tracking-wider text-white transition-all hover:-translate-y-0.5 hover:bg-[var(--marigold)] hover:shadow-md disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:bg-[var(--chalk)] disabled:hover:shadow-none"
+                              className="shrink-0 rounded-2xl bg-[var(--chalk)] px-6 text-xs font-black uppercase tracking-wider text-white transition-all hover:-translate-y-0.5 hover:bg-[var(--marigold)] hover:shadow-md disabled:cursor-not-allowed disabled:opacity-40"
                             >
                               + Add
                             </button>
                           </div>
                           {formData.subjects.length < MAX_SUBJECTS && (
-                            <div className="flex flex-wrap items-center gap-2 pt-2">
-                              <span className="mr-2 font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--ink)]/40">
-                                Quick add:
+                            <div className="flex flex-wrap items-center gap-2 pt-3">
+                              <span className="mr-2 font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--ink)]/50">
+                                Suggested:
                               </span>
                               {SUBJECT_SUGGESTIONS
                                 .filter((s) => !formData.subjects.some((f) => f.toLowerCase() === s.toLowerCase()))
@@ -707,7 +709,7 @@ export default function StudentRequest() {
                                     key={s}
                                     type="button"
                                     onClick={() => addSubject(s)}
-                                    className="rounded-full border border-[var(--line)] bg-white px-3 py-1.5 text-xs font-semibold text-[var(--ink)]/70 transition-all hover:border-[var(--marigold)] hover:text-[var(--ink)] shadow-xs"
+                                    className="rounded-full border border-[var(--line)] bg-white px-3.5 py-1.5 text-xs font-semibold text-[var(--ink)]/80 transition-all hover:border-[var(--marigold)] hover:bg-[var(--marigold)]/5 shadow-2xs"
                                   >
                                     + {s}
                                   </button>
@@ -717,45 +719,45 @@ export default function StudentRequest() {
                         </Field>
 
                         <div className="space-y-4">
-                          <label className="block font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--ink)]/70 pl-1">
-                            Preferred mode
+                          <label className="block font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--ink)]/80 pl-1">
+                            Preferred tutoring mode
                           </label>
                           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                             {MODES.map((mode) => (
                               <button
                                 type="button" key={mode.id} onClick={() => handleModeSelect(mode.id)}
-                                className={`flex flex-col items-center justify-center gap-2 rounded-xl border-2 p-4 text-center transition-all ${
+                                className={`flex flex-col items-center justify-center gap-2 rounded-2xl border-2 p-4 text-center transition-all ${
                                   formData.preferred_mode === mode.id
-                                    ? 'border-[var(--marigold)] bg-[var(--marigold)]/5 text-[var(--ink)] shadow-sm'
+                                    ? 'border-[var(--marigold)] bg-[var(--marigold)]/5 text-[var(--ink)] shadow-xs ring-2 ring-[var(--marigold)]/20'
                                     : 'border-[var(--line)] bg-gray-50/50 text-[var(--ink)]/60 hover:bg-gray-50'
                                 }`}
                               >
-                                <span className="text-3xl drop-shadow-sm">{mode.icon}</span>
+                                <span className="text-3xl drop-shadow-xs">{mode.icon}</span>
                                 <span className="text-sm font-bold">{mode.label}</span>
-                                <span className="text-[11px] font-medium text-[var(--ink)]/40">{mode.desc}</span>
+                                <span className="text-[11px] font-medium text-[var(--ink)]/50">{mode.desc}</span>
                               </button>
                             ))}
                           </div>
                         </div>
 
                         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                          <Field label="City" hint="We currently serve Jaipur only">
-                            <div className="flex items-center gap-2 rounded-xl border-2 border-[var(--line)] bg-gray-50/50 px-5 py-4 text-sm font-semibold text-[var(--ink)]/70">
+                          <Field label="City Location" hint="Active service zone">
+                            <div className="flex items-center gap-2 rounded-2xl border-2 border-[var(--line)] bg-gray-50/50 px-5 py-4 text-sm font-semibold text-[var(--ink)]/80">
                               <span aria-hidden="true">📍</span> Jaipur, Rajasthan
                             </div>
                           </Field>
-                          <Field label="Area / locality" error={errors.specific_area}>
+                          <Field label="Specific Area / Locality" error={errors.specific_area}>
                             <div className="flex gap-3">
                               <input
-                                name="specific_area" type="text" placeholder="e.g. Malviya Nagar"
+                                name="specific_area" type="text" placeholder="e.g. Malviya Nagar, C-Scheme"
                                 value={formData.specific_area} onChange={handleChange}
                                 className={inputClass(errors.specific_area)}
                               />
                               <button
                                 type="button" onClick={handleGetLocation} disabled={isLocating}
-                                className={`shrink-0 rounded-xl border-2 px-5 text-xs font-bold transition-all ${
+                                className={`shrink-0 rounded-2xl border-2 px-5 text-xs font-bold transition-all ${
                                   formData.location_coords
-                                    ? 'border-[var(--good)] bg-[var(--good)] text-white shadow-sm'
+                                    ? 'border-[var(--good)] bg-[var(--good)] text-white shadow-xs'
                                     : 'border-[var(--line)] bg-white text-[var(--ink)] hover:bg-gray-50'
                                 }`}
                               >
@@ -774,7 +776,7 @@ export default function StudentRequest() {
                         <button
                           type="button"
                           onClick={handlePrevStep}
-                          className="rounded-xl border-2 border-[var(--line)] px-6 py-4 text-sm font-black uppercase tracking-widest text-[var(--ink)]/70 transition-all hover:bg-gray-50 hover:text-[var(--ink)]"
+                          className="rounded-2xl border-2 border-[var(--line)] px-6 py-4 text-sm font-black uppercase tracking-widest text-[var(--ink)]/70 transition-all hover:bg-gray-50 hover:text-[var(--ink)]"
                         >
                           Back
                         </button>
@@ -784,7 +786,7 @@ export default function StudentRequest() {
                         <button
                           type="button"
                           onClick={handleNextStep}
-                          className="ml-auto rounded-xl bg-[var(--chalk)] px-8 py-4 text-sm font-black uppercase tracking-widest text-white shadow-lg shadow-[var(--chalk)]/20 transition-all hover:-translate-y-0.5 hover:bg-[var(--marigold)] hover:shadow-[var(--marigold)]/30 active:translate-y-0"
+                          className="ml-auto rounded-2xl bg-[var(--chalk)] px-8 py-4 text-sm font-black uppercase tracking-widest text-white shadow-lg shadow-[var(--chalk)]/20 transition-all hover:-translate-y-0.5 hover:bg-[var(--marigold)] hover:shadow-xl active:translate-y-0"
                         >
                           Next Step
                         </button>
@@ -792,13 +794,13 @@ export default function StudentRequest() {
                         <button
                           type="submit"
                           disabled={isSubmitting}
-                          className={`ml-auto rounded-xl px-8 py-4 text-sm font-black uppercase tracking-widest text-white transition-all disabled:cursor-not-allowed ${
+                          className={`ml-auto rounded-2xl px-8 py-4 text-sm font-black uppercase tracking-widest text-white transition-all disabled:cursor-not-allowed ${
                             isSubmitting
                               ? 'bg-[var(--ink)]/30'
-                              : 'bg-[var(--chalk)] shadow-lg shadow-[var(--chalk)]/20 hover:-translate-y-0.5 hover:bg-[var(--rust)] hover:shadow-[var(--rust)]/30 active:translate-y-0'
+                              : 'bg-[var(--chalk)] shadow-lg shadow-[var(--chalk)]/20 hover:-translate-y-0.5 hover:bg-[var(--rust)] hover:shadow-xl active:translate-y-0'
                           }`}
                         >
-                          {isSubmitting ? 'Sending…' : 'Submit Request'}
+                          {isSubmitting ? 'Transmitting Request…' : 'Submit Match Request'}
                         </button>
                       )}
                     </div>
@@ -812,7 +814,7 @@ export default function StudentRequest() {
 
       {/* --- FOOTER --- */}
       <footer className="mt-auto bg-[var(--chalk)] py-10 text-center font-mono text-[12px] font-medium uppercase tracking-widest text-[var(--line)]/50">
-        nexus. tuitions — connecting educators and students, one lesson at a time.
+        nexus. tuitions — connecting elite educators and ambitious students across Jaipur.
       </footer>
     </div>
   );
