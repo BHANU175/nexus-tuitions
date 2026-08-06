@@ -6,7 +6,7 @@ import TeacherApply from './pages/TeacherApply';
 function Navbar() {
   return (
     /* Changed bg-[#1e1f20] to bg-[#FAF7F2] (or bg-transparent) and updated text/border colors */
-    <nav className="flex items-center justify-between px-6 py-3 bg-[#FAF7F2] border-b border-gray-200/60 text-gray-900">
+    <nav className="flex items-center justify-between px-6 py-3 bg-[#FFFFFF] border-b border-gray-200/60 text-gray-900">
       {/* Left side: Logo + Title */}
       <Link to="/" className="flex items-center gap-2.5 text-gray-900 no-underline hover:opacity-80 transition-opacity">
         <img 
