@@ -111,23 +111,27 @@ export default function Home() {
       <nav className="sticky top-0 z-50 border-b border-[var(--line)]/60 bg-[var(--paper)]/90 backdrop-blur-md">
         <div className="mx-auto flex max-w-[1300px] items-center justify-between px-4 py-3 sm:px-6 sm:py-4 lg:px-8">
           
-          {/* Logo Area */}
-          <Link to="/" onClick={handleNavigation} className="flex items-center select-none py-1">
-            <img
-              src={LOGO_IMAGE_URL}
-              alt="Nexus Tuitions"
-              className="h-9 w-auto sm:h-10"
-              width={190}
-              height={65}
-            />
-          </Link>
+          {/* Logo & Custom Badge Group */}
+          <div className="flex items-center gap-3">
+            <Link to="/" onClick={handleNavigation} className="flex items-center select-none py-1">
+              <img
+                src={LOGO_IMAGE_URL}
+                alt="Nexus Tuitions"
+                className="h-9 w-auto sm:h-10"
+                width={190}
+                height={65}
+              />
+            </Link>
+            
+            {/* Custom Badge rendered next to logo */}
+            <CustomBadge />
+          </div>
           
           {/* Center Links */}
           <div className="hidden items-center gap-8 text-[15px] font-medium text-[var(--ink)] lg:flex">
             <a href="#why" className="transition-colors hover:text-[var(--marigold)]">Why Us</a>
             <Link to="/request-tutor" onClick={handleNavigation} className="transition-colors hover:text-[var(--marigold)]">Find a Tutor</Link>
             <Link to="/apply-teacher" onClick={handleNavigation} className="transition-colors hover:text-[var(--marigold)]">Become a Tutor</Link>
-            
           </div>
         </div>
       </nav>

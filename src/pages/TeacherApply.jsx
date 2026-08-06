@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import CustomBadge from '../components/CustomBadge';
 import axios from 'axios';
 import { supabase } from '../supabaseClient';
-import Maintenance from './Maintenance'; // Adjust path if Maintenance.jsx lives elsewhere
+import Maintenance from './Maintenance';
 
 /* ---------------------------------------------------------------------- */
 /*  Static data                                                           */
@@ -51,7 +51,6 @@ const MAX_FILE_BYTES = 8 * 1024 * 1024;
 const SUBJECT_SUGGESTIONS = ['Mathematics', 'Physics', 'Chemistry', 'Biology', 'English', 'Hindi', 'Computer Science', 'Economics'];
 const MAX_SUBJECTS = 8;
 
-// Served from /public/logo.png
 const LOGO_URL = "/logo.png";
 
 /* ---------------------------------------------------------------------- */
@@ -93,7 +92,6 @@ function formatPhone(value) {
   return digits.length > 5 ? `${digits.slice(0, 5)} ${digits.slice(5)}` : digits;
 }
 
-// Single source of truth for field validity, shared by per-field blur checks and step-level gating.
 function validateField(name, value, extra = {}) {
   switch (name) {
     case 'fullName':
@@ -398,15 +396,11 @@ export default function TeacherApply() {
   useEffect(() => {
     async function checkAppSettings() {
       try {
-        console.log("📡 Fetching app_settings from Supabase...");
-        
         const { data, error } = await supabase
           .from('app_settings')
-          .select('*') // Selecting all to see what actually exists
+          .select('*')
           .eq('id', 1)
           .maybeSingle();
-
-        console.log("📦 Supabase Response:", { data, error });
 
         if (error) {
           console.error("❌ Supabase Error:", error.message);
@@ -415,16 +409,12 @@ export default function TeacherApply() {
         if (data) {
           setIsMaintenance(Boolean(data.maintenance_mode));
           
-          // More resilient boolean check handling tinyints (1/0), strings, or booleans
           const isUploadEnabled = 
             data.enable_doc_upload === true || 
             String(data.enable_doc_upload).toLowerCase() === 'true' || 
             data.enable_doc_upload === 1;
             
-          console.log("⚙️ Evaluated docUploadEnabled:", isUploadEnabled);
           setDocUploadEnabled(isUploadEnabled);
-        } else {
-          console.warn("⚠️ No data returned! Is there a row with id=1? Or is RLS blocking it?");
         }
       } catch (err) {
         console.error('🔥 Failed to fetch app settings:', err);
@@ -439,7 +429,6 @@ export default function TeacherApply() {
     const channel = supabase
       .channel('teacher-apply-settings')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'app_settings' }, (payload) => {
-        console.log("🔄 Realtime Update Received:", payload.new);
         if (payload.new) {
           setIsMaintenance(Boolean(payload.new.maintenance_mode));
           
@@ -451,9 +440,7 @@ export default function TeacherApply() {
           setDocUploadEnabled(isUploadEnabled);
         }
       })
-      .subscribe((status) => {
-        console.log("🔌 Realtime Connection Status:", status);
-      });
+      .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
@@ -491,8 +478,6 @@ export default function TeacherApply() {
   const stepRef = useRef(null);
   const didMountRef = useRef(false);
 
-  // Move focus to the new step's first field for keyboard and screen-reader users,
-  // but skip on initial mount so the page doesn't yank focus down on load.
   useEffect(() => {
     if (!didMountRef.current) { didMountRef.current = true; return; }
     const el = stepRef.current?.querySelector('input:not([type="file"]), select, textarea, button');
@@ -649,7 +634,6 @@ export default function TeacherApply() {
       if (modesErr) e.teachingModes = modesErr;
     }
     if (s === 2) {
-      // ONLY enforce required files if doc uploads are enabled globally
       if (docUploadEnabled) {
         if (!profilePhoto) e.profilePhoto = 'A profile photo is required.';
         if (!idProof) e.idProof = 'An ID proof is required.';
@@ -672,7 +656,6 @@ export default function TeacherApply() {
     formData.append('subjects', subjects.join(', '));
     formData.append('teachingModes', JSON.stringify(teachingModes));
 
-    // Append files only if selected
     if (profilePhoto) formData.append('profilePhoto', profilePhoto);
     if (idProof) formData.append('idProof', idProof);
 
@@ -792,10 +775,11 @@ export default function TeacherApply() {
           }}
         />
         <div className="relative mx-auto max-w-[860px] px-4 py-14 text-center sm:px-6 sm:py-16 md:py-20">
-          <div className="mx-auto mb-6 inline-flex items-center gap-2 rounded-full border border-[var(--line)] bg-white px-3.5 py-1.5 font-mono text-[11px] font-bold uppercase tracking-widest text-[var(--ink)]/60">
-            <span className="h-1.5 w-1.5 rounded-full bg-[var(--marigold)]" />
-            Educator network
+          {/* UPDATED: Integrated CustomBadge Component */}
+          <div className="mb-6 flex justify-center">
+            <CustomBadge text="Educator Network in Jaipur" variant="orange" />
           </div>
+
           <h1 className="font-serif text-4xl font-black leading-[1.08] tracking-tight text-[var(--ink)] sm:text-5xl md:text-6xl">
             Teach on your terms.<br />
             <span className="italic text-[var(--rust)]">Grow</span> your income.
@@ -937,7 +921,6 @@ export default function TeacherApply() {
                 <form onSubmit={onFormSubmit} noValidate>
                   <Stepper steps={STEPS} current={step} onStepClick={handleStepClick} />
 
-                  {/* step content */}
                   <div ref={stepRef} key={step} className="min-h-[280px] motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-300">
                     {step === 0 && (
                       <div className="space-y-5">
@@ -1141,7 +1124,6 @@ export default function TeacherApply() {
                     )}
                   </div>
 
-                  {/* status + progress */}
                   {statusMessage.text && (
                     <div
                       role="status" aria-live="polite"
@@ -1168,7 +1150,6 @@ export default function TeacherApply() {
                     </div>
                   )}
 
-                  {/* nav buttons */}
                   <div className="mt-7 flex items-center justify-between gap-3">
                     {step > 0 ? (
                       <button

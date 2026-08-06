@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect, useCallback, memo } from 'react';
 import { Link } from 'react-router-dom';
-import CustomBadge from '../components/CustomBadge';
 import axios from 'axios';
-import { supabase } from '../supabaseClient'; // 1. Added Supabase import (adjust path if needed)
-import Maintenance from './Maintenance'; // Adjust path if Maintenance.jsx lives elsewhere
+import { supabase } from '../supabaseClient';
+import Maintenance from './Maintenance';
+import CustomBadge from '../components/CustomBadge';
 
 /* ---------------------------------------------------------------------- */
 /* Static data                                                            */
@@ -51,11 +51,10 @@ const PHONE_RE = /^(\+91[\s-]?)?[6-9]\d{9}$/;
 const SELECT_ARROW_URL =
   "data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23131313%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E";
 
-// Served from /public/logo.png
 const LOGO_URL = "/logo.png";
 
 /* ---------------------------------------------------------------------- */
-/* Small building blocks                                                  */
+/* Helper UI Components                                                   */
 /* ---------------------------------------------------------------------- */
 
 function Field({ label, error, hint, children }) {
@@ -92,7 +91,7 @@ function SectionLabel({ children }) {
 }
 
 /* ---------------------------------------------------------------------- */
-/* Decorative illustrations + rotating banner                             */
+/* Decorative Illustrations + Rotating Banner                             */
 /* ---------------------------------------------------------------------- */
 
 const NotebookIllustration = memo(function NotebookIllustration() {
@@ -156,7 +155,6 @@ function HeroBanner() {
         style={{ backgroundImage: 'radial-gradient(circle, var(--ink) 1.5px, transparent 1.5px)', backgroundSize: '24px 24px' }}
       />
       <div className="relative grid grid-cols-1 items-center gap-8 px-6 py-10 sm:px-10 sm:py-12 md:grid-cols-[1fr_auto_auto] md:gap-10 md:px-14 md:py-14">
-        {/* Card showing student text inside the orange banner */}
         <div className="mx-auto w-full max-w-[240px] -rotate-2 rounded-2xl bg-[var(--card)] p-5 shadow-xl md:mx-0">
           <p key={active} className="animate-in fade-in font-serif text-base font-bold leading-snug text-[var(--ink)] duration-500">
             {BANNER_SLIDES[active].note}
@@ -165,6 +163,7 @@ function HeroBanner() {
             {BANNER_SLIDES.map((_, i) => (
               <button
                 key={i}
+                type="button"
                 onClick={() => setActive(i)}
                 aria-label={`Show message ${i + 1}`}
                 className={`h-1.5 rounded-full transition-all ${i === active ? 'w-6 bg-[var(--marigold)]' : 'w-1.5 bg-[var(--ink)]/20'}`}
@@ -184,7 +183,7 @@ function HeroBanner() {
 }
 
 /* ---------------------------------------------------------------------- */
-/* Main component                                                         */
+/* Main Component                                                         */
 /* ---------------------------------------------------------------------- */
 
 const INITIAL_FORM = {
@@ -201,12 +200,12 @@ const INITIAL_FORM = {
 };
 
 export default function StudentRequest() {
-  // 2. Added maintenance mode state
   const [isMaintenance, setIsMaintenance] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // 3. Maintenance mode check effect
+  // Check Maintenance mode from Supabase
   useEffect(() => {
+    let isMounted = true;
     async function checkMaintenance() {
       try {
         const { data, error } = await supabase
@@ -214,17 +213,18 @@ export default function StudentRequest() {
           .select('maintenance_mode')
           .single();
 
-        if (data && !error) {
+        if (isMounted && data && !error) {
           setIsMaintenance(data.maintenance_mode);
         }
       } catch (err) {
         console.error('Failed to fetch app settings:', err);
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     }
 
     checkMaintenance();
+    return () => { isMounted = false; };
   }, []);
 
   const [formData, setFormData] = useState(INITIAL_FORM);
@@ -257,7 +257,7 @@ export default function StudentRequest() {
     setFormData((prev) => ({ ...prev, preferred_mode: id }));
   }, []);
 
-  /* ---- Subjects: add-as-you-go tag input ---- */
+  /* ---- Subjects Tag System ---- */
   const addSubject = useCallback((raw) => {
     setFormData((prev) => {
       const value = (raw ?? subjectInput).trim();
@@ -305,7 +305,7 @@ export default function StudentRequest() {
     );
   }, []);
 
-  // Step-by-Step Validation Logic
+  // Step Validation Logic
   const validateStep = useCallback((step) => {
     const e = {};
     if (step === 1) {
@@ -340,8 +340,8 @@ export default function StudentRequest() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    const stepErrors = validateStep(3); // Final step validation
+    if (e) e.preventDefault();
+    const stepErrors = validateStep(3);
     if (Object.keys(stepErrors).length > 0) {
       setErrors(stepErrors);
       return;
@@ -359,7 +359,7 @@ export default function StudentRequest() {
       setStatusMessage({ text: 'Request received! An advisor will contact you shortly.', type: 'success' });
       setFormData(INITIAL_FORM);
       setSubjectInput('');
-      setCurrentStep(1); // Reset form to step 1 on success
+      setCurrentStep(1);
     } catch (error) {
       console.error(error);
       setStatusMessage({ text: 'Could not connect. Please check your network and try again.', type: 'error' });
@@ -368,7 +368,15 @@ export default function StudentRequest() {
     }
   };
 
-  // 4. Loading Screen
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+    if (currentStep < 3) {
+      handleNextStep();
+    } else {
+      handleSubmit(e);
+    }
+  };
+
   if (loading) {
     return (
       <div
@@ -383,61 +391,51 @@ export default function StudentRequest() {
     );
   }
 
-  // 4. Maintenance Screen
   if (isMaintenance) {
     return <Maintenance />;
   }
 
   return (
-   <div
+    <div
       style={{
-  '--chalk': '#0E382C',     /* Deep Forest Green (Primary buttons) */
-  '--paper': '#FDF9F1',     /* Warm Cream Background */
-  '--ink': '#1C201E',       /* Near Black / Deep Ink text */
-  '--card': '#FFFFFF',      /* Card Background */
-  '--marigold': '#D25427',  /* Burnt Orange / Rust Accent */
-  '--rust': '#B8431B',      /* Darker Rust Accent */
-  '--line': '#E6DFD3',      /* Soft Cream Border Line */
-  '--good': '#10B981',      /* Success Green */
-}}
+        '--chalk': '#0E382C',
+        '--paper': '#FDF9F1',
+        '--ink': '#1C201E',
+        '--card': '#FFFFFF',
+        '--marigold': '#D25427',
+        '--rust': '#B8431B',
+        '--line': '#E6DFD3',
+        '--good': '#10B981',
+      }}
       className="relative flex min-h-screen scroll-smooth flex-col bg-[var(--paper)] font-sans text-[var(--ink)] selection:bg-[var(--marigold)]/30"
     >
-      
       {/* --- NAV --- */}
-<nav className="sticky top-0 z-50 border-b border-[var(--line)] bg-[var(--paper)]/90 backdrop-blur-md">
-  <div className="mx-auto flex max-w-[1200px] items-center justify-between px-4 py-4 sm:px-6 md:px-10">
-    
-    {/* Nexus Tuitions Logo */}
-    <Link to="/" className="flex items-center select-none">
-      <img
-        src={LOGO_URL}
-        alt="Nexus Tuitions"
-        className="h-9 w-auto"
-        width={190}
-        height={65}
-      />
-    </Link>
+      <nav className="sticky top-0 z-50 border-b border-[var(--line)] bg-[var(--paper)]/90 backdrop-blur-md">
+        <div className="mx-auto flex max-w-[1200px] items-center justify-between px-4 py-4 sm:px-6 md:px-10">
+          <Link to="/" className="flex items-center select-none">
+            <img
+              src={LOGO_URL}
+              alt="Nexus Tuitions"
+              className="h-9 w-auto"
+              width={190}
+              height={65}
+            />
+          </Link>
+          <div className="hidden items-center gap-8 font-sans text-sm font-semibold text-[var(--ink)] md:flex">
+            <Link to="/" className="transition-colors hover:opacity-70">Why Us</Link>
+            <Link to="/request-tutor" className="transition-colors hover:opacity-70">Find a Tutor</Link>
+            <Link to="/apply-teacher" className="transition-colors hover:opacity-70">Become a Tutor</Link>
+          </div>
+        </div>
+      </nav>
 
-    {/* Header Navigation Links */}
-    <div className="hidden items-center gap-8 font-sans text-sm font-semibold text-[var(--ink)] md:flex">
-      <Link to="/" className="transition-colors hover:opacity-70">Why Us</Link>
-      <Link to="/request-tutor" className="transition-colors hover:opacity-70">Find a Tutor</Link>
-      <Link to="/apply-teacher" className="transition-colors hover:opacity-70">Become a Tutor</Link>
-      
-    </div>
-
-  </div>
-</nav>
-      {/* --- UNIFIED HERO SECTION --- */}
+      {/* --- HERO SECTION --- */}
       <header className="relative pt-12 pb-16 sm:pt-20 sm:pb-24 lg:pt-24 lg:pb-28">
         <div className="relative mx-auto max-w-[1200px] px-4 sm:px-6 md:px-10">
           <div className="grid grid-cols-1 items-center gap-16 lg:grid-cols-2 lg:gap-12">
-
-            {/* Left: Copy */}
             <div className="max-w-xl text-center lg:text-left">
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[var(--line)] bg-white px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-widest text-[var(--ink)] shadow-sm">
-                <span className="h-2 w-2 animate-pulse rounded-full bg-[var(--marigold)]" />
-                For students &amp; parents in Jaipur
+              <div className="mb-6">
+                <CustomBadge text="For students & parents in Jaipur" variant="orange" />
               </div>
               <h1 className="font-serif text-4xl font-black leading-[1.1] tracking-tight text-[var(--ink)] sm:text-5xl md:text-6xl">
                 Find the right tutor,<br className="hidden sm:block lg:hidden xl:block" />
@@ -463,11 +461,9 @@ export default function StudentRequest() {
               </div>
             </div>
 
-            {/* Right: Premium Banner Component */}
             <div className="mx-auto w-full max-w-lg lg:max-w-none">
               <HeroBanner />
             </div>
-
           </div>
         </div>
       </header>
@@ -553,7 +549,6 @@ export default function StudentRequest() {
           )}
 
           <div className="overflow-hidden rounded-2xl bg-white shadow-xl shadow-[var(--chalk)]/5 ring-1 ring-[var(--line)]">
-            {/* Progress Bar */}
             <div className="flex h-1.5 w-full bg-[var(--line)]/50">
               <div 
                 className="bg-[var(--marigold)] transition-all duration-300" 
@@ -562,15 +557,13 @@ export default function StudentRequest() {
             </div>
 
             <div className="p-6 sm:p-10">
-              {/* Step Indicators */}
               <div className="mb-8 flex justify-between text-xs font-bold uppercase tracking-widest text-[var(--ink)]/40">
                 <span className={currentStep >= 1 ? 'text-[var(--marigold)]' : ''}>1. Student</span>
                 <span className={currentStep >= 2 ? 'text-[var(--marigold)]' : ''}>2. Parent</span>
                 <span className={currentStep >= 3 ? 'text-[var(--marigold)]' : ''}>3. Details</span>
               </div>
 
-              <form onSubmit={(e) => { e.preventDefault(); if(currentStep === 3) handleSubmit(e); }} noValidate>
-                
+              <form onSubmit={handleFormSubmit} noValidate>
                 {/* --- STEP 1: STUDENT DETAILS --- */}
                 {currentStep === 1 && (
                   <div className="animate-in fade-in slide-in-from-right-4 duration-300">
@@ -767,8 +760,7 @@ export default function StudentRequest() {
                     </button>
                   ) : (
                     <button
-                      type="button"
-                      onClick={handleSubmit}
+                      type="submit"
                       disabled={isSubmitting}
                       className={`ml-auto rounded-xl px-8 py-4 text-sm font-black uppercase tracking-widest text-white transition-all disabled:cursor-not-allowed ${
                         isSubmitting
@@ -780,7 +772,6 @@ export default function StudentRequest() {
                     </button>
                   )}
                 </div>
-
               </form>
             </div>
           </div>
