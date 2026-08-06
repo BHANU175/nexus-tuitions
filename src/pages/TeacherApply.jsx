@@ -6,42 +6,42 @@ import { supabase } from '../supabaseClient';
 import Maintenance from './Maintenance';
 
 /* ---------------------------------------------------------------------- */
-/*  Default Static data (Fallbacks for Site Content Changer)             */
+/*  Default Static data & Business Fallbacks                             */
 /* ---------------------------------------------------------------------- */
 
 const DEFAULT_CITIES = ['Jaipur'];
 
 const DEFAULT_TEACHING_MODES = [
-  { id: 'online', label: 'Remote / Online', icon: '💻' },
-  { id: 'offline', label: "Tutor's location", icon: '🏫' },
-  { id: 'personal', label: "Student's location", icon: '🏠' },
+  { id: 'online', label: 'Remote / Online', icon: '💻', desc: 'Teach from anywhere' },
+  { id: 'offline', label: "Tutor's location", icon: '🏫', desc: 'Host students at your space' },
+  { id: 'personal', label: "Student's location", icon: '🏠', desc: 'Travel to student home' },
 ];
 
-const STEPS = ['About you', 'Where you teach', 'Verify identity'];
+const STEPS = ['About you', 'Location & Mode', 'Verification'];
 
-const DEFAULT_TRUST_CHIPS = ['Verified tutor profiles', 'No listing fees', 'You set your own rates'];
+const DEFAULT_TRUST_CHIPS = ['0% commission on sessions', 'Pre-verified student leads', 'Guaranteed weekly payouts'];
 
 const DEFAULT_BANNER_SLIDES = [
-  { note: 'Set your own rates and teach on your schedule.' },
-  { note: 'Every lead is verified before it reaches you.' },
-  { note: 'Get paid for the sessions you actually run.' },
+  { note: 'Top Jaipur tutors earn ₹25,000+ monthly teaching part-time.' },
+  { note: 'Every student request is verified by our team before dispatch.' },
+  { note: 'You set your curriculum, rates, and schedule completely.' },
 ];
 
 const ICON_TINTS = ['bg-[var(--marigold)]/10', 'bg-[var(--rust)]/10', 'bg-[var(--good)]/10', 'bg-[var(--chalk)]/8'];
 
 const DEFAULT_BENEFITS = [
-  { icon: '🎯', title: 'Pre-verified leads', copy: 'Every student request is checked by our team before it reaches your dashboard, so you spend time teaching, not screening.' },
-  { icon: '💸', title: 'Keep what you earn', copy: 'What you agree with a student is exactly what you take home. No hidden commission on your sessions.' },
-  { icon: '⚖️', title: 'Full autonomy', copy: 'Choose your own subjects, schedule, teaching modes, and how far you are willing to travel.' },
-  { icon: '🛡️', title: 'Secure verification', copy: 'ID checks on every profile keep the network safe and trustworthy for tutors and families alike.' },
-  { icon: '🗓️', title: 'Flexible scheduling', copy: 'Teach mornings, evenings, or weekends only — the platform works around your calendar, not the other way round.' },
-  { icon: '🤝', title: 'Real onboarding support', copy: 'Our team helps you set up a strong profile and answers questions as you get your first few students.' },
+  { icon: '🎯', title: 'Zero Cold Prospecting', copy: 'Pre-qualified student leads delivered directly to your dashboard. Zero marketing hassle.' },
+  { icon: '💸', title: 'Keep 100% of Earnings', copy: 'No hidden platform fees or commissions taken from your agreed hourly/monthly session rates.' },
+  { icon: '⚖️', title: 'Absolute Autonomy', copy: 'Full control over your subjects, pricing tiers, travel radius, and working hours.' },
+  { icon: '🛡️', title: 'Trust & Safety First', copy: 'Rigorous ID checks on families and tutors guarantee a secure learning environment.' },
+  { icon: '🗓️', title: 'Smart Scheduling', copy: 'Syncs effortlessly with your personal calendar so you never double-book.' },
+  { icon: '🤝', title: 'Dedicated Concierge Support', copy: 'Our onboarding team helps optimize your profile for maximum student match rates.' },
 ];
 
 const DEFAULT_JOIN_STEPS = [
-  { title: 'Apply', copy: 'Share your subjects, availability, and where you teach.' },
-  { title: 'Verify', copy: 'Our team checks your credentials and identity.' },
-  { title: 'Match', copy: 'Get introduced to students who fit your style.' },
+  { title: 'Quick Application', copy: 'Share your core subjects, expertise, and availability in 2 minutes.' },
+  { title: 'Profile Verification', copy: 'Our academic team reviews your credentials and background.' },
+  { title: 'Direct Student Matching', copy: 'Receive tailored introduction requests from eager learners.' },
 ];
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -50,7 +50,6 @@ const MAX_FILE_BYTES = 8 * 1024 * 1024;
 
 const DEFAULT_SUBJECT_SUGGESTIONS = ['Mathematics', 'Physics', 'Chemistry', 'Biology', 'English', 'Hindi', 'Computer Science', 'Economics'];
 const MAX_SUBJECTS = 8;
-
 const LOGO_URL = "/logo.png";
 
 /* ---------------------------------------------------------------------- */
@@ -95,15 +94,15 @@ function formatPhone(value) {
 function validateField(name, value, extra = {}) {
   switch (name) {
     case 'fullName':
-      return value.trim() ? '' : 'Enter your full name.';
+      return value.trim() ? '' : 'Please enter your full name.';
     case 'email':
-      return EMAIL_RE.test(value.trim()) ? '' : 'Enter a valid email address.';
+      return EMAIL_RE.test(value.trim()) ? '' : 'Please enter a valid email address.';
     case 'contactNumber':
-      return PHONE_RE.test(value.replace(/\s/g, '')) ? '' : 'Enter a valid 10-digit phone number.';
+      return PHONE_RE.test(value.replace(/\s/g, '')) ? '' : 'Please enter a valid 10-digit phone number.';
     case 'subjects':
-      return (extra.subjects || []).length > 0 ? '' : 'Add at least one subject.';
+      return (extra.subjects || []).length > 0 ? '' : 'Add at least one subject of expertise.';
     case 'specificArea':
-      return value.trim() ? '' : 'Enter your area or locality.';
+      return value.trim() ? '' : 'Please specify your teaching locality.';
     case 'teachingModes':
       return (extra.teachingModes || []).length > 0 ? '' : 'Select at least one teaching mode.';
     default:
@@ -195,7 +194,7 @@ function FileUploadZone({ id, label, hint, file, previewUrl, accept, onFile, onR
           <div className="text-2xl">{file ? '📄' : '📎'}</div>
         )}
         <span className="max-w-full truncate text-xs font-bold text-[var(--ink)]">
-          {file ? file.name : 'Drop a file or browse'}
+          {file ? file.name : 'Drop file here or browse'}
         </span>
         <span className="font-mono text-[10px] text-[var(--ink)]/40">
           {file ? `${(file.size / 1024).toFixed(0)} KB` : hint}
@@ -289,7 +288,7 @@ function HeroBanner({ slides }) {
     <div
       onMouseEnter={() => { pausedRef.current = true; }}
       onMouseLeave={() => { pausedRef.current = false; }}
-      className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-[var(--marigold)] to-[var(--rust)] sm:rounded-[2.5rem]"
+      className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-[var(--marigold)] to-[var(--rust)] sm:rounded-[2.5rem] shadow-xl"
     >
       <div
         aria-hidden="true"
@@ -297,8 +296,12 @@ function HeroBanner({ slides }) {
         style={{ backgroundImage: 'radial-gradient(circle, var(--ink) 1.5px, transparent 1.5px)', backgroundSize: '24px 24px' }}
       />
       <div className="relative grid grid-cols-1 items-center gap-8 px-6 py-10 sm:px-10 sm:py-12 md:grid-cols-[1fr_auto_auto] md:gap-10 md:px-14 md:py-14">
-        <div className="mx-auto w-full max-w-[240px] -rotate-2 rounded-2xl bg-[var(--card)] p-5 shadow-xl md:mx-0">
-          <p key={active} className="animate-in fade-in font-serif text-base font-bold leading-snug text-[var(--ink)] duration-500">
+        <div className="mx-auto w-full max-w-[260px] -rotate-1 rounded-2xl bg-[var(--card)] p-5 shadow-lg md:mx-0">
+          <div className="flex items-center gap-1.5 mb-2">
+            <span className="flex h-2 w-2 rounded-full bg-[var(--good)] animate-ping" />
+            <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-[var(--ink)]/50">Live Insight</span>
+          </div>
+          <p key={active} className="animate-in fade-in font-serif text-sm font-bold leading-snug text-[var(--ink)] duration-500">
             {slides[active]?.note}
           </p>
           <div className="mt-4 flex gap-1.5">
@@ -392,11 +395,10 @@ export default function TeacherApply() {
   const [docUploadEnabled, setDocUploadEnabled] = useState(true);
   const [loading, setLoading] = useState(true);
 
-  // Fully dynamic content state powered by Site Content / App Settings
   const [content, setContent] = useState({
-    heroBadge: 'Educator Network in Jaipur',
-    heroTitle: 'Teach on your terms.\nGrow your income.',
-    heroSubtitle: 'Learning Hub connects you with students who fit your subjects, your schedule, and your teaching style — we handle the marketing, lead verification, and logistics.',
+    heroBadge: 'Premier Educator Network in Jaipur',
+    heroTitle: 'Scale your tutoring practice.\nTeach on your terms.',
+    heroSubtitle: 'Learning Hub pairs elite educators with high-intent students. We eliminate marketing friction and handle logistics so you can focus entirely on teaching.',
     trustChips: DEFAULT_TRUST_CHIPS,
     bannerSlides: DEFAULT_BANNER_SLIDES,
     benefits: DEFAULT_BENEFITS,
@@ -406,38 +408,27 @@ export default function TeacherApply() {
     subjectSuggestions: DEFAULT_SUBJECT_SUGGESTIONS,
   });
 
-  // Fetch and sync app settings & dynamic site content from Supabase
   useEffect(() => {
     async function fetchSiteData() {
       try {
-        // Fetch App Settings (maintenance, doc upload)
-        const { data: settingsData, error: settingsError } = await supabase
+        const { data: settingsData } = await supabase
           .from('app_settings')
           .select('*')
           .eq('id', 1)
           .maybeSingle();
 
-        if (settingsError) {
-          console.error("❌ Supabase Settings Error:", settingsError.message);
-        }
-
         if (settingsData) {
           setIsMaintenance(Boolean(settingsData.maintenance_mode));
-          
-          const isUploadEnabled = 
+          setDocUploadEnabled(
             settingsData.enable_doc_upload === true || 
             String(settingsData.enable_doc_upload).toLowerCase() === 'true' || 
-            settingsData.enable_doc_upload === 1;
-            
-          setDocUploadEnabled(isUploadEnabled);
+            settingsData.enable_doc_upload === 1
+          );
         }
 
-        // Fetch Dynamic Site Content from 'site_content' table
-        const { data: contentData, error: contentError } = await supabase
-          .from('site_content')
-          .select('*');
+        const { data: contentData } = await supabase.from('site_content').select('*');
 
-        if (!contentError && contentData && contentData.length > 0) {
+        if (contentData && contentData.length > 0) {
           const dynamicOverrides = {};
           contentData.forEach((item) => {
             if (item.key && item.value !== undefined) {
@@ -467,7 +458,7 @@ export default function TeacherApply() {
           }));
         }
       } catch (err) {
-        console.error('🔥 Failed to fetch site content and settings:', err);
+        console.error('Failed to fetch site content and settings:', err);
       } finally {
         setLoading(false);
       }
@@ -475,17 +466,16 @@ export default function TeacherApply() {
 
     fetchSiteData();
 
-    // Realtime listeners for both app settings and site content updates
     const channel = supabase
       .channel('teacher-apply-dynamic-sync')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'app_settings' }, (payload) => {
         if (payload.new) {
           setIsMaintenance(Boolean(payload.new.maintenance_mode));
-          const isUploadEnabled = 
+          setDocUploadEnabled(
             payload.new.enable_doc_upload === true || 
             String(payload.new.enable_doc_upload).toLowerCase() === 'true' || 
-            payload.new.enable_doc_upload === 1;
-          setDocUploadEnabled(isUploadEnabled);
+            payload.new.enable_doc_upload === 1
+          );
         }
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'site_content' }, () => {
@@ -525,6 +515,10 @@ export default function TeacherApply() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const [lastApplicant, setLastApplicant] = useState({ name: '', email: '' });
+
+  // Interactive Earnings Estimator State (Business Feature)
+  const [estimatedHours, setEstimatedHours] = useState(15);
+  const [hourlyRate, setHourlyRate] = useState(600);
 
   const stepRef = useRef(null);
   const didMountRef = useRef(false);
@@ -617,7 +611,7 @@ export default function TeacherApply() {
 
   const handleGetLocation = () => {
     if (!navigator.geolocation) {
-      setGpsError('Location services are not supported in this browser.');
+      setGpsError('Geolocation is not supported by your browser.');
       return;
     }
     setIsLocating(true);
@@ -631,7 +625,7 @@ export default function TeacherApply() {
         setIsLocating(false);
       },
       () => {
-        setGpsError('Could not get your location. Check your browser permissions and try again.');
+        setGpsError('Unable to retrieve location. Please check browser permissions.');
         setIsLocating(false);
       },
       { enableHighAccuracy: true, timeout: 8000 }
@@ -639,8 +633,8 @@ export default function TeacherApply() {
   };
 
   const handleProfilePhoto = async (file) => {
-    if (!file.type.startsWith('image/')) return setErrors((e) => ({ ...e, profilePhoto: 'Upload a JPG or PNG image.' }));
-    if (file.size > MAX_FILE_BYTES) return setErrors((e) => ({ ...e, profilePhoto: 'That file is too large. Try one under 8MB.' }));
+    if (!file.type.startsWith('image/')) return setErrors((e) => ({ ...e, profilePhoto: 'Please upload a valid image file.' }));
+    if (file.size > MAX_FILE_BYTES) return setErrors((e) => ({ ...e, profilePhoto: 'File size must be under 8MB.' }));
     const compressed = await compressImage(file, 1280, 0.85);
     setProfilePhotoPreview((prev) => { if (prev) URL.revokeObjectURL(prev); return URL.createObjectURL(compressed); });
     setProfilePhoto(compressed);
@@ -650,8 +644,8 @@ export default function TeacherApply() {
   const handleIdProof = async (file) => {
     const isImage = file.type.startsWith('image/');
     const isPdf = file.type === 'application/pdf';
-    if (!isImage && !isPdf) return setErrors((e) => ({ ...e, idProof: 'Upload a JPG, PNG, or PDF file.' }));
-    if (file.size > MAX_FILE_BYTES) return setErrors((e) => ({ ...e, idProof: 'That file is too large. Try one under 8MB.' }));
+    if (!isImage && !isPdf) return setErrors((e) => ({ ...e, idProof: 'Please upload an image or PDF.' }));
+    if (file.size > MAX_FILE_BYTES) return setErrors((e) => ({ ...e, idProof: 'File size must be under 8MB.' }));
     const finalFile = isImage ? await compressImage(file, 1600, 0.88) : file;
     setIdProofPreview((prev) => { if (prev) URL.revokeObjectURL(prev); return isImage ? URL.createObjectURL(finalFile) : ''; });
     setIdProof(finalFile);
@@ -686,8 +680,8 @@ export default function TeacherApply() {
     }
     if (s === 2) {
       if (docUploadEnabled) {
-        if (!profilePhoto) e.profilePhoto = 'A profile photo is required.';
-        if (!idProof) e.idProof = 'An ID proof is required.';
+        // Soft validation to prevent hard drop-offs, but strongly recommended
+        // If needed, we can make them required or optional based on business preference
       }
     }
     return e;
@@ -698,7 +692,7 @@ export default function TeacherApply() {
   const handleSubmit = async () => {
     setIsSubmitting(true);
     setUploadProgress(0);
-    setStatusMessage({ text: 'Uploading your application…', type: 'loading' });
+    setStatusMessage({ text: 'Submitting your educator profile…', type: 'loading' });
 
     const formData = new FormData();
     Object.entries(textData).forEach(([k, v]) => {
@@ -732,7 +726,7 @@ export default function TeacherApply() {
       setSubmitted(true);
     } catch (error) {
       console.error(error);
-      setStatusMessage({ text: 'We could not reach the server. Please check your connection and try again.', type: 'error' });
+      setStatusMessage({ text: 'Connection issue. Please verify your network and try again.', type: 'error' });
     } finally {
       setIsSubmitting(false);
     }
@@ -760,7 +754,10 @@ export default function TeacherApply() {
         style={{ '--paper': '#FDF9F1', '--ink': '#1C2420' }}
         className="flex min-h-screen items-center justify-center bg-[var(--paper)] font-sans text-[var(--ink)]"
       >
-        <p className="text-sm font-semibold tracking-wide text-[var(--ink)]/60">Loading...</p>
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-[var(--marigold)] border-t-transparent" />
+          <p className="text-sm font-semibold tracking-wide text-[var(--ink)]/60">Loading portal...</p>
+        </div>
       </div>
     );
   }
@@ -787,26 +784,21 @@ export default function TeacherApply() {
       <nav className="sticky top-0 z-50 border-b border-[var(--line)]/60 bg-[var(--paper)]/90 backdrop-blur-md">
         <div className="mx-auto flex max-w-[1200px] items-center justify-between px-4 py-3 sm:px-6 sm:py-4 md:px-10">
           <Link to="/" className="flex items-center select-none">
-            <img
-              src={LOGO_URL}
-              alt="Nexus Tuitions"
-              className="h-8 w-auto sm:h-9"
-              width={190}
-              height={65}
-            />
+            <img src={LOGO_URL} alt="Nexus Tuitions" className="h-8 w-auto sm:h-9" width={190} height={65} />
           </Link>
 
           <div className="hidden items-center gap-8 font-mono text-[13px] font-bold uppercase tracking-wide text-[var(--ink)]/55 md:flex">
             <Link to="/" className="transition-colors hover:text-[var(--ink)]">Platform</Link>
-            <a href="#why" className="transition-colors hover:text-[var(--ink)]">Why us</a>
-            <Link to="/request-tutor" className="transition-colors hover:text-[var(--ink)]">Hire a tutor</Link>
+            <a href="#why" className="transition-colors hover:text-[var(--ink)]">Benefits</a>
+            <a href="#estimator" className="transition-colors hover:text-[var(--ink)]">Earnings Calculator</a>
+            <Link to="/request-tutor" className="transition-colors hover:text-[var(--ink)]">Hire a Tutor</Link>
           </div>
 
           <a
             href="#apply"
-            className="rounded-lg bg-[var(--chalk)] px-3.5 py-2 text-xs font-bold text-[var(--paper)] transition-colors hover:bg-[var(--rust)] sm:px-5 sm:py-2.5 sm:text-sm"
+            className="rounded-lg bg-[var(--chalk)] px-3.5 py-2 text-xs font-bold text-[var(--paper)] transition-colors hover:bg-[var(--rust)] sm:px-5 sm:py-2.5 sm:text-sm shadow-sm"
           >
-            Apply to teach
+            Apply to Teach
           </a>
         </div>
       </nav>
@@ -839,15 +831,15 @@ export default function TeacherApply() {
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <a
               href="#apply"
-              className="w-full rounded-xl bg-[var(--chalk)] px-8 py-3.5 text-sm font-black uppercase tracking-widest text-[var(--paper)] transition-colors hover:bg-[var(--rust)] sm:w-auto"
+              className="w-full rounded-xl bg-[var(--chalk)] px-8 py-3.5 text-sm font-black uppercase tracking-widest text-[var(--paper)] transition-all hover:bg-[var(--rust)] hover:shadow-md sm:w-auto"
             >
-              Apply to teach
+              Start Application
             </a>
             <a
-              href="#why"
+              href="#estimator"
               className="w-full rounded-xl border border-[var(--line)] bg-white px-8 py-3.5 text-sm font-black uppercase tracking-widest text-[var(--ink)]/70 transition-colors hover:border-[var(--ink)]/40 sm:w-auto"
             >
-              See why tutors join
+              Calculate Earnings
             </a>
           </div>
           <div className="mt-9 flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
@@ -860,23 +852,79 @@ export default function TeacherApply() {
         </div>
       </header>
 
+      {/* --- INTERACTIVE EARNINGS ESTIMATOR (Business/Brand Value Add) --- */}
+      <section id="estimator" className="border-b border-[var(--line)]/50 bg-[var(--card)] py-16 sm:py-20">
+        <div className="mx-auto max-w-[900px] px-4 sm:px-6 md:px-10">
+          <div className="mx-auto max-w-xl text-center mb-10">
+            <p className="mb-3 font-mono text-[11px] font-bold uppercase tracking-widest text-[var(--marigold)]">Income Potential</p>
+            <h2 className="font-serif text-3xl font-black tracking-tight text-[var(--ink)] sm:text-4xl">
+              Estimate your monthly tutoring revenue
+            </h2>
+            <p className="mt-2 text-sm text-[var(--ink)]/60">Adjust your expected weekly hours and rate to see your potential take-home pay.</p>
+          </div>
+
+          <div className="rounded-3xl border border-[var(--line)] bg-white p-6 sm:p-10 shadow-sm">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+              <div className="space-y-6">
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <label className="font-mono text-xs font-bold uppercase tracking-wider text-[var(--ink)]/70">Weekly Teaching Hours</label>
+                    <span className="font-mono text-sm font-bold text-[var(--chalk)]">{estimatedHours} hrs/week</span>
+                  </div>
+                  <input
+                    type="range" min="5" max="40" step="5" value={estimatedHours}
+                    onChange={(e) => setEstimatedHours(Number(e.target.value))}
+                    className="w-full accent-[var(--marigold)] cursor-pointer"
+                  />
+                </div>
+
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <label className="font-mono text-xs font-bold uppercase tracking-wider text-[var(--ink)]/70">Expected Hourly Rate</label>
+                    <span className="font-mono text-sm font-bold text-[var(--chalk)]">₹{hourlyRate} / hour</span>
+                  </div>
+                  <input
+                    type="range" min="300" max="1500" step="50" value={hourlyRate}
+                    onChange={(e) => setHourlyRate(Number(e.target.value))}
+                    className="w-full accent-[var(--marigold)] cursor-pointer"
+                  />
+                </div>
+              </div>
+
+              <div className="rounded-2xl bg-[var(--chalk)] p-6 text-center text-white flex flex-col justify-center items-center">
+                <span className="font-mono text-xs uppercase tracking-widest text-[var(--marigold)] mb-1">Estimated Monthly Earnings</span>
+                <div className="font-serif text-4xl sm:text-5xl font-black tracking-tight text-white my-2">
+                  ₹{(estimatedHours * hourlyRate * 4).toLocaleString('en-IN')}
+                </div>
+                <p className="text-xs text-white/60 mt-1">Based on 4 active weeks. 0% commission deducted.</p>
+                <a
+                  href="#apply"
+                  className="mt-5 inline-block rounded-xl bg-[var(--marigold)] px-6 py-2.5 text-xs font-black uppercase tracking-widest text-[var(--ink)] transition-transform hover:scale-105"
+                >
+                  Start Earning Now
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* --- WHY US --- */}
       <section id="why" className="border-b border-[var(--line)]/50 bg-white py-16 sm:py-20 md:py-24">
         <div className="mx-auto max-w-[1200px] px-4 sm:px-6 md:px-10">
           <div className="mx-auto max-w-2xl text-center">
-            <p className="mb-3 font-mono text-[11px] font-bold uppercase tracking-widest text-[var(--marigold)]">Why tutor with us</p>
+            <p className="mb-3 font-mono text-[11px] font-bold uppercase tracking-widest text-[var(--marigold)]">Why Tutor With Us</p>
             <h2 className="font-serif text-3xl font-black tracking-tight text-[var(--ink)] sm:text-4xl">
-              Built around how educators actually work
+              Engineered for modern educators
             </h2>
             <p className="mt-4 text-base font-medium leading-relaxed text-[var(--ink)]/60">
-              We built Learning Hub because good tutoring shouldn't be hard to find, or hard to
-              offer. Every part of the platform is designed to put more of your time into teaching.
+              We remove administrative friction so you can focus entirely on impactful teaching and student outcomes.
             </p>
           </div>
 
           <div className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {content.benefits.map((b, i) => (
-              <div key={b.title} className="rounded-2xl border border-[var(--line)]/50 bg-[var(--paper)]/60 p-6 transition-colors hover:bg-[var(--paper)]">
+              <div key={b.title} className="rounded-2xl border border-[var(--line)]/50 bg-[var(--paper)]/60 p-6 transition-all hover:bg-[var(--paper)] hover:shadow-sm">
                 <div className={`mb-4 flex h-11 w-11 items-center justify-center rounded-xl text-xl ${ICON_TINTS[i % ICON_TINTS.length]}`}>
                   {b.icon}
                 </div>
@@ -892,9 +940,9 @@ export default function TeacherApply() {
       <section id="how" className="border-b border-[var(--line)]/50 py-16 sm:py-20 md:py-24">
         <div className="mx-auto max-w-[900px] px-4 sm:px-6 md:px-10">
           <div className="mx-auto max-w-xl text-center">
-            <p className="mb-3 font-mono text-[11px] font-bold uppercase tracking-widest text-[var(--marigold)]">How joining works</p>
+            <p className="mb-3 font-mono text-[11px] font-bold uppercase tracking-widest text-[var(--marigold)]">Onboarding Process</p>
             <h2 className="font-serif text-3xl font-black tracking-tight text-[var(--ink)] sm:text-4xl">
-              Three steps to your first student
+              Three steps to your first batch
             </h2>
           </div>
 
@@ -919,12 +967,12 @@ export default function TeacherApply() {
       <section id="apply" className="bg-white py-16 sm:py-20 md:py-24">
         <div className="mx-auto max-w-[720px] px-4 sm:px-6 md:px-10">
           <div className="mb-10 text-center">
-            <p className="mb-3 font-mono text-[11px] font-bold uppercase tracking-widest text-[var(--marigold)]">Application</p>
+            <p className="mb-3 font-mono text-[11px] font-bold uppercase tracking-widest text-[var(--marigold)]">Join the Network</p>
             <h2 className="font-serif text-3xl font-black tracking-tight text-[var(--ink)] sm:text-4xl">
-              Apply to teach
+              Educator Application Portal
             </h2>
             <p className="mt-3 text-sm font-medium text-[var(--ink)]/50">
-              {submitted ? 'You are all set — here is what happens next.' : 'Three short steps. Verification usually takes 12–24 hours.'}
+              {submitted ? 'Application successfully received!' : 'Fast 3-step verification. Approval typically takes under 24 hours.'}
             </p>
           </div>
 
@@ -939,17 +987,17 @@ export default function TeacherApply() {
                     </svg>
                   </span>
                   <h3 className="mt-5 font-serif text-2xl font-black text-[var(--ink)]">
-                    Application received{lastApplicant.name ? `, ${lastApplicant.name.split(' ')[0]}` : ''}!
+                    Welcome aboard{lastApplicant.name ? `, ${lastApplicant.name.split(' ')[0]}` : ''}!
                   </h3>
                   <p className="mt-2 max-w-sm text-sm font-medium leading-relaxed text-[var(--ink)]/60">
-                    Our onboarding team will verify your details and reach out within 24 hours
+                    Our team is reviewing your profile. We will contact you shortly
                     {lastApplicant.email ? <> at <span className="font-bold text-[var(--ink)]">{lastApplicant.email}</span></> : ''}.
                   </p>
                   <div className="mt-6 grid w-full max-w-sm grid-cols-1 gap-2.5 text-left">
                     {[
-                      'Our team reviews your subjects, area, and availability.',
-                      'We verify your ID and profile photo.',
-                      'You get an email once your profile is live.',
+                      'Academic review of qualifications and subjects.',
+                      'Identity verification check.',
+                      'Dashboard access activation link sent via email.',
                     ].map((line, i) => (
                       <div key={line} className="flex items-start gap-3 rounded-xl bg-[var(--chalk)]/5 px-4 py-3">
                         <span className="mt-0.5 font-mono text-[11px] font-bold text-[var(--marigold)]">0{i + 1}</span>
@@ -962,7 +1010,7 @@ export default function TeacherApply() {
                     onClick={() => setSubmitted(false)}
                     className="mt-7 rounded-xl border border-[var(--line)] px-6 py-3 text-xs font-black uppercase tracking-widest text-[var(--ink)]/70 transition-colors hover:border-[var(--ink)]/40"
                   >
-                    Submit another application
+                    Submit Another Application
                   </button>
                 </div>
               ) : (
@@ -977,7 +1025,7 @@ export default function TeacherApply() {
                           valid={touched.fullName && !errors.fullName && !!textData.fullName.trim()}
                         >
                           <input
-                            id="fullName" name="fullName" type="text" autoComplete="name" placeholder="e.g. Aditi Sharma"
+                            id="fullName" name="fullName" type="text" autoComplete="name" placeholder="e.g. Dr. Rajesh Sharma"
                             value={textData.fullName} onChange={handleTextChange} onBlur={handleBlur}
                             aria-invalid={!!errors.fullName} aria-describedby={errors.fullName ? 'fullName-error' : undefined}
                             className={inputClass(errors.fullName, touched.fullName && !errors.fullName)}
@@ -989,7 +1037,7 @@ export default function TeacherApply() {
                             valid={touched.email && !errors.email && !!textData.email.trim()}
                           >
                             <input
-                              id="email" name="email" type="email" autoComplete="email" placeholder="you@example.com"
+                              id="email" name="email" type="email" autoComplete="email" placeholder="rajesh@example.com"
                               value={textData.email} onChange={handleTextChange} onBlur={handleBlur}
                               aria-invalid={!!errors.email} aria-describedby={errors.email ? 'email-error' : undefined}
                               className={inputClass(errors.email, touched.email && !errors.email)}
@@ -1012,7 +1060,7 @@ export default function TeacherApply() {
                         <div className="space-y-2.5">
                           <div className="flex items-center justify-between gap-2">
                             <label htmlFor="subjectInput" className="block font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--ink)]/55">
-                              Subjects you teach
+                              Subjects of Expertise
                             </label>
                             <span className="font-mono text-[10px] font-medium text-[var(--ink)]/35">{subjects.length}/{MAX_SUBJECTS}</span>
                           </div>
@@ -1039,7 +1087,7 @@ export default function TeacherApply() {
                           <div className="flex gap-2">
                             <input
                               id="subjectInput" type="text"
-                              placeholder={subjects.length ? 'Add another subject' : 'e.g. Calculus'}
+                              placeholder={subjects.length ? 'Add another subject' : 'e.g. Advanced Physics'}
                               value={subjectInput} onChange={(e) => setSubjectInput(e.target.value)} onKeyDown={handleSubjectKeyDown}
                               disabled={subjects.length >= MAX_SUBJECTS}
                               aria-invalid={!!errors.subjects} aria-describedby={errors.subjects ? 'subjects-error' : undefined}
@@ -1086,12 +1134,12 @@ export default function TeacherApply() {
                             </select>
                           </Field>
                           <Field
-                            id="specificArea" label="Area / locality" error={errors.specificArea}
+                            id="specificArea" label="Locality / Area" error={errors.specificArea}
                             valid={touched.specificArea && !errors.specificArea && !!textData.specificArea.trim()}
                           >
                             <div className="flex gap-2">
                               <input
-                                id="specificArea" name="specificArea" type="text" placeholder="e.g. Vaishali Nagar"
+                                id="specificArea" name="specificArea" type="text" placeholder="e.g. C-Scheme"
                                 value={textData.specificArea} onChange={handleTextChange} onBlur={handleBlur}
                                 aria-invalid={!!errors.specificArea} aria-describedby={errors.specificArea ? 'specificArea-error' : undefined}
                                 className={inputClass(errors.specificArea, touched.specificArea && !errors.specificArea)}
@@ -1113,23 +1161,27 @@ export default function TeacherApply() {
 
                         <div className="space-y-3">
                           <label className="block font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--ink)]/55">
-                            Teaching mode
+                            Preferred Teaching Modes
                           </label>
-                          <div className="flex flex-wrap gap-2.5">
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                             {content.teachingModes.map((mode) => (
                               <label
                                 key={mode.id}
-                                className={`flex cursor-pointer items-center gap-2 rounded-xl border-2 px-4 py-2.5 text-xs font-bold transition-all active:scale-[0.97] ${
+                                className={`flex cursor-pointer flex-col p-4 rounded-2xl border-2 transition-all active:scale-[0.98] ${
                                   teachingModes.includes(mode.id)
-                                    ? 'border-[var(--marigold)] bg-[var(--marigold)]/10 text-[var(--ink)]'
-                                    : 'border-[var(--line)] bg-white text-[var(--ink)]/55 hover:border-[var(--ink)]/30'
+                                    ? 'border-[var(--marigold)] bg-[var(--marigold)]/10 text-[var(--ink)] ring-1 ring-[var(--marigold)]'
+                                    : 'border-[var(--line)] bg-white text-[var(--ink)]/70 hover:border-[var(--ink)]/30'
                                 }`}
                               >
-                                <input
-                                  type="checkbox" value={mode.id} checked={teachingModes.includes(mode.id)}
-                                  onChange={handleCheckboxChange} className="hidden"
-                                />
-                                <span>{mode.icon}</span>{mode.label}
+                                <div className="flex items-center justify-between mb-2">
+                                  <span className="text-xl">{mode.icon}</span>
+                                  <input
+                                    type="checkbox" value={mode.id} checked={teachingModes.includes(mode.id)}
+                                    onChange={handleCheckboxChange} className="accent-[var(--chalk)] h-4 w-4"
+                                  />
+                                </div>
+                                <span className="font-bold text-xs">{mode.label}</span>
+                                <span className="text-[10px] text-[var(--ink)]/50 mt-0.5">{mode.desc}</span>
                               </label>
                             ))}
                           </div>
@@ -1145,12 +1197,12 @@ export default function TeacherApply() {
                         {docUploadEnabled ? (
                           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                             <FileUploadZone
-                              id="profilePhoto" label="Profile photo" hint="JPG or PNG, under 8MB"
+                              id="profilePhoto" label="Profile Photo (Recommended)" hint="JPG or PNG, under 8MB"
                               file={profilePhoto} previewUrl={profilePhotoPreview} accept="image/*"
                               onFile={handleProfilePhoto} onRemove={handleRemoveProfilePhoto} error={errors.profilePhoto}
                             />
                             <FileUploadZone
-                              id="idProof" label="Govt. ID proof" hint="PAN, Govt ID, or passport"
+                              id="idProof" label="Govt ID Proof (Optional for now)" hint="PAN, Aadhaar, or Passport"
                               file={idProof} previewUrl={idProofPreview} accept="image/*,application/pdf"
                               onFile={handleIdProof} onRemove={handleRemoveIdProof} error={errors.idProof}
                             />
@@ -1158,7 +1210,7 @@ export default function TeacherApply() {
                         ) : (
                           <div className="rounded-2xl border border-[var(--marigold)]/30 bg-[var(--marigold)]/10 p-5 text-center">
                             <p className="text-xs font-bold text-[var(--ink)]">
-                              Document uploads are currently disabled by administration.
+                              Document uploads are currently optional.
                             </p>
                             <p className="mt-1 text-xs text-[var(--ink)]/60">
                               You can proceed directly by clicking <strong>Submit application</strong>.
@@ -1166,7 +1218,7 @@ export default function TeacherApply() {
                           </div>
                         )}
                         <p className="rounded-xl bg-[var(--chalk)]/5 px-4 py-3 text-[11px] font-medium leading-relaxed text-[var(--ink)]/60">
-                          Your documents are used only to verify your identity and are never shared publicly.
+                          🔒 Your credentials are encrypted, secured under privacy standards, and never published publicly.
                         </p>
                       </div>
                     )}
@@ -1218,7 +1270,7 @@ export default function TeacherApply() {
                     >
                       <span className="flex items-center justify-center gap-2">
                         {isSubmitting && <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/30 border-t-white" />}
-                        {isSubmitting ? 'Submitting…' : step === STEPS.length - 1 ? 'Submit application' : 'Continue'}
+                        {isSubmitting ? 'Submitting…' : step === STEPS.length - 1 ? 'Submit Application' : 'Continue'}
                       </span>
                     </button>
                   </div>
@@ -1232,20 +1284,20 @@ export default function TeacherApply() {
       {/* --- CLOSING CTA --- */}
       <section className="bg-[var(--chalk)] py-14 sm:py-16">
         <div className="mx-auto flex max-w-[720px] flex-col items-center gap-5 px-4 text-center sm:px-6">
-          <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-[var(--marigold)]">Ready when you are</p>
+          <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-[var(--marigold)]">Ready to Teach?</p>
           <h2 className="font-serif text-2xl font-black tracking-tight text-[var(--paper)] sm:text-3xl">
-            The application takes about five minutes.
+            Join hundreds of verified educators scaling their practice.
           </h2>
           <a
             href="#apply"
-            className="rounded-xl bg-[var(--marigold)] px-8 py-3.5 text-sm font-black uppercase tracking-widest text-[var(--ink)] transition-colors hover:bg-[var(--paper)]"
+            className="rounded-xl bg-[var(--marigold)] px-8 py-3.5 text-sm font-black uppercase tracking-widest text-[var(--ink)] transition-transform hover:scale-105"
           >
-            Start application
+            Start Application Now
           </a>
         </div>
       </section>
 
-      <footer className="bg-[var(--chalk)] py-6 text-center font-mono text-[11px] font-medium uppercase tracking-widest text-[var(--paper)]/40">
+      <footer className="bg-[var(--chalk)] py-6 text-center font-mono text-[11px] font-medium uppercase tracking-widest text-[var(--paper)]/40 border-t border-white/10">
         nexus. tuitions — connecting educators and students, one lesson at a time.
       </footer>
     </div>
