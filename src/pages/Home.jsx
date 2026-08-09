@@ -2,6 +2,34 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import CustomBadge from '../components/CustomBadge';
 import Maintenance from './Maintenance';
+import { supabase } from '../supabaseClient';
+
+/* Parses a raw site_content.value string back into its original type.
+   Mirrors the parsing logic used in TeacherApply.jsx / SiteContentManager.jsx */
+function parseSiteContentValue(raw) {
+  if (typeof raw !== 'string') return raw;
+  const t = raw.trim();
+  if (t.startsWith('[') || t.startsWith('{')) {
+    try { return JSON.parse(t); } catch { return raw; }
+  }
+  return raw;
+}
+
+/* Maps site_content row keys to fields on the Home page's content object */
+const HOME_CONTENT_KEYS = {
+  global: 'home_global',
+  nav: 'home_nav',
+  hero: 'home_hero',
+  statsBanner: 'home_stats_banner',
+  whyUs: 'home_why_us',
+  howItWorks: 'home_how_it_works',
+  comparison: 'home_comparison',
+  whatWeBelieve: 'home_what_we_believe',
+  testimonials: 'home_testimonials',
+  dualCta: 'home_dual_cta',
+  faq: 'home_faq',
+  footer: 'home_footer',
+};
 
 /* ---------------------------------------------------------------------- */
 /*  DEFAULT CONTENT FALLBACK (The UI will never break if DB is empty)     */
@@ -167,30 +195,54 @@ export default function Home() {
   useEffect(() => {
     async function fetchInitialData() {
       try {
-        // MERN Stack Backend API integration (Express / MongoDB REST endpoints)
-        const [settingsRes, contentRes] = await Promise.all([
-          fetch('/api/settings').then(res => res.json()).catch(() => null),
-          fetch('/api/content/home').then(res => res.json()).catch(() => null)
+        const [{ data: settingsData }, { data: contentRows }] = await Promise.all([
+          supabase.from('app_settings').select('maintenance_mode').eq('id', 1).maybeSingle(),
+          supabase.from('site_content').select('*'),
         ]);
 
-        if (settingsRes && settingsRes.maintenance_mode !== undefined) {
-          setIsMaintenance(settingsRes.maintenance_mode);
+        if (settingsData && settingsData.maintenance_mode !== undefined) {
+          setIsMaintenance(Boolean(settingsData.maintenance_mode));
         }
 
-        if (contentRes && contentRes.data_json) {
-          setPageData({
-            ...DEFAULT_CONTENT,
-            ...contentRes.data_json,
+        if (contentRows) {
+          const rowsDict = {};
+          contentRows.forEach((row) => {
+            rowsDict[row.key] = parseSiteContentValue(row.value);
+          });
+
+          setPageData((prev) => {
+            const next = { ...prev };
+            Object.entries(HOME_CONTENT_KEYS).forEach(([field, key]) => {
+              if (rowsDict[key] !== undefined) next[field] = rowsDict[key];
+            });
+            return next;
           });
         }
       } catch (err) {
-        console.error('Failed to fetch initial data from MERN backend:', err);
+        console.error('Failed to fetch site content from Supabase:', err);
       } finally {
         setLoading(false);
       }
     }
 
     fetchInitialData();
+
+    // Keep the page in sync if an admin updates content while it's open
+    const channel = supabase
+      .channel('home-page-dynamic-sync')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'app_settings' }, (payload) => {
+        if (payload.new && payload.new.maintenance_mode !== undefined) {
+          setIsMaintenance(Boolean(payload.new.maintenance_mode));
+        }
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'site_content' }, () => {
+        fetchInitialData();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   // Reveal a persistent mobile CTA once the visitor has scrolled past the hero —

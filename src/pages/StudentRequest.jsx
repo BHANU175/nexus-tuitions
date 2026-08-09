@@ -9,26 +9,26 @@ import CustomBadge from '../components/CustomBadge';
 /* Static data & Configurations                                           */
 /* ---------------------------------------------------------------------- */
 
-const CLASS_LEVELS = [
+const DEFAULT_CLASS_LEVELS = [
   'Pre-Nursery', 'Nursery', 'LKG', 'UKG',
   'Class 1', 'Class 2', 'Class 3', 'Class 4',
   'Class 5', 'Class 6', 'Class 7', 'Class 8',
   'Class 9', 'Class 10', 'Class 11', 'Class 12',
 ];
 
-const SUBJECT_SUGGESTIONS = [
+const DEFAULT_SUBJECT_SUGGESTIONS = [
   'Mathematics', 'Physics', 'Chemistry', 'Biology', 
   'English', 'Accountancy', 'Economics', 'Science', 'Social Studies'
 ];
 const MAX_SUBJECTS = 8;
 
-const MODES = [
+const DEFAULT_MODES = [
   { id: 'online', label: 'Online', icon: '💻', desc: 'Live virtual 1-on-1 sessions' },
   { id: 'offline', label: "At tutor's studio", icon: '🏫', desc: 'Structured local learning center' },
   { id: 'personal', label: 'At my home', icon: '🏠', desc: 'Convenient doorstep tutoring' },
 ];
 
-const TRUST_BENEFITS = [
+const DEFAULT_TRUST_BENEFITS = [
   { icon: '🛡️', title: 'Verified educators', copy: 'Every tutor undergoes strict identity checks and background verification before onboarding.' },
   { icon: '🔒', title: 'Private & secure', copy: 'Your contact details are shared exclusively with your assigned academic advisor.' },
   { icon: '⏱️', title: 'Rapid 18hr turnaround', copy: 'An expert learning advisor reviews your criteria and matches profiles swiftly.' },
@@ -37,35 +37,80 @@ const TRUST_BENEFITS = [
   { icon: '📞', title: 'Dedicated support', copy: 'Direct access to human advisors throughout your tutoring journey.' },
 ];
 
-const HOW_STEPS = [
+const DEFAULT_HOW_STEPS = [
   { title: 'Define your needs', copy: "Share your child's class, target subjects, and preferred mode." },
   { title: 'Advisor curation', copy: 'Our Jaipur education team hand-selects vetted local specialists.' },
   { title: 'Begin sessions', copy: 'Meet your tutor, evaluate synergy, and start structured learning.' },
 ];
 
-const NEXT_STEPS = [
+const DEFAULT_NEXT_STEPS = [
   { icon: '🔍', text: 'An advisor reviews your requirements' },
   { icon: '🤝', text: 'We share 1–2 matched tutor profiles' },
   { icon: '🎓', text: 'You confirm and schedule the first session' },
 ];
 
-const BANNER_SLIDES = [
+const DEFAULT_BANNER_SLIDES = [
   { note: 'Expert private tutors for Classes 1 to 12 across all major school boards in Jaipur.' },
   { note: 'Rigorous background verification for absolute safety and academic excellence.' },
   { note: 'Zero placement fees. Get matched with top educators within 18 hours.' },
 ];
 
-const PLATFORM_STATS = [
+const DEFAULT_PLATFORM_STATS = [
   { label: 'Verified Tutors in Jaipur', value: '450+' },
   { label: 'Average Match Window', value: '< 18 hrs' },
   { label: 'Parent Satisfaction Score', value: '4.9 / 5' },
 ];
 
-const NAV_LINKS = [
+const DEFAULT_NAV_LINKS = [
   { label: 'Why Us', href: '/#why' },
-  { label: 'Find a Tutor', href: '/request-tutor', current: true },
+  { label: 'Find a Tutor', href: '/request-tutor', current: 'true' },
   { label: 'Become a Tutor', href: '/apply-teacher' },
 ];
+
+const DEFAULT_HERO = {
+  badge: "Jaipur's Premier Academic Concierge (Classes 1-12)",
+  titleStart: 'Find the ultimate tutor, expertly matched for',
+  titleHighlight: 'your child',
+  description: 'From foundational early classes to high-stakes Class 12 board exam preparation, our academic advisors personally curate verified educators across Jaipur.',
+  primaryCtaText: 'Request a tutor',
+  secondaryCtaText: 'See how it works',
+  footnote: 'Free advisor consultation · No placement fees · Responses within 18 hours',
+};
+
+const DEFAULT_SECTIONS = {
+  whyTrustTitle: 'An advisory process built for total confidence',
+  whyTrustSubtitle: "Finding the right mentor shouldn't feel uncertain. Here's our operational standard for every match.",
+  howItWorksTitle: 'Three clear steps to your first session',
+  requestFormTitle: 'Request your tutor match',
+  requestFormSubtitle: 'Complete the secure form below. An academic advisor will review your criteria today.',
+  successTitle: 'Request Registered Successfully!',
+  successSubtitle: 'Thank you. One of our senior learning advisors in Jaipur has received your criteria and is carefully vetting the ideal tutor match. You will hear from us within 18 hours.',
+};
+
+/* Maps site_content row keys to fields on this page's `content` state.
+   Must exactly match STUDENT_KEYS in SiteContentManager.jsx */
+const STUDENT_CONTENT_KEYS = {
+  hero: 'student_hero',
+  nav: 'student_nav',
+  sections: 'student_sections',
+  trustBenefits: 'student_trust_benefits',
+  howSteps: 'student_how_steps',
+  nextSteps: 'student_next_steps',
+  bannerSlides: 'student_banner_slides',
+  platformStats: 'student_platform_stats',
+  classLevels: 'student_class_levels',
+  subjectSuggestions: 'student_subject_suggestions',
+  teachingModes: 'student_teaching_modes',
+};
+
+function parseSiteContentValue(raw) {
+  if (typeof raw !== 'string') return raw;
+  const t = raw.trim();
+  if (t.startsWith('[') || t.startsWith('{')) {
+    try { return JSON.parse(t); } catch { return raw; }
+  }
+  return raw;
+}
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_RE = /^(\+91[\s-]?)?[6-9]\d{9}$/;
@@ -162,16 +207,16 @@ const MentorBadgeIllustration = memo(function MentorBadgeIllustration() {
   );
 });
 
-function HeroBanner() {
+function HeroBanner({ slides }) {
   const [active, setActive] = useState(0);
   const pausedRef = useRef(false);
 
   useEffect(() => {
     const id = setInterval(() => {
-      if (!pausedRef.current) setActive((a) => (a + 1) % BANNER_SLIDES.length);
+      if (!pausedRef.current) setActive((a) => (a + 1) % slides.length);
     }, 4500);
     return () => clearInterval(id);
-  }, []);
+  }, [slides.length]);
 
   return (
     <div
@@ -187,10 +232,10 @@ function HeroBanner() {
       <div className="relative grid grid-cols-1 items-center gap-6 px-6 py-10 sm:px-10 sm:py-12 md:grid-cols-[1fr_auto_auto] md:gap-8 md:px-12 md:py-12">
         <div className="mx-auto w-full max-w-[260px] -rotate-1 rounded-2xl bg-[var(--card)] p-6 shadow-xl md:mx-0">
           <p key={active} aria-live="polite" className="animate-in fade-in font-serif text-base font-bold leading-snug text-[var(--ink)] duration-500">
-            {BANNER_SLIDES[active].note}
+            {slides[active].note}
           </p>
           <div className="mt-5 flex gap-1.5">
-            {BANNER_SLIDES.map((_, i) => (
+            {slides.map((_, i) => (
               <button
                 key={i}
                 type="button"
@@ -234,28 +279,73 @@ export default function StudentRequest() {
   const [isMaintenance, setIsMaintenance] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Check Maintenance mode from Supabase
+  const [content, setContent] = useState({
+    hero: DEFAULT_HERO,
+    nav: { links: DEFAULT_NAV_LINKS },
+    sections: DEFAULT_SECTIONS,
+    trustBenefits: DEFAULT_TRUST_BENEFITS,
+    howSteps: DEFAULT_HOW_STEPS,
+    nextSteps: DEFAULT_NEXT_STEPS,
+    bannerSlides: DEFAULT_BANNER_SLIDES,
+    platformStats: DEFAULT_PLATFORM_STATS,
+    classLevels: DEFAULT_CLASS_LEVELS,
+    subjectSuggestions: DEFAULT_SUBJECT_SUGGESTIONS,
+    teachingModes: DEFAULT_MODES,
+  });
+
+  // Check maintenance mode + load editable page content from Supabase
   useEffect(() => {
     let isMounted = true;
-    async function checkMaintenance() {
+    async function fetchSiteData() {
       try {
-        const { data, error } = await supabase
-          .from('app_settings')
-          .select('maintenance_mode')
-          .single();
+        const [{ data: settingsData }, { data: contentRows }] = await Promise.all([
+          supabase.from('app_settings').select('maintenance_mode').eq('id', 1).maybeSingle(),
+          supabase.from('site_content').select('*'),
+        ]);
 
-        if (isMounted && data && !error) {
-          setIsMaintenance(data.maintenance_mode);
+        if (isMounted && settingsData) {
+          setIsMaintenance(Boolean(settingsData.maintenance_mode));
+        }
+
+        if (isMounted && contentRows) {
+          const rowsDict = {};
+          contentRows.forEach((row) => {
+            rowsDict[row.key] = parseSiteContentValue(row.value);
+          });
+
+          setContent((prev) => {
+            const next = { ...prev };
+            Object.entries(STUDENT_CONTENT_KEYS).forEach(([field, key]) => {
+              if (rowsDict[key] !== undefined) next[field] = rowsDict[key];
+            });
+            return next;
+          });
         }
       } catch (err) {
-        console.error('Failed to fetch app settings:', err);
+        console.error('Failed to fetch app settings or site content:', err);
       } finally {
         if (isMounted) setLoading(false);
       }
     }
 
-    checkMaintenance();
-    return () => { isMounted = false; };
+    fetchSiteData();
+
+    const channel = supabase
+      .channel('student-request-dynamic-sync')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'app_settings' }, (payload) => {
+        if (payload.new && payload.new.maintenance_mode !== undefined) {
+          setIsMaintenance(Boolean(payload.new.maintenance_mode));
+        }
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'site_content' }, () => {
+        fetchSiteData();
+      })
+      .subscribe();
+
+    return () => {
+      isMounted = false;
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const [formData, setFormData] = useState(INITIAL_FORM);
@@ -473,7 +563,7 @@ export default function StudentRequest() {
             />
           </Link>
           <div className="hidden items-center gap-8 font-sans text-sm font-semibold text-[var(--ink)] md:flex">
-            {NAV_LINKS.map((link) => (
+            {content.nav.links.map((link) => (
               <Link
                 key={link.label}
                 to={link.href}
@@ -504,7 +594,7 @@ export default function StudentRequest() {
         <div className={`grid overflow-hidden border-t border-[var(--line)] bg-[var(--paper)] transition-all duration-300 ease-in-out md:hidden ${mobileMenuOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0 border-t-0'}`}>
           <div className="overflow-hidden">
             <div className="flex flex-col gap-1 px-4 py-4 sm:px-6">
-              {NAV_LINKS.map((link) => (
+              {content.nav.links.map((link) => (
                 <Link
                   key={link.label}
                   to={link.href}
@@ -525,42 +615,41 @@ export default function StudentRequest() {
           <div className="grid grid-cols-1 items-center gap-16 lg:grid-cols-2 lg:gap-12">
             <div className="max-w-xl text-center lg:text-left">
               <div className="mb-6 inline-block">
-                <CustomBadge text="Jaipur's Premier Academic Concierge (Classes 1-12)" variant="orange" />
+                <CustomBadge text={content.hero.badge} variant="orange" />
               </div>
               <h1 className="font-serif text-4xl font-black leading-[1.1] tracking-tight text-[var(--ink)] sm:text-5xl md:text-6xl">
-                Find the ultimate tutor,<br className="hidden sm:block lg:hidden xl:block" />
-                expertly matched for <span className="text-[var(--marigold)]">your child</span>.
+                {content.hero.titleStart} <span className="text-[var(--marigold)]">{content.hero.titleHighlight}</span>.
               </h1>
               <p className="mx-auto mt-6 text-base font-medium leading-relaxed text-[var(--ink)]/70 lg:mx-0 lg:text-lg">
-                From foundational early classes to high-stakes Class 12 board exam preparation, our academic advisors personally curate verified educators across Jaipur.
+                {content.hero.description}
               </p>
               <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row lg:justify-start">
                 <a
                   href="#request"
                   className={`w-full rounded-2xl bg-[var(--chalk)] px-8 py-4 text-center text-sm font-black uppercase tracking-widest text-white shadow-xl shadow-[var(--chalk)]/20 transition-all hover:-translate-y-0.5 hover:bg-[var(--marigold)] hover:shadow-2xl sm:w-auto ${focusRing}`}
                 >
-                  Request a tutor
+                  {content.hero.primaryCtaText}
                 </a>
                 <a
                   href="#how"
                   className={`w-full rounded-2xl border-2 border-[var(--line)] bg-white px-8 py-3.5 text-center text-sm font-black uppercase tracking-widest text-[var(--ink)]/70 transition-all hover:bg-gray-50 hover:border-gray-300 sm:w-auto ${focusRing}`}
                 >
-                  See how it works
+                  {content.hero.secondaryCtaText}
                 </a>
               </div>
               <p className="mt-5 text-xs font-bold uppercase tracking-wider text-[var(--ink)]/40">
-                Free advisor consultation · No placement fees · Responses within 18 hours
+                {content.hero.footnote}
               </p>
             </div>
 
             <div className="mx-auto w-full max-w-lg lg:max-w-none">
-              <HeroBanner />
+              <HeroBanner slides={content.bannerSlides} />
             </div>
           </div>
 
           {/* --- PLATFORM STATS BAR --- */}
           <div className="mt-16 grid grid-cols-1 gap-4 sm:grid-cols-3">
-            {PLATFORM_STATS.map((stat) => (
+            {content.platformStats.map((stat) => (
               <div key={stat.label} className="flex items-center justify-between sm:justify-start sm:gap-6 rounded-2xl bg-white/80 border border-[var(--line)] px-6 py-5 shadow-sm backdrop-blur-sm">
                 <span className="font-serif text-3xl font-black text-[var(--marigold)]">{stat.value}</span>
                 <span className="text-xs font-bold uppercase tracking-wider text-[var(--ink)]/60">{stat.label}</span>
@@ -575,15 +664,15 @@ export default function StudentRequest() {
         <div className="mx-auto max-w-[1200px] px-4 sm:px-6 md:px-10">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="font-serif text-3xl font-black tracking-tight text-[var(--ink)] sm:text-4xl">
-              An advisory process built for total confidence
+              {content.sections.whyTrustTitle}
             </h2>
             <p className="mt-4 text-base font-medium leading-relaxed text-[var(--ink)]/70">
-              Finding the right mentor shouldn't feel uncertain. Here's our operational standard for every match.
+              {content.sections.whyTrustSubtitle}
             </p>
           </div>
 
           <div className="mt-14 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {TRUST_BENEFITS.map((b) => (
+            {content.trustBenefits.map((b) => (
               <div key={b.title} className="group rounded-3xl bg-white border border-[var(--line)]/60 p-8 shadow-xs transition-all hover:-translate-y-1 hover:shadow-xl hover:border-[var(--marigold)]/40">
                 <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--paper)] border border-[var(--line)] text-xl transition-transform group-hover:scale-110">
                   {b.icon}
@@ -601,13 +690,13 @@ export default function StudentRequest() {
         <div className="mx-auto max-w-[1000px] px-4 sm:px-6 md:px-10">
           <div className="mx-auto max-w-xl text-center">
             <h2 className="font-serif text-3xl font-black tracking-tight text-[var(--ink)] sm:text-4xl">
-              Three clear steps to your first session
+              {content.sections.howItWorksTitle}
             </h2>
           </div>
 
           <div className="relative mt-16 flex flex-col gap-12 md:flex-row md:justify-between md:gap-8">
             <div aria-hidden="true" className="absolute left-[15%] right-[15%] top-7 hidden h-0.5 rounded-full bg-[var(--line)] md:block" />
-            {HOW_STEPS.map((s, i) => (
+            {content.howSteps.map((s, i) => (
               <div key={s.title} className="relative z-10 flex flex-1 flex-col items-center text-center">
                 <span className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--marigold)] font-mono text-lg font-black text-white shadow-lg shadow-[var(--marigold)]/25 ring-4 ring-[var(--paper)] transition-transform hover:scale-110">
                   0{i + 1}
@@ -625,10 +714,10 @@ export default function StudentRequest() {
         <div className="relative mx-auto max-w-[760px] px-4 sm:px-6 md:px-10">
           <div className="mb-12 text-center">
             <h2 className="font-serif text-3xl font-black tracking-tight text-[var(--ink)] sm:text-4xl">
-              Request your tutor match
+              {content.sections.requestFormTitle}
             </h2>
             <p className="mt-3 text-base font-medium text-[var(--ink)]/70">
-              Complete the secure form below. An academic advisor will review your criteria today.
+              {content.sections.requestFormSubtitle}
             </p>
             <p className="mt-2 text-sm font-semibold text-[var(--ink)]/50">
               Prefer to talk it through? <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className={`font-bold text-[var(--marigold)] underline underline-offset-2 rounded ${focusRing}`}>Message us on WhatsApp</a> instead.
@@ -652,13 +741,13 @@ export default function StudentRequest() {
                 <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 text-3xl shadow-inner">
                   ✓
                 </div>
-                <h3 className="font-serif text-3xl font-black text-[var(--ink)] mb-3">Request Registered Successfully!</h3>
+                <h3 className="font-serif text-3xl font-black text-[var(--ink)] mb-3">{content.sections.successTitle}</h3>
                 <p className="text-base font-medium text-[var(--ink)]/70 max-w-md mx-auto mb-8 leading-relaxed">
-                  Thank you. One of our senior learning advisors in Jaipur has received your criteria and is carefully vetting the ideal tutor match. You will hear from us within 18 hours.
+                  {content.sections.successSubtitle}
                 </p>
 
                 <div className="mx-auto mb-8 grid max-w-lg grid-cols-1 gap-4 text-left sm:grid-cols-3">
-                  {NEXT_STEPS.map((step, i) => (
+                  {content.nextSteps.map((step, i) => (
                     <div key={i} className="rounded-2xl border border-[var(--line)] bg-[var(--paper)]/60 p-4">
                       <span className="text-2xl" aria-hidden="true">{step.icon}</span>
                       <p className="mt-2 text-xs font-bold leading-relaxed text-[var(--ink)]/70">{step.text}</p>
@@ -728,7 +817,7 @@ export default function StudentRequest() {
                             className={selectClass(errors.class_level)}
                           >
                             <option value="" disabled>Select class level</option>
-                            {CLASS_LEVELS.map((c) => <option key={c} value={c}>{c}</option>)}
+                            {content.classLevels.map((c) => <option key={c} value={c}>{c}</option>)}
                           </select>
                         </Field>
                       </div>
@@ -817,7 +906,7 @@ export default function StudentRequest() {
                               <span className="mr-2 font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--ink)]/50">
                                 Suggested:
                               </span>
-                              {SUBJECT_SUGGESTIONS
+                              {content.subjectSuggestions
                                 .filter((s) => !formData.subjects.some((f) => f.toLowerCase() === s.toLowerCase()))
                                 .map((s) => (
                                   <button
@@ -838,7 +927,7 @@ export default function StudentRequest() {
                             Preferred tutoring mode
                           </span>
                           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                            {MODES.map((mode) => (
+                            {content.teachingModes.map((mode) => (
                               <button
                                 type="button" key={mode.id} onClick={() => handleModeSelect(mode.id)}
                                 aria-pressed={formData.preferred_mode === mode.id}
