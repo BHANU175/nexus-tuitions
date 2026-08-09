@@ -9,14 +9,14 @@
   /* Learning Hub palette — chalkboard / paper / marigold theme used
      across the tutor-facing pages. Available anywhere as Tailwind
      utilities, e.g. bg-chalk, text-marigold, border-line. */
-  --color-chalk: #16302A;
-  --color-paper: #EEEFE4;
+  --color-chalk: #12392F;
+  --color-paper: #FDF9F1;
   --color-ink: #1C2420;
-  --color-card: #FCFBF6;
-  --color-marigold: #E7A23D;
-  --color-rust: #B6472F;
-  --color-line: #C9CBB8;
-  --color-good: #3F7D5C;
+  --color-card: #FFFFFF;
+  --color-marigold: #E8903D;
+  --color-rust: #C24D2C;
+  --color-line: #DCDAD0;
+  --color-good: #3D8A62;
 }
 
 body {

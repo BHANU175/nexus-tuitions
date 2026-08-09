@@ -15,14 +15,14 @@
    to delete whenever you touch those files next.
    -------------------------------------------------------------------------- */
 :root {
-  --chalk: #16302A;    /* primary dark surface / headings on light bg */
-  --paper: #EEEFE4;     /* page background */
+  --chalk: #12392F;    /* primary dark surface / headings on light bg */
+  --paper: #FDF9F1;     /* page background */
   --ink: #1C2420;       /* body text */
-  --card: #FCFBF6;      /* card / panel surfaces */
-  --marigold: #E7A23D;  /* primary accent, CTAs, highlights */
-  --rust: #B6472F;      /* secondary accent, hover states, emphasis */
-  --line: #C9CBB8;      /* borders, dividers, disabled states */
-  --good: #3F7D5C;      /* success / confirmation states */
+  --card: #FFFFFF;      /* card / panel surfaces */
+  --marigold: #E8903D;  /* primary accent, CTAs, highlights */
+  --rust: #C24D2C;      /* secondary accent, hover states, emphasis */
+  --line: #DCDAD0;      /* borders, dividers, disabled states */
+  --good: #3D8A62;      /* success / confirmation states */
 }
 
 /* --------------------------------------------------------------------------
@@ -56,7 +56,7 @@ button:not(:disabled) {
    needing a `selection:` / `focus-visible:` utility on every element.
    -------------------------------------------------------------------------- */
 ::selection {
-  background: rgba(231, 162, 61, 0.35); /* marigold @ ~35% */
+  background: rgba(232, 144, 61, 0.35); /* marigold @ ~35% */
   color: var(--ink);
 }
 
