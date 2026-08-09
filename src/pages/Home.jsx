@@ -5,6 +5,8 @@ import Maintenance from './Maintenance';
 
 /* ---------------------------------------------------------------------- */
 /*  DEFAULT CONTENT FALLBACK (The UI will never break if DB is empty)     */
+/*  NOTE: numbers, testimonials, and FAQ copy below are placeholder       */
+/*  content — swap in real figures/quotes before this goes live.          */
 /* ---------------------------------------------------------------------- */
 const DEFAULT_CONTENT = {
   global: {
@@ -14,6 +16,7 @@ const DEFAULT_CONTENT = {
   nav: {
     links: [
       { label: 'Why Us', href: '#why', isExternal: false },
+      { label: 'How It Works', href: '#how', isExternal: false },
       { label: 'Find a Tutor', href: '/request-tutor', isExternal: false },
       { label: 'Become a Tutor', href: '/apply-teacher', isExternal: false }
     ]
@@ -67,6 +70,20 @@ const DEFAULT_CONTENT = {
       { title: 'Start learning', copy: 'Book your first session online or in person, on your terms.' },
     ]
   },
+  comparison: {
+    tagline: "The Nexus Difference",
+    title: "Nexus Tuitions vs. a local coaching agency",
+    footnote: "Based on common practices at traditional tutoring agencies. Individual agencies may vary.",
+    columns: { nexus: "Nexus Tuitions", other: "Typical Agency" },
+    rows: [
+      { feature: "Background-verified tutors", nexus: 'yes', other: 'varies' },
+      { feature: "See tutor rates before you commit", nexus: 'yes', other: 'no' },
+      { feature: "No hidden placement fees", nexus: 'yes', other: 'no' },
+      { feature: "Browse and choose your own tutor", nexus: 'yes', other: 'varies' },
+      { feature: "Switch tutors any time, no penalty", nexus: 'yes', other: 'varies' },
+      { feature: "Online or at-home sessions", nexus: 'yes', other: 'varies' },
+    ],
+  },
   whatWeBelieve: {
     tagline: "Our Core Values",
     title: "Why we built Nexus Tuitions",
@@ -75,6 +92,15 @@ const DEFAULT_CONTENT = {
       { title: 'Learning is personal', copy: 'No two students learn the same way, so we never treat tutoring as one-size-fits-all.' },
       { title: 'Trust is earned', copy: 'Verification and transparency come before growth, on both sides of the platform.' },
       { title: 'Good teaching compounds', copy: 'The right tutor at the right moment can change the whole trajectory of a student’s year.' },
+    ]
+  },
+  testimonials: {
+    tagline: "From the Nexus Community",
+    title: "What families and educators say",
+    items: [
+      { quote: "We went through three tutors before Nexus — the matching questions actually mattered this time. My daughter's grades in chemistry turned around within a term.", name: "Priya S.", role: "Parent, Class 10 student" },
+      { quote: "I could see the rate and the tutor's background before messaging anyone. No awkward negotiation, no agency middleman.", name: "Arjun M.", role: "Parent, Class 8 student" },
+      { quote: "I set my own hours and my own rate. Support actually replies when I have a question about a student match.", name: "Kavya R.", role: "Mathematics tutor" },
     ]
   },
   dualCta: {
@@ -92,8 +118,39 @@ const DEFAULT_CONTENT = {
       btnText: "Apply to teach",
       href: "/apply-teacher"
     }
+  },
+  faq: {
+    tagline: "Questions, Answered",
+    title: "Before you get started",
+    items: [
+      { q: "How are tutors verified?", a: "Every tutor completes an identity check and a background screening before their profile goes live, and before they can message a family." },
+      { q: "How much does tutoring cost?", a: "Rates are set by each tutor and shown on their profile up front. You agree on the rate directly with your tutor — Nexus doesn't add a hidden booking or placement fee." },
+      { q: "What if the tutor isn't the right fit?", a: "You can switch to a different tutor at any time, at no extra cost. We'd rather you find the right match than stay stuck with the wrong one." },
+      { q: "Do you offer online or in-person sessions?", a: "Both. You can filter tutors by whether they teach online, at your home, or either, when you search." },
+      { q: "How do I pay my tutor?", a: "Payment is arranged directly between you and your tutor, based on the terms you agree on together." },
+    ]
+  },
+  footer: {
+    columns: [
+      { title: "Company", links: [{ label: "Why Us", href: "#why" }, { label: "How It Works", href: "#how" }] },
+      { title: "For Families", links: [{ label: "Find a Tutor", href: "/request-tutor" }] },
+      { title: "For Educators", links: [{ label: "Become a Tutor", href: "/apply-teacher" }] },
+    ]
   }
 };
+
+/* ---------------------------------------------------------------------- */
+/*  Small presentational helpers                                          */
+/* ---------------------------------------------------------------------- */
+function ComparisonMark({ value }) {
+  if (value === 'yes') {
+    return <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[var(--good)]/15 text-[var(--good)] font-black">✓</span>;
+  }
+  if (value === 'no') {
+    return <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-black/5 text-[var(--ink)]/30 font-black">–</span>;
+  }
+  return <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[var(--marigold)]/15 text-[var(--rust)] font-black text-xs">~</span>;
+}
 
 /* ---------------------------------------------------------------------- */
 /*  Main Component (MERN Stack Integrated with REST API Backend)           */
@@ -103,6 +160,9 @@ export default function Home() {
   const [isMaintenance, setIsMaintenance] = useState(false);
   const [pageData, setPageData] = useState(DEFAULT_CONTENT);
   const [loading, setLoading] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showStickyCta, setShowStickyCta] = useState(false);
+  const [openFaq, setOpenFaq] = useState(0);
 
   useEffect(() => {
     async function fetchInitialData() {
@@ -133,7 +193,20 @@ export default function Home() {
     fetchInitialData();
   }, []);
 
-  const handleNavigation = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+  // Reveal a persistent mobile CTA once the visitor has scrolled past the hero —
+  // keeps the primary conversion action reachable without crowding the fold.
+  useEffect(() => {
+    const handleScroll = () => setShowStickyCta(window.scrollY > 700);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const handleNavigation = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setMobileMenuOpen(false);
+  };
+
+  const focusRing = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--marigold)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--paper)]";
 
   if (loading) {
     return (
@@ -148,7 +221,7 @@ export default function Home() {
 
   if (isMaintenance) return <Maintenance />;
 
-  const { global, nav, hero, statsBanner, whyUs, howItWorks, whatWeBelieve, dualCta } = pageData;
+  const { global, nav, hero, statsBanner, whyUs, howItWorks, comparison, whatWeBelieve, testimonials, dualCta, faq, footer } = pageData;
 
   return (
     <div
@@ -168,7 +241,7 @@ export default function Home() {
       <nav className="fixed top-0 z-50 w-full border-b border-[var(--line)]/40 bg-[var(--paper)]/85 backdrop-blur-xl transition-all duration-300">
         <div className="mx-auto flex max-w-[1300px] items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-4">
-            <Link to="/" onClick={handleNavigation} className="flex select-none items-center py-1 group focus:outline-none">
+            <Link to="/" onClick={handleNavigation} className={`flex select-none items-center py-1 group rounded-lg ${focusRing}`}>
               <img src={global.logoUrl} alt="Nexus Tuitions" className="h-9 w-auto sm:h-10 object-contain bg-transparent border-0 outline-none shadow-none drop-shadow-none" />
             </Link>
             <div className="hidden sm:block">
@@ -178,21 +251,72 @@ export default function Home() {
               </span>
             </div>
           </div>
-          
+
           <div className="hidden items-center gap-8 text-[14px] font-bold tracking-wide text-[var(--ink)] lg:flex">
             {nav.links.map((link, idx) => (
               link.href.startsWith('#') ? (
-                <a key={idx} href={link.href} className="group relative transition-colors hover:text-[var(--marigold)]">
+                <a key={idx} href={link.href} className={`group relative rounded transition-colors hover:text-[var(--marigold)] ${focusRing}`}>
                   {link.label}
                   <span className="absolute -bottom-1.5 left-0 h-[2px] w-0 bg-[var(--marigold)] transition-all duration-300 group-hover:w-full"></span>
                 </a>
               ) : (
-                <Link key={idx} to={link.href} onClick={handleNavigation} className="group relative transition-colors hover:text-[var(--marigold)]">
+                <Link key={idx} to={link.href} onClick={handleNavigation} className={`group relative rounded transition-colors hover:text-[var(--marigold)] ${focusRing}`}>
                   {link.label}
                   <span className="absolute -bottom-1.5 left-0 h-[2px] w-0 bg-[var(--marigold)] transition-all duration-300 group-hover:w-full"></span>
                 </Link>
               )
             ))}
+          </div>
+
+          <div className="hidden items-center lg:flex">
+            <Link
+              to={hero.primaryCta.href}
+              onClick={handleNavigation}
+              className={`rounded-xl bg-[var(--chalk)] px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-all hover:scale-[1.02] hover:shadow-md active:scale-[0.98] ${focusRing}`}
+            >
+              {hero.primaryCta.label}
+            </Link>
+          </div>
+
+          {/* Mobile menu toggle — links were previously unreachable below the lg breakpoint */}
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen((v) => !v)}
+            aria-expanded={mobileMenuOpen}
+            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+            className={`flex h-10 w-10 items-center justify-center rounded-lg text-[var(--ink)] lg:hidden ${focusRing}`}
+          >
+            <span className="relative block h-4 w-6">
+              <span className={`absolute left-0 top-0 h-[2px] w-6 bg-current transition-all duration-300 ${mobileMenuOpen ? 'top-[7px] rotate-45' : ''}`}></span>
+              <span className={`absolute left-0 top-[7px] h-[2px] w-6 bg-current transition-all duration-300 ${mobileMenuOpen ? 'opacity-0' : ''}`}></span>
+              <span className={`absolute left-0 top-[14px] h-[2px] w-6 bg-current transition-all duration-300 ${mobileMenuOpen ? 'top-[7px] -rotate-45' : ''}`}></span>
+            </span>
+          </button>
+        </div>
+
+        {/* Mobile nav panel */}
+        <div className={`grid overflow-hidden border-t border-[var(--line)]/40 bg-[var(--paper)] transition-all duration-300 ease-in-out lg:hidden ${mobileMenuOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0 border-t-0'}`}>
+          <div className="overflow-hidden">
+            <div className="flex flex-col gap-1 px-4 py-4 sm:px-6">
+              {nav.links.map((link, idx) => (
+                link.href.startsWith('#') ? (
+                  <a key={idx} href={link.href} onClick={() => setMobileMenuOpen(false)} className={`rounded-lg px-3 py-3 text-base font-bold text-[var(--ink)] hover:bg-[var(--chalk)]/5 ${focusRing}`}>
+                    {link.label}
+                  </a>
+                ) : (
+                  <Link key={idx} to={link.href} onClick={handleNavigation} className={`rounded-lg px-3 py-3 text-base font-bold text-[var(--ink)] hover:bg-[var(--chalk)]/5 ${focusRing}`}>
+                    {link.label}
+                  </Link>
+                )
+              ))}
+              <Link
+                to={hero.primaryCta.href}
+                onClick={handleNavigation}
+                className={`mt-2 rounded-xl bg-[var(--chalk)] px-5 py-3 text-center text-sm font-bold text-white shadow-sm ${focusRing}`}
+              >
+                {hero.primaryCta.label}
+              </Link>
+            </div>
           </div>
         </div>
       </nav>
@@ -201,17 +325,17 @@ export default function Home() {
         {/* --- HERO SECTION --- */}
         <section className="relative mx-auto max-w-[1300px] overflow-hidden px-4 py-12 sm:px-6 lg:px-8 lg:py-24">
           <div className="absolute top-[-10%] left-[-10%] h-[500px] w-[500px] rounded-full bg-[var(--marigold)]/10 blur-[100px] -z-10"></div>
-          
+
           <div className="grid grid-cols-1 items-center gap-16 lg:grid-cols-2">
             <div className="max-w-2xl z-10">
               <div className="inline-flex items-center gap-2 rounded-full border border-[var(--marigold)]/30 bg-[var(--marigold)]/10 px-4 py-2 text-xs font-bold text-[var(--rust)] shadow-[0_0_15px_rgba(243,140,53,0.15)] backdrop-blur-sm">
                 <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--marigold)] opacity-75"></span>
+                  <span className="motion-safe:animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--marigold)] opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--rust)]"></span>
                 </span>
                 {hero.badge}
               </div>
-              
+
               <h1 className="mt-8 break-words font-serif text-5xl font-black leading-[1.1] tracking-tight text-[var(--ink)] sm:text-6xl md:text-7xl lg:text-[5rem]">
                 {hero.titleStart} <br />
                 <span className="relative inline-block text-[var(--chalk)] z-10">
@@ -221,7 +345,7 @@ export default function Home() {
                   </svg>
                 </span> {hero.titleEnd}
               </h1>
-              
+
               <p className="mt-8 text-lg sm:text-xl font-medium leading-relaxed text-[var(--ink)]/75 max-w-lg">
                 {hero.description}
               </p>
@@ -236,31 +360,35 @@ export default function Home() {
               </div>
 
               <div className="mt-12 flex flex-col gap-4 sm:flex-row sm:items-center">
-                <Link to={hero.primaryCta.href} onClick={handleNavigation} className="group relative flex items-center justify-center gap-2 overflow-hidden rounded-2xl bg-[var(--chalk)] px-8 py-4 text-base font-bold text-white shadow-lg transition-all hover:scale-[1.02] hover:shadow-xl active:scale-[0.98]">
+                <Link to={hero.primaryCta.href} onClick={handleNavigation} className={`group relative flex items-center justify-center gap-2 overflow-hidden rounded-2xl bg-[var(--chalk)] px-8 py-4 text-base font-bold text-white shadow-lg transition-all hover:scale-[1.02] hover:shadow-xl active:scale-[0.98] ${focusRing}`}>
                   <span className="relative z-10 flex items-center gap-2">{hero.primaryCta.label} <span className="group-hover:translate-x-1 transition-transform">→</span></span>
-                  <div className="absolute inset-0 h-full w-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></div>
+                  <div className="absolute inset-0 h-full w-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full motion-safe:group-hover:animate-[shimmer_1.5s_infinite]"></div>
                 </Link>
-                <Link to={hero.secondaryCta.href} onClick={handleNavigation} className="flex items-center justify-center gap-2 rounded-2xl border-2 border-[var(--line)] bg-white/50 px-8 py-4 text-base font-bold text-[var(--ink)] backdrop-blur-sm transition-all hover:border-[var(--ink)]/30 hover:bg-white hover:shadow-md active:scale-[0.98]">
+                <Link to={hero.secondaryCta.href} onClick={handleNavigation} className={`flex items-center justify-center gap-2 rounded-2xl border-2 border-[var(--line)] bg-white/50 px-8 py-4 text-base font-bold text-[var(--ink)] backdrop-blur-sm transition-all hover:border-[var(--ink)]/30 hover:bg-white hover:shadow-md active:scale-[0.98] ${focusRing}`}>
                   {hero.secondaryCta.label}
                 </Link>
               </div>
+
+              <p className="mt-6 text-sm font-semibold text-[var(--ink)]/50">
+                No commitment to browse. See tutor rates before you message anyone.
+              </p>
             </div>
 
             <div className="relative mx-auto mt-10 w-full max-w-lg lg:mt-0 lg:max-w-xl xl:max-w-2xl">
               <div className="absolute left-1/2 top-1/2 -z-20 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-tr from-[#F6C280] to-[#F3B770] opacity-30 blur-3xl"></div>
-              
+
               <div className="relative z-10 group">
-                <img src={hero.imageUrl} alt="Hero illustration" className="w-full scale-105 rounded-2xl object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.15)] transition-transform duration-700 group-hover:scale-110" />
+                <img src={hero.imageUrl} alt="Student learning with a Nexus tutor" className="w-full scale-105 rounded-2xl object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.15)] transition-transform duration-700 group-hover:scale-110" />
               </div>
 
               {hero.floatingStats.map((stat, idx) => {
                 const positions = {
-                  "top-left": "absolute -left-2 top-0 sm:-left-12 sm:top-10 origin-top-left animate-[float_6s_ease-in-out_infinite]",
-                  "top-right": "absolute -right-2 top-0 sm:-right-12 sm:top-10 origin-top-right animate-[float_6s_ease-in-out_infinite_1s]",
-                  "bottom-left": "absolute -left-2 bottom-6 sm:-left-12 sm:bottom-20 origin-bottom-left animate-[float_6s_ease-in-out_infinite_2s]",
-                  "bottom-right": "absolute -right-2 bottom-12 sm:-right-12 sm:bottom-24 origin-bottom-right animate-[float_6s_ease-in-out_infinite_3s]"
+                  "top-left": "absolute -left-2 top-0 sm:-left-12 sm:top-10 origin-top-left motion-safe:animate-[float_6s_ease-in-out_infinite]",
+                  "top-right": "absolute -right-2 top-0 sm:-right-12 sm:top-10 origin-top-right motion-safe:animate-[float_6s_ease-in-out_infinite_1s]",
+                  "bottom-left": "absolute -left-2 bottom-6 sm:-left-12 sm:bottom-20 origin-bottom-left motion-safe:animate-[float_6s_ease-in-out_infinite_2s]",
+                  "bottom-right": "absolute -right-2 bottom-12 sm:-right-12 sm:bottom-24 origin-bottom-right motion-safe:animate-[float_6s_ease-in-out_infinite_3s]"
                 };
-                
+
                 return (
                   <div key={idx} className={`z-20 flex scale-[0.8] sm:scale-100 flex-col items-center rounded-2xl border border-white/40 bg-white/80 p-4 shadow-[0_8px_30px_rgb(0,0,0,0.08)] backdrop-blur-md transition-transform hover:scale-[1.05] sm:hover:scale-110 cursor-default ${positions[stat.position]}`}>
                     {stat.icon.includes('★') ? (
@@ -321,7 +449,7 @@ export default function Home() {
         </section>
 
         {/* --- HOW IT WORKS (Connected Flow) --- */}
-        <section className="py-20 sm:py-28">
+        <section id="how" className="py-20 sm:py-28">
           <div className="mx-auto max-w-[1100px] px-4 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-2xl text-center">
               <span className="mb-4 inline-block rounded-full bg-[var(--marigold)]/20 px-4 py-1.5 font-mono text-xs font-bold uppercase tracking-widest text-[var(--rust)]">{howItWorks.tagline}</span>
@@ -330,7 +458,7 @@ export default function Home() {
 
             <div className="relative mt-20 flex flex-col gap-12 md:flex-row md:justify-between md:gap-8">
               <div aria-hidden="true" className="absolute left-[5%] right-[5%] top-8 hidden h-[2px] bg-gradient-to-r from-[var(--chalk)]/10 via-[var(--chalk)]/40 to-[var(--chalk)]/10 md:block" />
-              
+
               {howItWorks.steps.map((s, i) => (
                 <div key={i} className="group relative z-10 flex items-start gap-6 md:w-1/3 md:flex-col md:items-center md:text-center">
                   <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full border-[6px] border-[var(--paper)] bg-[var(--chalk)] font-mono text-xl font-bold text-white shadow-lg transition-transform duration-300 group-hover:scale-110">
@@ -346,10 +474,42 @@ export default function Home() {
           </div>
         </section>
 
+        {/* --- COMPARISON (Business differentiation) --- */}
+        <section className="py-20 sm:py-28">
+          <div className="mx-auto max-w-[1000px] px-4 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-2xl text-center">
+              <span className="mb-4 inline-block rounded-full bg-[var(--chalk)]/10 px-4 py-1.5 font-mono text-xs font-bold uppercase tracking-widest text-[var(--chalk)]">{comparison.tagline}</span>
+              <h2 className="mt-2 font-serif text-4xl font-black tracking-tight text-[var(--ink)] sm:text-5xl">{comparison.title}</h2>
+            </div>
+
+            <div className="mt-14 overflow-hidden rounded-3xl border border-[var(--line)]/60 bg-white shadow-sm">
+              <div className="grid grid-cols-3 border-b border-[var(--line)]/60 bg-[var(--paper)]">
+                <div className="p-5"></div>
+                <div className="p-5 text-center">
+                  <span className="text-sm font-black text-[var(--chalk)]">{comparison.columns.nexus}</span>
+                </div>
+                <div className="p-5 text-center">
+                  <span className="text-sm font-bold text-[var(--ink)]/50">{comparison.columns.other}</span>
+                </div>
+              </div>
+              {comparison.rows.map((row, idx) => (
+                <div key={idx} className={`grid grid-cols-3 items-center ${idx !== comparison.rows.length - 1 ? 'border-b border-[var(--line)]/40' : ''}`}>
+                  <div className="p-5 text-sm font-bold text-[var(--ink)]/80">{row.feature}</div>
+                  <div className="flex justify-center p-5"><ComparisonMark value={row.nexus} /></div>
+                  <div className="flex justify-center p-5"><ComparisonMark value={row.other} /></div>
+                </div>
+              ))}
+            </div>
+            {comparison.footnote && (
+              <p className="mt-4 text-center text-xs font-medium text-[var(--ink)]/40">{comparison.footnote}</p>
+            )}
+          </div>
+        </section>
+
         {/* --- WHAT WE BELIEVE --- */}
         <section className="relative overflow-hidden bg-[var(--ink)] py-20 text-white sm:py-28">
           <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '32px 32px' }}></div>
-          
+
           <div className="relative z-10 mx-auto max-w-[1100px] px-4 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-3xl text-center">
               <span className="mb-4 inline-block font-mono text-xs font-bold uppercase tracking-widest text-[var(--marigold)]">{whatWeBelieve.tagline}</span>
@@ -360,10 +520,35 @@ export default function Home() {
             <div className="mt-16 grid grid-cols-1 gap-10 sm:grid-cols-3 sm:gap-8">
               {whatWeBelieve.values.map((v, i) => (
                 <div key={i} className="relative border-t border-white/20 pt-6 transition-all hover:border-[var(--marigold)]">
-                  <span className="absolute -top-4 right-0 font-serif text-6xl font-black text-white/5 group-hover:text-white/10">0{i + 1}</span>
+                  <span className="absolute -top-4 right-0 font-serif text-6xl font-black text-white/5">0{i + 1}</span>
                   <h3 className="mt-2 font-serif text-2xl font-black text-white">{v.title}</h3>
                   <p className="mt-4 text-base font-medium leading-relaxed text-white/60">{v.copy}</p>
                 </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* --- TESTIMONIALS (Social proof) --- */}
+        <section className="py-20 sm:py-28">
+          <div className="mx-auto max-w-[1300px] px-4 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-2xl text-center">
+              <span className="mb-4 inline-block rounded-full bg-[var(--marigold)]/20 px-4 py-1.5 font-mono text-xs font-bold uppercase tracking-widest text-[var(--rust)]">{testimonials.tagline}</span>
+              <h2 className="mt-2 font-serif text-4xl font-black tracking-tight text-[var(--ink)] sm:text-5xl">{testimonials.title}</h2>
+            </div>
+
+            <div className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {testimonials.items.map((t, idx) => (
+                <figure key={idx} className="flex flex-col rounded-3xl border border-[var(--line)]/60 bg-white p-8 shadow-sm">
+                  <div className="text-[var(--marigold)]" aria-hidden="true">★★★★★</div>
+                  <blockquote className="mt-4 flex-1 text-base font-medium leading-relaxed text-[var(--ink)]/75">
+                    “{t.quote}”
+                  </blockquote>
+                  <figcaption className="mt-6 border-t border-[var(--line)]/50 pt-4">
+                    <div className="text-sm font-black text-[var(--ink)]">{t.name}</div>
+                    <div className="text-xs font-bold uppercase tracking-wide text-[var(--ink)]/40">{t.role}</div>
+                  </figcaption>
+                </figure>
               ))}
             </div>
           </div>
@@ -378,12 +563,12 @@ export default function Home() {
                 <p className="inline-block rounded-md bg-[var(--marigold)]/15 px-3 py-1 font-mono text-xs font-bold uppercase tracking-widest text-[var(--rust)]">{dualCta.family.tagline}</p>
                 <h3 className="mt-6 font-serif text-3xl font-black tracking-tight text-[var(--ink)] sm:text-4xl">{dualCta.family.title}</h3>
                 <p className="mt-4 max-w-sm text-base font-medium leading-relaxed text-[var(--ink)]/60">{dualCta.family.description}</p>
-                <Link to={dualCta.family.href} onClick={handleNavigation} className="mt-10 inline-flex items-center gap-2 rounded-2xl bg-[var(--chalk)] px-8 py-4 text-sm font-bold uppercase tracking-wider text-white shadow-lg transition-all hover:scale-[1.02] hover:bg-opacity-90 active:scale-[0.98]">
+                <Link to={dualCta.family.href} onClick={handleNavigation} className={`mt-10 inline-flex items-center gap-2 rounded-2xl bg-[var(--chalk)] px-8 py-4 text-sm font-bold uppercase tracking-wider text-white shadow-lg transition-all hover:scale-[1.02] hover:bg-opacity-90 active:scale-[0.98] ${focusRing}`}>
                   {dualCta.family.btnText} <span className="text-lg">→</span>
                 </Link>
               </div>
             </div>
-            
+
             <div className="group relative overflow-hidden rounded-3xl bg-[var(--chalk)] p-10 sm:p-14 shadow-xl transition-all duration-300 hover:-translate-y-1">
               <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
               <div className="absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-[var(--good)] blur-3xl transition-transform duration-500 group-hover:scale-150"></div>
@@ -391,25 +576,108 @@ export default function Home() {
                 <p className="inline-block rounded-md bg-white/10 px-3 py-1 font-mono text-xs font-bold uppercase tracking-widest text-[var(--marigold)] backdrop-blur-sm">{dualCta.educator.tagline}</p>
                 <h3 className="mt-6 font-serif text-3xl font-black tracking-tight text-white sm:text-4xl">{dualCta.educator.title}</h3>
                 <p className="mt-4 max-w-sm text-base font-medium leading-relaxed text-white/70">{dualCta.educator.description}</p>
-                <Link to={dualCta.educator.href} onClick={handleNavigation} className="mt-10 inline-flex items-center gap-2 rounded-2xl bg-[var(--marigold)] px-8 py-4 text-sm font-bold uppercase tracking-wider text-[var(--ink)] shadow-lg transition-all hover:scale-[1.02] hover:bg-white active:scale-[0.98]">
+                <Link to={dualCta.educator.href} onClick={handleNavigation} className={`mt-10 inline-flex items-center gap-2 rounded-2xl bg-[var(--marigold)] px-8 py-4 text-sm font-bold uppercase tracking-wider text-[var(--ink)] shadow-lg transition-all hover:scale-[1.02] hover:bg-white active:scale-[0.98] ${focusRing}`}>
                   {dualCta.educator.btnText} <span className="text-lg">→</span>
                 </Link>
               </div>
             </div>
           </div>
         </section>
+
+        {/* --- FAQ (Reduces friction before signup) --- */}
+        <section className="py-20 sm:py-28">
+          <div className="mx-auto max-w-[800px] px-4 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-2xl text-center">
+              <span className="mb-4 inline-block rounded-full bg-[var(--chalk)]/10 px-4 py-1.5 font-mono text-xs font-bold uppercase tracking-widest text-[var(--chalk)]">{faq.tagline}</span>
+              <h2 className="mt-2 font-serif text-4xl font-black tracking-tight text-[var(--ink)] sm:text-5xl">{faq.title}</h2>
+            </div>
+
+            <div className="mt-14 flex flex-col gap-3">
+              {faq.items.map((item, idx) => {
+                const isOpen = openFaq === idx;
+                return (
+                  <div key={idx} className="overflow-hidden rounded-2xl border border-[var(--line)]/60 bg-white">
+                    <button
+                      type="button"
+                      onClick={() => setOpenFaq(isOpen ? -1 : idx)}
+                      aria-expanded={isOpen}
+                      className={`flex w-full items-center justify-between gap-4 px-6 py-5 text-left ${focusRing}`}
+                    >
+                      <span className="text-base font-bold text-[var(--ink)]">{item.q}</span>
+                      <span className={`shrink-0 text-xl font-black text-[var(--rust)] transition-transform duration-300 ${isOpen ? 'rotate-45' : ''}`}>+</span>
+                    </button>
+                    <div className={`grid transition-all duration-300 ease-in-out ${isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}>
+                      <div className="overflow-hidden">
+                        <p className="px-6 pb-5 text-base font-medium leading-relaxed text-[var(--ink)]/60">{item.a}</p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
       </main>
 
       {/* --- PREMIUM FOOTER --- */}
-      <footer className="mt-auto border-t border-[var(--line)]/40 bg-white py-12 text-center">
-        <div className="mx-auto max-w-[1300px] px-4 flex flex-col items-center gap-6">
-          <img src={global.logoUrl} alt="Nexus Tuitions" className="h-8 w-auto grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all duration-300" />
-          <p className="font-mono text-[12px] font-bold uppercase tracking-widest text-[var(--ink)]/40">
-            {global.footerText}
-          </p>
+      <footer className="mt-auto border-t border-[var(--line)]/40 bg-white pb-28 pt-16 sm:pb-16">
+        <div className="mx-auto max-w-[1300px] px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 gap-10 sm:grid-cols-4">
+            <div className="col-span-2 sm:col-span-1">
+              <img src={global.logoUrl} alt="Nexus Tuitions" className="h-8 w-auto" />
+            </div>
+            {footer.columns.map((col, idx) => (
+              <div key={idx}>
+                <h5 className="text-xs font-black uppercase tracking-widest text-[var(--ink)]/40">{col.title}</h5>
+                <ul className="mt-4 flex flex-col gap-3">
+                  {col.links.map((link, i) => (
+                    <li key={i}>
+                      {link.href.startsWith('#') ? (
+                        <a href={link.href} className={`text-sm font-semibold text-[var(--ink)]/70 hover:text-[var(--marigold)] rounded ${focusRing}`}>{link.label}</a>
+                      ) : (
+                        <Link to={link.href} onClick={handleNavigation} className={`text-sm font-semibold text-[var(--ink)]/70 hover:text-[var(--marigold)] rounded ${focusRing}`}>{link.label}</Link>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-14 flex flex-col items-center gap-4 border-t border-[var(--line)]/40 pt-8 text-center">
+            <p className="font-mono text-[12px] font-bold uppercase tracking-widest text-[var(--ink)]/40">
+              {global.footerText}
+            </p>
+          </div>
         </div>
       </footer>
-      
+
+      {/* --- STICKY MOBILE CTA (appears after scrolling past the hero) --- */}
+      <div
+        className={`fixed inset-x-0 bottom-0 z-40 border-t border-[var(--line)]/60 bg-white/95 px-4 py-3 shadow-[0_-8px_30px_rgba(0,0,0,0.08)] backdrop-blur-md transition-transform duration-300 sm:hidden ${showStickyCta ? 'translate-y-0' : 'translate-y-full'}`}
+        style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}
+      >
+        <Link
+          to={hero.primaryCta.href}
+          onClick={handleNavigation}
+          className={`flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--chalk)] px-6 py-3.5 text-sm font-bold text-white shadow-md active:scale-[0.98] ${focusRing}`}
+        >
+          {hero.primaryCta.label} <span>→</span>
+        </Link>
+      </div>
+
+      {/* --- QUICK CONTACT (desktop/tablet only, avoids overlapping the mobile sticky CTA) --- */}
+      {/* TODO: replace with the real WhatsApp business number before launch */}
+      <a
+        href="https://wa.me/910000000000"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Chat with us on WhatsApp"
+        className={`fixed bottom-6 right-6 z-40 hidden h-14 w-14 items-center justify-center rounded-full bg-[var(--good)] text-2xl text-white shadow-lg transition-transform hover:scale-105 active:scale-95 sm:flex ${focusRing}`}
+      >
+        💬
+      </a>
+
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes float {
           0%, 100% { transform: translateY(0); }
@@ -417,6 +685,14 @@ export default function Home() {
         }
         @keyframes shimmer {
           100% { transform: translateX(100%); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          *, *::before, *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
+          }
         }
       `}} />
     </div>
