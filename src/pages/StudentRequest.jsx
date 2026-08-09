@@ -43,6 +43,12 @@ const HOW_STEPS = [
   { title: 'Begin sessions', copy: 'Meet your tutor, evaluate synergy, and start structured learning.' },
 ];
 
+const NEXT_STEPS = [
+  { icon: '🔍', text: 'An advisor reviews your requirements' },
+  { icon: '🤝', text: 'We share 1–2 matched tutor profiles' },
+  { icon: '🎓', text: 'You confirm and schedule the first session' },
+];
+
 const BANNER_SLIDES = [
   { note: 'Expert private tutors for Classes 1 to 12 across all major school boards in Jaipur.' },
   { note: 'Rigorous background verification for absolute safety and academic excellence.' },
@@ -55,8 +61,17 @@ const PLATFORM_STATS = [
   { label: 'Parent Satisfaction Score', value: '4.9 / 5' },
 ];
 
+const NAV_LINKS = [
+  { label: 'Why Us', href: '/#why' },
+  { label: 'Find a Tutor', href: '/request-tutor', current: true },
+  { label: 'Become a Tutor', href: '/apply-teacher' },
+];
+
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_RE = /^(\+91[\s-]?)?[6-9]\d{9}$/;
+
+// TODO: replace with the real WhatsApp business number before launch
+const WHATSAPP_URL = "https://wa.me/910000000000";
 
 const SELECT_ARROW_URL =
   "data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23131313%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E";
@@ -67,15 +82,17 @@ const LOGO_URL = "/logo.png";
 /* Helper UI Components                                                   */
 /* ---------------------------------------------------------------------- */
 
-function Field({ label, error, hint, children }) {
+const focusRing = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--marigold)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--paper)]";
+
+function Field({ label, htmlFor, error, hint, children }) {
   return (
     <div className="space-y-2">
-      <label className="block font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--ink)]/80 pl-1">
+      <label htmlFor={htmlFor} className="block font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--ink)]/80 pl-1">
         {label}
       </label>
       {children}
       {error ? (
-        <p className="font-mono text-[11px] font-semibold text-[var(--rust)] pl-1 animate-shake">{error}</p>
+        <p className="font-mono text-[11px] font-semibold text-[var(--rust)] pl-1 animate-shake" role="alert">{error}</p>
       ) : hint ? (
         <p className="text-[11px] font-medium text-[var(--ink)]/40 pl-1">{hint}</p>
       ) : null}
@@ -169,7 +186,7 @@ function HeroBanner() {
       />
       <div className="relative grid grid-cols-1 items-center gap-6 px-6 py-10 sm:px-10 sm:py-12 md:grid-cols-[1fr_auto_auto] md:gap-8 md:px-12 md:py-12">
         <div className="mx-auto w-full max-w-[260px] -rotate-1 rounded-2xl bg-[var(--card)] p-6 shadow-xl md:mx-0">
-          <p key={active} className="animate-in fade-in font-serif text-base font-bold leading-snug text-[var(--ink)] duration-500">
+          <p key={active} aria-live="polite" className="animate-in fade-in font-serif text-base font-bold leading-snug text-[var(--ink)] duration-500">
             {BANNER_SLIDES[active].note}
           </p>
           <div className="mt-5 flex gap-1.5">
@@ -179,7 +196,7 @@ function HeroBanner() {
                 type="button"
                 onClick={() => setActive(i)}
                 aria-label={`Show message ${i + 1}`}
-                className={`h-1.5 rounded-full transition-all ${i === active ? 'w-6 bg-[var(--marigold)]' : 'w-1.5 bg-[var(--ink)]/20'}`}
+                className={`h-1.5 rounded-full transition-all ${focusRing} ${i === active ? 'w-6 bg-[var(--marigold)]' : 'w-1.5 bg-[var(--ink)]/20'}`}
               />
             ))}
           </div>
@@ -210,6 +227,7 @@ const INITIAL_FORM = {
   city: 'Jaipur',
   specific_area: '',
   location_coords: '',
+  consent: false,
 };
 
 export default function StudentRequest() {
@@ -247,10 +265,20 @@ export default function StudentRequest() {
   const [statusMessage, setStatusMessage] = useState({ text: '', type: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
-  
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showStickyCta, setShowStickyCta] = useState(false);
+
   // State for Multi-Step Form & Success View
   const [currentStep, setCurrentStep] = useState(1);
   const [isSuccess, setIsSuccess] = useState(false);
+
+  // Reveal a persistent mobile CTA once the visitor has scrolled past the hero,
+  // so the request form is always one tap away while they're reading Trust / How-it-works.
+  useEffect(() => {
+    const handleScroll = () => setShowStickyCta(window.scrollY > 700);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const clearError = useCallback((name) => {
     setErrors((e) => {
@@ -270,6 +298,11 @@ export default function StudentRequest() {
   const handleModeSelect = useCallback((id) => {
     setFormData((prev) => ({ ...prev, preferred_mode: id }));
   }, []);
+
+  const handleConsentToggle = useCallback(() => {
+    setFormData((prev) => ({ ...prev, consent: !prev.consent }));
+    clearError('consent');
+  }, [clearError]);
 
   /* ---- Subjects Tag System ---- */
   const addSubject = useCallback((raw) => {
@@ -334,6 +367,7 @@ export default function StudentRequest() {
     if (step === 3) {
       if (formData.subjects.length === 0) e.subjects = 'Add at least one subject requirement.';
       if (!formData.specific_area.trim()) e.specific_area = 'Enter your specific locality in Jaipur.';
+      if (!formData.consent) e.consent = 'Please confirm you agree to be contacted about this request.';
     }
     return e;
   }, [formData]);
@@ -389,6 +423,8 @@ export default function StudentRequest() {
     }
   };
 
+  const closeMobileMenu = () => setMobileMenuOpen(false);
+
   if (loading) {
     return (
       <div
@@ -427,7 +463,7 @@ export default function StudentRequest() {
       {/* --- NAV --- */}
       <nav className="sticky top-0 z-50 border-b border-[var(--line)] bg-[var(--paper)]/95 backdrop-blur-md">
         <div className="mx-auto flex max-w-[1200px] items-center justify-between px-4 py-4 sm:px-6 md:px-10">
-          <Link to="/" className="flex items-center select-none">
+          <Link to="/" className={`flex items-center select-none rounded-lg ${focusRing}`}>
             <img
               src={LOGO_URL}
               alt="Nexus Tuitions"
@@ -437,9 +473,48 @@ export default function StudentRequest() {
             />
           </Link>
           <div className="hidden items-center gap-8 font-sans text-sm font-semibold text-[var(--ink)] md:flex">
-            <Link to="/" className="transition-colors hover:opacity-70">Why Us</Link>
-            <Link to="/request-tutor" className="transition-colors hover:opacity-70 text-[var(--marigold)] font-bold">Find a Tutor</Link>
-            <Link to="/apply-teacher" className="transition-colors hover:opacity-70">Become a Tutor</Link>
+            {NAV_LINKS.map((link) => (
+              <Link
+                key={link.label}
+                to={link.href}
+                className={`rounded transition-colors hover:opacity-70 ${focusRing} ${link.current ? 'text-[var(--marigold)] font-bold' : ''}`}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </div>
+
+          {/* Mobile menu toggle — nav links were previously unreachable below md */}
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen((v) => !v)}
+            aria-expanded={mobileMenuOpen}
+            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+            className={`flex h-10 w-10 items-center justify-center rounded-lg text-[var(--ink)] md:hidden ${focusRing}`}
+          >
+            <span className="relative block h-4 w-6">
+              <span className={`absolute left-0 top-0 h-[2px] w-6 bg-current transition-all duration-300 ${mobileMenuOpen ? 'top-[7px] rotate-45' : ''}`}></span>
+              <span className={`absolute left-0 top-[7px] h-[2px] w-6 bg-current transition-all duration-300 ${mobileMenuOpen ? 'opacity-0' : ''}`}></span>
+              <span className={`absolute left-0 top-[14px] h-[2px] w-6 bg-current transition-all duration-300 ${mobileMenuOpen ? 'top-[7px] -rotate-45' : ''}`}></span>
+            </span>
+          </button>
+        </div>
+
+        {/* Mobile nav panel */}
+        <div className={`grid overflow-hidden border-t border-[var(--line)] bg-[var(--paper)] transition-all duration-300 ease-in-out md:hidden ${mobileMenuOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0 border-t-0'}`}>
+          <div className="overflow-hidden">
+            <div className="flex flex-col gap-1 px-4 py-4 sm:px-6">
+              {NAV_LINKS.map((link) => (
+                <Link
+                  key={link.label}
+                  to={link.href}
+                  onClick={closeMobileMenu}
+                  className={`rounded-lg px-3 py-3 text-base font-bold hover:bg-[var(--chalk)]/5 ${focusRing} ${link.current ? 'text-[var(--marigold)]' : 'text-[var(--ink)]'}`}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </nav>
@@ -462,17 +537,20 @@ export default function StudentRequest() {
               <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row lg:justify-start">
                 <a
                   href="#request"
-                  className="w-full rounded-2xl bg-[var(--chalk)] px-8 py-4 text-center text-sm font-black uppercase tracking-widest text-white shadow-xl shadow-[var(--chalk)]/20 transition-all hover:-translate-y-0.5 hover:bg-[var(--marigold)] hover:shadow-2xl sm:w-auto"
+                  className={`w-full rounded-2xl bg-[var(--chalk)] px-8 py-4 text-center text-sm font-black uppercase tracking-widest text-white shadow-xl shadow-[var(--chalk)]/20 transition-all hover:-translate-y-0.5 hover:bg-[var(--marigold)] hover:shadow-2xl sm:w-auto ${focusRing}`}
                 >
                   Request a tutor
                 </a>
                 <a
                   href="#how"
-                  className="w-full rounded-2xl border-2 border-[var(--line)] bg-white px-8 py-3.5 text-center text-sm font-black uppercase tracking-widest text-[var(--ink)]/70 transition-all hover:bg-gray-50 hover:border-gray-300 sm:w-auto"
+                  className={`w-full rounded-2xl border-2 border-[var(--line)] bg-white px-8 py-3.5 text-center text-sm font-black uppercase tracking-widest text-[var(--ink)]/70 transition-all hover:bg-gray-50 hover:border-gray-300 sm:w-auto ${focusRing}`}
                 >
                   See how it works
                 </a>
               </div>
+              <p className="mt-5 text-xs font-bold uppercase tracking-wider text-[var(--ink)]/40">
+                Free advisor consultation · No placement fees · Responses within 18 hours
+              </p>
             </div>
 
             <div className="mx-auto w-full max-w-lg lg:max-w-none">
@@ -552,10 +630,17 @@ export default function StudentRequest() {
             <p className="mt-3 text-base font-medium text-[var(--ink)]/70">
               Complete the secure form below. An academic advisor will review your criteria today.
             </p>
+            <p className="mt-2 text-sm font-semibold text-[var(--ink)]/50">
+              Prefer to talk it through? <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className={`font-bold text-[var(--marigold)] underline underline-offset-2 rounded ${focusRing}`}>Message us on WhatsApp</a> instead.
+            </p>
           </div>
 
           {statusMessage.text && (
-            <div className="mb-8 flex items-center gap-4 rounded-2xl border border-red-200 bg-red-50 px-6 py-5 text-sm font-bold text-red-700 shadow-xs">
+            <div
+              role="status"
+              aria-live="polite"
+              className="mb-8 flex items-center gap-4 rounded-2xl border border-red-200 bg-red-50 px-6 py-5 text-sm font-bold text-red-700 shadow-xs"
+            >
               <span className="flex-1 text-[15px]">{statusMessage.text}</span>
             </div>
           )}
@@ -571,6 +656,16 @@ export default function StudentRequest() {
                 <p className="text-base font-medium text-[var(--ink)]/70 max-w-md mx-auto mb-8 leading-relaxed">
                   Thank you. One of our senior learning advisors in Jaipur has received your criteria and is carefully vetting the ideal tutor match. You will hear from us within 18 hours.
                 </p>
+
+                <div className="mx-auto mb-8 grid max-w-lg grid-cols-1 gap-4 text-left sm:grid-cols-3">
+                  {NEXT_STEPS.map((step, i) => (
+                    <div key={i} className="rounded-2xl border border-[var(--line)] bg-[var(--paper)]/60 p-4">
+                      <span className="text-2xl" aria-hidden="true">{step.icon}</span>
+                      <p className="mt-2 text-xs font-bold leading-relaxed text-[var(--ink)]/70">{step.text}</p>
+                    </div>
+                  ))}
+                </div>
+
                 <button
                   type="button"
                   onClick={() => {
@@ -578,10 +673,14 @@ export default function StudentRequest() {
                     setFormData(INITIAL_FORM);
                     setCurrentStep(1);
                   }}
-                  className="rounded-2xl bg-[var(--chalk)] px-8 py-4 text-xs font-black uppercase tracking-widest text-white shadow-lg transition-all hover:bg-[var(--marigold)]"
+                  className={`rounded-2xl bg-[var(--chalk)] px-8 py-4 text-xs font-black uppercase tracking-widest text-white shadow-lg transition-all hover:bg-[var(--marigold)] ${focusRing}`}
                 >
                   Submit Another Request
                 </button>
+
+                <p className="mt-6 text-sm font-semibold text-[var(--ink)]/50">
+                  Questions in the meantime? <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className={`font-bold text-[var(--marigold)] underline underline-offset-2 rounded ${focusRing}`}>Message us on WhatsApp</a>.
+                </p>
               </div>
             ) : (
               /* --- MULTI-STEP FORM --- */
@@ -594,10 +693,22 @@ export default function StudentRequest() {
                 </div>
 
                 <div className="p-6 sm:p-10">
-                  <div className="mb-8 flex justify-between text-xs font-bold uppercase tracking-widest text-[var(--ink)]/40 border-b border-[var(--line)]/40 pb-4">
-                    <span className={currentStep >= 1 ? 'text-[var(--marigold)] font-black' : ''}>Step 1: Student</span>
-                    <span className={currentStep >= 2 ? 'text-[var(--marigold)] font-black' : ''}>Step 2: Parent</span>
-                    <span className={currentStep >= 3 ? 'text-[var(--marigold)] font-black' : ''}>Step 3: Location & Subjects</span>
+                  <div className="mb-8 border-b border-[var(--line)]/40 pb-4">
+                    {/* Compact progress for narrow screens */}
+                    <div className="flex items-center justify-between sm:hidden">
+                      <span className="text-xs font-black uppercase tracking-widest text-[var(--marigold)]">Step {currentStep} of 3</span>
+                      <div className="flex gap-1.5" aria-hidden="true">
+                        {[1, 2, 3].map((s) => (
+                          <span key={s} className={`h-1.5 w-6 rounded-full transition-colors ${currentStep >= s ? 'bg-[var(--marigold)]' : 'bg-[var(--line)]'}`} />
+                        ))}
+                      </div>
+                    </div>
+                    {/* Full step labels for wider screens */}
+                    <div className="hidden justify-between text-xs font-bold uppercase tracking-widest text-[var(--ink)]/40 sm:flex">
+                      <span aria-current={currentStep === 1 ? 'step' : undefined} className={currentStep >= 1 ? 'text-[var(--marigold)] font-black' : ''}>Step 1: Student</span>
+                      <span aria-current={currentStep === 2 ? 'step' : undefined} className={currentStep >= 2 ? 'text-[var(--marigold)] font-black' : ''}>Step 2: Parent</span>
+                      <span aria-current={currentStep === 3 ? 'step' : undefined} className={currentStep >= 3 ? 'text-[var(--marigold)] font-black' : ''}>Step 3: Location & Subjects</span>
+                    </div>
                   </div>
 
                   <form onSubmit={handleFormSubmit} noValidate>
@@ -605,15 +716,15 @@ export default function StudentRequest() {
                     {currentStep === 1 && (
                       <div className="animate-in fade-in slide-in-from-right-4 duration-300 space-y-6">
                         <SectionLabel stepNumber="1">Student Information</SectionLabel>
-                        <Field label="Student's full name" error={errors.student_name}>
+                        <Field label="Student's full name" htmlFor="student_name" error={errors.student_name}>
                           <input
-                            name="student_name" type="text" autoComplete="name" placeholder="e.g. Aarav Sharma"
+                            id="student_name" name="student_name" type="text" autoComplete="name" placeholder="e.g. Aarav Sharma"
                             value={formData.student_name} onChange={handleChange} className={inputClass(errors.student_name)}
                           />
                         </Field>
-                        <Field label="Class Selection (Classes 1 to 12 & Early Years)" error={errors.class_level} hint="Choose the precise current academic class level">
+                        <Field label="Class Selection (Classes 1 to 12 & Early Years)" htmlFor="class_level" error={errors.class_level} hint="Choose the precise current academic class level">
                           <select
-                            name="class_level" value={formData.class_level} onChange={handleChange}
+                            id="class_level" name="class_level" value={formData.class_level} onChange={handleChange}
                             className={selectClass(errors.class_level)}
                           >
                             <option value="" disabled>Select class level</option>
@@ -627,26 +738,29 @@ export default function StudentRequest() {
                     {currentStep === 2 && (
                       <div className="animate-in fade-in slide-in-from-right-4 duration-300 space-y-6">
                         <SectionLabel stepNumber="2">Parent / Guardian Contact</SectionLabel>
-                        <Field label="Parent's full name" error={errors.parent_name}>
+                        <Field label="Parent's full name" htmlFor="parent_name" error={errors.parent_name}>
                           <input
-                            name="parent_name" type="text" autoComplete="name" placeholder="e.g. Rajesh Sharma"
+                            id="parent_name" name="parent_name" type="text" autoComplete="name" placeholder="e.g. Rajesh Sharma"
                             value={formData.parent_name} onChange={handleChange} className={inputClass(errors.parent_name)}
                           />
                         </Field>
                         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                          <Field label="Parent email address" error={errors.email}>
+                          <Field label="Parent email address" htmlFor="email" error={errors.email}>
                             <input
-                              name="email" type="email" autoComplete="email" placeholder="you@example.com"
+                              id="email" name="email" type="email" autoComplete="email" placeholder="you@example.com"
                               value={formData.email} onChange={handleChange} className={inputClass(errors.email)}
                             />
                           </Field>
-                          <Field label="Contact phone number" error={errors.contact_number}>
+                          <Field label="Contact phone number" htmlFor="contact_number" error={errors.contact_number}>
                             <input
-                              name="contact_number" type="tel" autoComplete="tel" placeholder="98765 43210"
+                              id="contact_number" name="contact_number" type="tel" autoComplete="tel" placeholder="98765 43210"
                               value={formData.contact_number} onChange={handleChange} className={inputClass(errors.contact_number)}
                             />
                           </Field>
                         </div>
+                        <p className="pl-1 text-[11px] font-medium text-[var(--ink)]/40">
+                          We'll only use these details to match you with a tutor and follow up on this request — never spam, never shared with third parties.
+                        </p>
                       </div>
                     )}
 
@@ -656,6 +770,7 @@ export default function StudentRequest() {
                         <SectionLabel stepNumber="3">Academic Requirements & Location</SectionLabel>
                         <Field
                           label="Subjects Required"
+                          htmlFor="subject_input"
                           error={errors.subjects}
                           hint={`Add each subject individually · up to ${MAX_SUBJECTS}`}
                         >
@@ -671,7 +786,7 @@ export default function StudentRequest() {
                                     type="button"
                                     onClick={() => removeSubject(subject)}
                                     aria-label={`Remove ${subject}`}
-                                    className="flex h-5 w-5 items-center justify-center rounded-full text-[var(--rust)] transition-colors hover:bg-[var(--rust)]/10"
+                                    className={`flex h-5 w-5 items-center justify-center rounded-full text-[var(--rust)] transition-colors hover:bg-[var(--rust)]/10 ${focusRing}`}
                                   >
                                     ×
                                   </button>
@@ -681,7 +796,7 @@ export default function StudentRequest() {
                           )}
                           <div className="flex gap-3">
                             <input
-                              name="subject_input" type="text" placeholder="e.g. Physics, Accountancy, Mathematics"
+                              id="subject_input" name="subject_input" type="text" placeholder="e.g. Physics, Accountancy, Mathematics"
                               value={subjectInput}
                               onChange={(e) => setSubjectInput(e.target.value)}
                               onKeyDown={handleSubjectKeyDown}
@@ -692,7 +807,7 @@ export default function StudentRequest() {
                               type="button"
                               onClick={() => addSubject()}
                               disabled={!subjectInput.trim() || formData.subjects.length >= MAX_SUBJECTS}
-                              className="shrink-0 rounded-2xl bg-[var(--chalk)] px-6 text-xs font-black uppercase tracking-wider text-white transition-all hover:-translate-y-0.5 hover:bg-[var(--marigold)] hover:shadow-md disabled:cursor-not-allowed disabled:opacity-40"
+                              className={`shrink-0 rounded-2xl bg-[var(--chalk)] px-6 text-xs font-black uppercase tracking-wider text-white transition-all hover:-translate-y-0.5 hover:bg-[var(--marigold)] hover:shadow-md disabled:cursor-not-allowed disabled:opacity-40 ${focusRing}`}
                             >
                               + Add
                             </button>
@@ -709,7 +824,7 @@ export default function StudentRequest() {
                                     key={s}
                                     type="button"
                                     onClick={() => addSubject(s)}
-                                    className="rounded-full border border-[var(--line)] bg-white px-3.5 py-1.5 text-xs font-semibold text-[var(--ink)]/80 transition-all hover:border-[var(--marigold)] hover:bg-[var(--marigold)]/5 shadow-2xs"
+                                    className={`rounded-full border border-[var(--line)] bg-white px-3.5 py-1.5 text-xs font-semibold text-[var(--ink)]/80 transition-all hover:border-[var(--marigold)] hover:bg-[var(--marigold)]/5 shadow-2xs ${focusRing}`}
                                   >
                                     + {s}
                                   </button>
@@ -719,14 +834,15 @@ export default function StudentRequest() {
                         </Field>
 
                         <div className="space-y-4">
-                          <label className="block font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--ink)]/80 pl-1">
+                          <span className="block font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--ink)]/80 pl-1">
                             Preferred tutoring mode
-                          </label>
+                          </span>
                           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                             {MODES.map((mode) => (
                               <button
                                 type="button" key={mode.id} onClick={() => handleModeSelect(mode.id)}
-                                className={`flex flex-col items-center justify-center gap-2 rounded-2xl border-2 p-4 text-center transition-all ${
+                                aria-pressed={formData.preferred_mode === mode.id}
+                                className={`flex flex-col items-center justify-center gap-2 rounded-2xl border-2 p-4 text-center transition-all ${focusRing} ${
                                   formData.preferred_mode === mode.id
                                     ? 'border-[var(--marigold)] bg-[var(--marigold)]/5 text-[var(--ink)] shadow-xs ring-2 ring-[var(--marigold)]/20'
                                     : 'border-[var(--line)] bg-gray-50/50 text-[var(--ink)]/60 hover:bg-gray-50'
@@ -746,16 +862,16 @@ export default function StudentRequest() {
                               <span aria-hidden="true">📍</span> Jaipur, Rajasthan
                             </div>
                           </Field>
-                          <Field label="Specific Area / Locality" error={errors.specific_area}>
+                          <Field label="Specific Area / Locality" htmlFor="specific_area" error={errors.specific_area}>
                             <div className="flex gap-3">
                               <input
-                                name="specific_area" type="text" placeholder="e.g. Malviya Nagar, C-Scheme"
+                                id="specific_area" name="specific_area" type="text" placeholder="e.g. Malviya Nagar, C-Scheme"
                                 value={formData.specific_area} onChange={handleChange}
                                 className={inputClass(errors.specific_area)}
                               />
                               <button
                                 type="button" onClick={handleGetLocation} disabled={isLocating}
-                                className={`shrink-0 rounded-2xl border-2 px-5 text-xs font-bold transition-all ${
+                                className={`shrink-0 rounded-2xl border-2 px-5 text-xs font-bold transition-all ${focusRing} ${
                                   formData.location_coords
                                     ? 'border-[var(--good)] bg-[var(--good)] text-white shadow-xs'
                                     : 'border-[var(--line)] bg-white text-[var(--ink)] hover:bg-gray-50'
@@ -767,6 +883,24 @@ export default function StudentRequest() {
                             {gpsError && <p className="font-mono text-[11px] font-semibold text-[var(--rust)] pl-1 pt-1">{gpsError}</p>}
                           </Field>
                         </div>
+
+                        <div className="rounded-2xl border-2 border-[var(--line)] bg-gray-50/50 p-5">
+                          <label htmlFor="consent" className="flex cursor-pointer items-start gap-3">
+                            <input
+                              id="consent"
+                              name="consent"
+                              type="checkbox"
+                              checked={formData.consent}
+                              onChange={handleConsentToggle}
+                              className={`mt-0.5 h-5 w-5 shrink-0 rounded border-2 border-[var(--line)] text-[var(--marigold)] focus:ring-2 focus:ring-[var(--marigold)]/40 ${focusRing}`}
+                            />
+                            <span className="text-sm font-medium leading-relaxed text-[var(--ink)]/70">
+                              I agree to be contacted by Nexus Tuitions and its advisors about this request, by phone, email, or WhatsApp. See our{' '}
+                              <Link to="/privacy" className={`font-bold text-[var(--marigold)] underline underline-offset-2 rounded ${focusRing}`}>Privacy Policy</Link>.
+                            </span>
+                          </label>
+                          {errors.consent && <p role="alert" className="mt-2 pl-8 font-mono text-[11px] font-semibold text-[var(--rust)]">{errors.consent}</p>}
+                        </div>
                       </div>
                     )}
 
@@ -776,7 +910,7 @@ export default function StudentRequest() {
                         <button
                           type="button"
                           onClick={handlePrevStep}
-                          className="rounded-2xl border-2 border-[var(--line)] px-6 py-4 text-sm font-black uppercase tracking-widest text-[var(--ink)]/70 transition-all hover:bg-gray-50 hover:text-[var(--ink)]"
+                          className={`rounded-2xl border-2 border-[var(--line)] px-6 py-4 text-sm font-black uppercase tracking-widest text-[var(--ink)]/70 transition-all hover:bg-gray-50 hover:text-[var(--ink)] ${focusRing}`}
                         >
                           Back
                         </button>
@@ -786,7 +920,7 @@ export default function StudentRequest() {
                         <button
                           type="button"
                           onClick={handleNextStep}
-                          className="ml-auto rounded-2xl bg-[var(--chalk)] px-8 py-4 text-sm font-black uppercase tracking-widest text-white shadow-lg shadow-[var(--chalk)]/20 transition-all hover:-translate-y-0.5 hover:bg-[var(--marigold)] hover:shadow-xl active:translate-y-0"
+                          className={`ml-auto rounded-2xl bg-[var(--chalk)] px-8 py-4 text-sm font-black uppercase tracking-widest text-white shadow-lg shadow-[var(--chalk)]/20 transition-all hover:-translate-y-0.5 hover:bg-[var(--marigold)] hover:shadow-xl active:translate-y-0 ${focusRing}`}
                         >
                           Next Step
                         </button>
@@ -794,7 +928,7 @@ export default function StudentRequest() {
                         <button
                           type="submit"
                           disabled={isSubmitting}
-                          className={`ml-auto rounded-2xl px-8 py-4 text-sm font-black uppercase tracking-widest text-white transition-all disabled:cursor-not-allowed ${
+                          className={`ml-auto rounded-2xl px-8 py-4 text-sm font-black uppercase tracking-widest text-white transition-all disabled:cursor-not-allowed ${focusRing} ${
                             isSubmitting
                               ? 'bg-[var(--ink)]/30'
                               : 'bg-[var(--chalk)] shadow-lg shadow-[var(--chalk)]/20 hover:-translate-y-0.5 hover:bg-[var(--rust)] hover:shadow-xl active:translate-y-0'
@@ -804,6 +938,11 @@ export default function StudentRequest() {
                         </button>
                       )}
                     </div>
+                    {currentStep === 3 && (
+                      <p className="mt-4 text-center text-[11px] font-semibold uppercase tracking-wider text-[var(--ink)]/40">
+                        Free, no-obligation consultation · Advisors typically respond within 18 hours
+                      </p>
+                    )}
                   </form>
                 </div>
               </>
@@ -816,6 +955,39 @@ export default function StudentRequest() {
       <footer className="mt-auto bg-[var(--chalk)] py-10 text-center font-mono text-[12px] font-medium uppercase tracking-widest text-[var(--line)]/50">
         nexus. tuitions — connecting elite educators and ambitious students across Jaipur.
       </footer>
+
+      {/* --- STICKY MOBILE CTA (jumps back to the request form) --- */}
+      {!isSuccess && (
+        <a
+          href="#request"
+          className={`fixed inset-x-0 bottom-0 z-40 flex items-center justify-center gap-2 border-t border-[var(--line)] bg-white/95 px-6 py-3.5 text-sm font-black uppercase tracking-widest text-[var(--chalk)] shadow-[0_-8px_30px_rgba(0,0,0,0.08)] backdrop-blur-md transition-transform duration-300 sm:hidden ${focusRing} ${showStickyCta ? 'translate-y-0' : 'translate-y-full'}`}
+          style={{ paddingBottom: 'max(0.875rem, env(safe-area-inset-bottom))' }}
+        >
+          Request a Tutor <span aria-hidden="true">→</span>
+        </a>
+      )}
+
+      {/* --- QUICK CONTACT (tablet/desktop, avoids overlapping the mobile sticky CTA) --- */}
+      <a
+        href={WHATSAPP_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Chat with us on WhatsApp"
+        className={`fixed bottom-6 right-6 z-40 hidden h-14 w-14 items-center justify-center rounded-full bg-[var(--good)] text-2xl text-white shadow-lg transition-transform hover:scale-105 active:scale-95 sm:flex ${focusRing}`}
+      >
+        💬
+      </a>
+
+      <style dangerouslySetInnerHTML={{__html: `
+        @media (prefers-reduced-motion: reduce) {
+          *, *::before, *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
+          }
+        }
+      `}} />
     </div>
   );
 }
