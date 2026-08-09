@@ -51,10 +51,11 @@ export default function Maintenance() {
         '--paper-deep': '#F2E9D7',
         '--ink': '#1C2420',
         '--ink-soft': 'rgba(28, 36, 32, 0.64)',
-        '--marigold': '#F38C35',
+        '--marigold': '#E8903D',
         '--marigold-light': '#FFCB8E',
-        '--mint': '#2E7A63',
-        '--line': 'rgba(28, 36, 32, 0.14)',
+        '--good': '#3D8A62',
+        '--chalk': '#12392F',
+        '--line': '#DCDAD0',
         background: 'var(--paper)',
         color: 'var(--ink)',
         fontFamily: "'Inter', sans-serif",
@@ -211,14 +212,14 @@ export default function Maintenance() {
               </g>
               <g className="nx-part nx-p-antenna">
                 <line x1="110" y1="34" x2="110" y2="14" stroke="var(--ink)" strokeWidth="4" strokeLinecap="round" />
-                <circle className="nx-antenna-dot" cx="110" cy="10" r="6" fill="var(--mint)" />
+                <circle className="nx-antenna-dot" cx="110" cy="10" r="6" fill="var(--good)" />
               </g>
               <g className="nx-spark" aria-hidden="true">
                 <line x1="110" y1="66" x2="110" y2="26" stroke="var(--marigold)" strokeWidth="3" strokeLinecap="round" />
                 <line x1="110" y1="66" x2="110" y2="26" stroke="var(--marigold)" strokeWidth="3" strokeLinecap="round" transform="rotate(60 110 66)" />
-                <line x1="110" y1="66" x2="110" y2="26" stroke="var(--mint)" strokeWidth="3" strokeLinecap="round" transform="rotate(120 110 66)" />
+                <line x1="110" y1="66" x2="110" y2="26" stroke="var(--good)" strokeWidth="3" strokeLinecap="round" transform="rotate(120 110 66)" />
                 <line x1="110" y1="66" x2="110" y2="26" stroke="var(--marigold)" strokeWidth="3" strokeLinecap="round" transform="rotate(180 110 66)" />
-                <line x1="110" y1="66" x2="110" y2="26" stroke="var(--mint)" strokeWidth="3" strokeLinecap="round" transform="rotate(240 110 66)" />
+                <line x1="110" y1="66" x2="110" y2="26" stroke="var(--good)" strokeWidth="3" strokeLinecap="round" transform="rotate(240 110 66)" />
                 <line x1="110" y1="66" x2="110" y2="26" stroke="var(--marigold)" strokeWidth="3" strokeLinecap="round" transform="rotate(300 110 66)" />
               </g>
             </g>
@@ -251,7 +252,7 @@ export default function Maintenance() {
         {/* Notify me */}
         <div className="mt-6 w-full max-w-sm">
           {subscribed ? (
-            <p className="nx-mono text-[13px]" style={{ color: 'var(--mint)' }}>
+            <p className="nx-mono text-[13px]" style={{ color: 'var(--good)' }}>
               ✓ you're on the list — we'll email you when we're back.
             </p>
           ) : (
@@ -274,13 +275,13 @@ export default function Maintenance() {
                   type="button"
                   onClick={handleSubscribe}
                   className="nx-focus rounded-lg px-4 text-sm font-semibold"
-                  style={{ background: 'var(--ink)', color: 'var(--paper)', height: '42px' }}
+                  style={{ background: 'var(--chalk)', color: 'var(--paper)', height: '42px' }}
                 >
                   Notify me
                 </button>
               </div>
               {error && (
-                <p className="mt-2 text-[12px]" style={{ color: '#B0442B' }}>
+                <p className="mt-2 text-[12px]" style={{ color: '#C24D2C' }}>
                   {error}
                 </p>
               )}

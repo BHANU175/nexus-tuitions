@@ -764,14 +764,14 @@ export default function TeacherApply() {
   return (
     <div
       style={{
-        '--chalk': '#16302A',
+        '--chalk': '#12392F',
         '--paper': '#FDF9F1',
         '--ink': '#1C2420',
-        '--card': '#FCFBF6',
-        '--marigold': '#E7A23D',
-        '--rust': '#B6472F',
-        '--line': '#C9CBB8',
-        '--good': '#3F7D5C',
+        '--card': '#FFFFFF',
+        '--marigold': '#E8903D',
+        '--rust': '#C24D2C',
+        '--line': '#DCDAD0',
+        '--good': '#3D8A62',
       }}
       className="scroll-smooth bg-[var(--paper)] font-sans text-[var(--ink)] selection:bg-[var(--marigold)]/30"
     >

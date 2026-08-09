@@ -539,14 +539,14 @@ export default function StudentRequest() {
   return (
     <div
       style={{
-        '--chalk': '#0E382C',
+        '--chalk': '#12392F',
         '--paper': '#FDF9F1',
-        '--ink': '#1C201E',
+        '--ink': '#1C2420',
         '--card': '#FFFFFF',
-        '--marigold': '#D25427',
-        '--rust': '#B8431B',
-        '--line': '#E6DFD3',
-        '--good': '#10B981',
+        '--marigold': '#E8903D',
+        '--rust': '#C24D2C',
+        '--line': '#DCDAD0',
+        '--good': '#3D8A62',
       }}
       className="relative flex min-h-screen scroll-smooth flex-col bg-[var(--paper)] font-sans text-[var(--ink)] selection:bg-[var(--marigold)]/30"
     >

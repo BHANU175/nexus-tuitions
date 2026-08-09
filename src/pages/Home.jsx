@@ -278,14 +278,14 @@ export default function Home() {
   return (
     <div
       style={{
-        '--chalk': '#0E3E35',
+        '--chalk': '#12392F',
         '--paper': '#FDF9F1',
         '--ink': '#1C2420',
         '--card': '#FFFFFF',
-        '--marigold': '#F38C35',
-        '--rust': '#D95D39',
-        '--line': '#E5E5E5',
-        '--good': '#3F7D5C',
+        '--marigold': '#E8903D',
+        '--rust': '#C24D2C',
+        '--line': '#DCDAD0',
+        '--good': '#3D8A62',
       }}
       className="min-h-screen bg-[var(--paper)] font-sans text-[var(--ink)] selection:bg-[var(--marigold)]/30 scroll-smooth overflow-x-hidden"
     >
@@ -427,7 +427,7 @@ export default function Home() {
             </div>
 
             <div className="relative mx-auto mt-10 w-full max-w-lg lg:mt-0 lg:max-w-xl xl:max-w-2xl">
-              <div className="absolute left-1/2 top-1/2 -z-20 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-tr from-[#F6C280] to-[#F3B770] opacity-30 blur-3xl"></div>
+              <div className="absolute left-1/2 top-1/2 -z-20 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-tr from-[#F6D2B1] to-[#F1BC8A] opacity-30 blur-3xl"></div>
 
               <div className="relative z-10 group">
                 <img src={hero.imageUrl} alt="Student learning with a Nexus tutor" className="w-full scale-105 rounded-2xl object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.15)] transition-transform duration-700 group-hover:scale-110" />
