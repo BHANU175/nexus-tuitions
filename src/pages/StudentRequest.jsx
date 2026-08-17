@@ -1058,7 +1058,7 @@ export default function StudentRequest() {
 
       {/* --- QUICK CONTACT (tablet/desktop, avoids overlapping the mobile sticky CTA) --- */}
       <a
-        href={WHATSAPP_URL}
+        href="https://wa.me/9588057703"
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Chat with us on WhatsApp"
