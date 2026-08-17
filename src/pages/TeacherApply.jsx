@@ -394,6 +394,7 @@ export default function TeacherApply() {
   const [isMaintenance, setIsMaintenance] = useState(false);
   const [docUploadEnabled, setDocUploadEnabled] = useState(true);
   const [loading, setLoading] = useState(true);
+  const [showStickyCta, setShowStickyCta] = useState(false);
 
   const [content, setContent] = useState({
     heroBadge: 'Premier Educator Network in Jaipur',
@@ -407,6 +408,14 @@ export default function TeacherApply() {
     teachingModes: DEFAULT_TEACHING_MODES,
     subjectSuggestions: DEFAULT_SUBJECT_SUGGESTIONS,
   });
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowStickyCta(window.scrollY > 300);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     async function fetchSiteData() {
@@ -673,11 +682,6 @@ export default function TeacherApply() {
       if (areaErr) e.specificArea = areaErr;
       const modesErr = validateField('teachingModes', '', { teachingModes });
       if (modesErr) e.teachingModes = modesErr;
-    }
-    if (s === 2) {
-      if (docUploadEnabled) {
-        // Optional/flexible
-      }
     }
     return e;
   };
@@ -1140,7 +1144,7 @@ export default function TeacherApply() {
                               onFile={handleProfilePhoto} onRemove={handleRemoveProfilePhoto} error={errors.profilePhoto}
                             />
                             <FileUploadZone
-                              id="idProof" label="Govt ID Proof (Optional for now)" hint="PAN, Aadhaar, or Passport"
+                              id="idProof" label="Govt ID Proof (Optional for now)" hint="PAN, Passport, etc."
                               file={idProof} previewUrl={idProofPreview} accept="image/*,application/pdf"
                               onFile={handleIdProof} onRemove={handleRemoveIdProof} error={errors.idProof}
                             />
@@ -1151,7 +1155,7 @@ export default function TeacherApply() {
                               Document uploads are currently optional.
                             </p>
                             <p className="mt-1 text-xs text-[var(--ink)]/60">
-                              You can proceed directly by clicking <strong>Submit application</strong>.
+                              You can proceed directly by clicking <strong>Submit Application</strong>.
                             </p>
                           </div>
                         )}
@@ -1238,6 +1242,30 @@ export default function TeacherApply() {
       <footer className="bg-[var(--chalk)] py-6 text-center font-mono text-[11px] font-medium uppercase tracking-widest text-[var(--paper)]/40 border-t border-white/10">
         nexus. tuitions — connecting educators and students, one lesson at a time.
       </footer>
+
+      {/* --- STICKY MOBILE CTA --- */}
+      {!submitted && (
+        <a
+          href="#apply"
+          className={`fixed inset-x-0 bottom-0 z-40 flex items-center justify-center gap-2 border-t border-[var(--line)] bg-white/95 px-6 py-3.5 text-sm font-black uppercase tracking-widest text-[var(--chalk)] shadow-[0_-8px_30px_rgba(0,0,0,0.08)] backdrop-blur-md transition-transform duration-300 focus:outline-none focus:ring-2 focus:ring-[var(--marigold)] sm:hidden ${
+            showStickyCta ? 'translate-y-0' : 'translate-y-full'
+          }`}
+          style={{ paddingBottom: 'max(0.875rem, env(safe-area-inset-bottom))' }}
+        >
+          Apply to Teach <span aria-hidden="true">→</span>
+        </a>
+      )}
+
+      {/* --- QUICK CONTACT --- */}
+      <a
+        href="https://wa.me/9588057703"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Chat with us on WhatsApp"
+        className="fixed bottom-6 right-6 z-40 hidden h-14 w-14 items-center justify-center rounded-full bg-[var(--good)] text-2xl text-white shadow-lg transition-transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-[var(--marigold)] sm:flex"
+      >
+        💬
+      </a>
     </div>
   );
 }
