@@ -721,7 +721,7 @@ export default function Home() {
       {/* --- QUICK CONTACT (desktop/tablet only, avoids overlapping the mobile sticky CTA) --- */}
       {/* TODO: replace with the real WhatsApp business number before launch */}
       <a
-        href="https://wa.me/910000000000"
+        href="https://wa.me/9588057703"
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Chat with us on WhatsApp"
