@@ -1258,7 +1258,7 @@ export default function TeacherApply() {
 
       {/* --- QUICK CONTACT --- */}
       <a
-        href="https://wa.me/9588057703"
+        href="https://wa.me/919588057703"
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Chat with us on WhatsApp"
