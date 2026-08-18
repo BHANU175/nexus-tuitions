@@ -4,8 +4,6 @@ import CustomBadge from '../components/CustomBadge';
 import Maintenance from './Maintenance';
 import { supabase } from '../supabaseClient';
 
-/* Parses a raw site_content.value string back into its original type.
-   Mirrors the parsing logic used in TeacherApply.jsx / SiteContentManager.jsx */
 function parseSiteContentValue(raw) {
   if (typeof raw !== 'string') return raw;
   const t = raw.trim();
@@ -15,7 +13,6 @@ function parseSiteContentValue(raw) {
   return raw;
 }
 
-/* Maps site_content row keys to fields on the Home page's content object */
 const HOME_CONTENT_KEYS = {
   global: 'home_global',
   nav: 'home_nav',
@@ -27,15 +24,11 @@ const HOME_CONTENT_KEYS = {
   whatWeBelieve: 'home_what_we_believe',
   testimonials: 'home_testimonials',
   dualCta: 'home_dual_cta',
+  contact: 'home_contact',
   faq: 'home_faq',
   footer: 'home_footer',
 };
 
-/* ---------------------------------------------------------------------- */
-/*  DEFAULT CONTENT FALLBACK (The UI will never break if DB is empty)     */
-/*  NOTE: numbers, testimonials, and FAQ copy below are placeholder       */
-/*  content — swap in real figures/quotes before this goes live.          */
-/* ---------------------------------------------------------------------- */
 const DEFAULT_CONTENT = {
   global: {
     logoUrl: "/logo.png",
@@ -45,6 +38,7 @@ const DEFAULT_CONTENT = {
     links: [
       { label: 'Why Us', href: '#why', isExternal: false },
       { label: 'How It Works', href: '#how', isExternal: false },
+      { label: 'Contact Us', href: '#contact', isExternal: false },
       { label: 'Find a Tutor', href: '/request-tutor', isExternal: false },
       { label: 'Become a Tutor', href: '/apply-teacher', isExternal: false }
     ]
@@ -147,6 +141,15 @@ const DEFAULT_CONTENT = {
       href: "/apply-teacher"
     }
   },
+  contact: {
+    tagline: "Get in Touch",
+    title: "Have questions? We're here to help.",
+    description: "Reach out to us directly for any inquiries, technical support, or personalized matching assistance.",
+    email: "support@nexustuitions.com",
+    phone: "+91 95880 57703",
+    whatsapp: "https://wa.me/919588057703",
+    location: "India"
+  },
   faq: {
     tagline: "Questions, Answered",
     title: "Before you get started",
@@ -160,16 +163,13 @@ const DEFAULT_CONTENT = {
   },
   footer: {
     columns: [
-      { title: "Company", links: [{ label: "Why Us", href: "#why" }, { label: "How It Works", href: "#how" }] },
+      { title: "Company", links: [{ label: "Why Us", href: "#why" }, { label: "How It Works", href: "#how" }, { label: "Contact Us", href: "#contact" }] },
       { title: "For Families", links: [{ label: "Find a Tutor", href: "/request-tutor" }] },
       { title: "For Educators", links: [{ label: "Become a Tutor", href: "/apply-teacher" }] },
     ]
   }
 };
 
-/* ---------------------------------------------------------------------- */
-/*  Small presentational helpers                                          */
-/* ---------------------------------------------------------------------- */
 function ComparisonMark({ value }) {
   if (value === 'yes') {
     return <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[var(--good)]/15 text-[var(--good)] font-black">✓</span>;
@@ -180,10 +180,6 @@ function ComparisonMark({ value }) {
   return <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[var(--marigold)]/15 text-[var(--rust)] font-black text-xs">~</span>;
 }
 
-/* ---------------------------------------------------------------------- */
-/*  Main Component (MERN Stack Integrated with REST API Backend)           */
-/* ---------------------------------------------------------------------- */
-
 export default function Home() {
   const [isMaintenance, setIsMaintenance] = useState(false);
   const [pageData, setPageData] = useState(DEFAULT_CONTENT);
@@ -191,6 +187,10 @@ export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showStickyCta, setShowStickyCta] = useState(false);
   const [openFaq, setOpenFaq] = useState(0);
+
+  // Quick state for contact form interaction
+  const [contactForm, setContactForm] = useState({ name: '', email: '', message: '' });
+  const [contactSubmitted, setContactSubmitted] = useState(false);
 
   useEffect(() => {
     async function fetchInitialData() {
@@ -227,7 +227,6 @@ export default function Home() {
 
     fetchInitialData();
 
-    // Keep the page in sync if an admin updates content while it's open
     const channel = supabase
       .channel('home-page-dynamic-sync')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'app_settings' }, (payload) => {
@@ -245,8 +244,6 @@ export default function Home() {
     };
   }, []);
 
-  // Reveal a persistent mobile CTA once the visitor has scrolled past the hero —
-  // keeps the primary conversion action reachable without crowding the fold.
   useEffect(() => {
     const handleScroll = () => setShowStickyCta(window.scrollY > 700);
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -256,6 +253,13 @@ export default function Home() {
   const handleNavigation = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     setMobileMenuOpen(false);
+  };
+
+  const handleContactSubmit = (e) => {
+    e.preventDefault();
+    if (!contactForm.name || !contactForm.email || !contactForm.message) return;
+    setContactSubmitted(true);
+    setContactForm({ name: '', email: '', message: '' });
   };
 
   const focusRing = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--marigold)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--paper)]";
@@ -273,7 +277,7 @@ export default function Home() {
 
   if (isMaintenance) return <Maintenance />;
 
-  const { global, nav, hero, statsBanner, whyUs, howItWorks, comparison, whatWeBelieve, testimonials, dualCta, faq, footer } = pageData;
+  const { global, nav, hero, statsBanner, whyUs, howItWorks, comparison, whatWeBelieve, testimonials, dualCta, contact, faq, footer } = pageData;
 
   return (
     <div
@@ -330,7 +334,6 @@ export default function Home() {
             </Link>
           </div>
 
-          {/* Mobile menu toggle — links were previously unreachable below the lg breakpoint */}
           <button
             type="button"
             onClick={() => setMobileMenuOpen((v) => !v)}
@@ -457,7 +460,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* --- STATS / FEATURES OVERLAPPING BANNER --- */}
+        {/* --- STATS / FEATURES BANNER --- */}
         <section className="relative z-20 mx-auto max-w-[1300px] px-4 sm:px-6 lg:px-8 -mt-8 sm:-mt-12">
           <div className="grid grid-cols-1 gap-0 overflow-hidden rounded-3xl bg-white shadow-[0_20px_40px_rgba(0,0,0,0.06)] border border-[var(--line)]/30 sm:grid-cols-2 lg:grid-cols-4">
             {statsBanner.map((stat, idx) => (
@@ -474,7 +477,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* --- WHY US (Bento Grid Style) --- */}
+        {/* --- WHY US --- */}
         <section id="why" className="relative mt-20 bg-gradient-to-b from-white to-[var(--paper)] py-20 sm:py-28">
           <div className="mx-auto max-w-[1300px] px-4 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-2xl text-center">
@@ -500,7 +503,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* --- HOW IT WORKS (Connected Flow) --- */}
+        {/* --- HOW IT WORKS --- */}
         <section id="how" className="py-20 sm:py-28">
           <div className="mx-auto max-w-[1100px] px-4 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-2xl text-center">
@@ -526,7 +529,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* --- COMPARISON (Business differentiation) --- */}
+        {/* --- COMPARISON --- */}
         <section className="py-20 sm:py-28">
           <div className="mx-auto max-w-[1000px] px-4 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-2xl text-center">
@@ -581,7 +584,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* --- TESTIMONIALS (Social proof) --- */}
+        {/* --- TESTIMONIALS --- */}
         <section className="py-20 sm:py-28">
           <div className="mx-auto max-w-[1300px] px-4 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-2xl text-center">
@@ -636,8 +639,112 @@ export default function Home() {
           </div>
         </section>
 
-        {/* --- FAQ (Reduces friction before signup) --- */}
-        <section className="py-20 sm:py-28">
+        {/* --- CONTACT US SECTION --- */}
+        <section id="contact" className="py-20 sm:py-28 bg-[var(--paper)]">
+          <div className="mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-2xl text-center">
+              <span className="mb-4 inline-block rounded-full bg-[var(--chalk)]/10 px-4 py-1.5 font-mono text-xs font-bold uppercase tracking-widest text-[var(--chalk)]">{contact.tagline}</span>
+              <h2 className="mt-2 font-serif text-4xl font-black tracking-tight text-[var(--ink)] sm:text-5xl">{contact.title}</h2>
+              <p className="mt-4 text-base font-medium leading-relaxed text-[var(--ink)]/60">{contact.description}</p>
+            </div>
+
+            <div className="mt-14 grid grid-cols-1 gap-10 lg:grid-cols-3">
+              {/* Info Cards */}
+              <div className="flex flex-col gap-6 lg:col-span-1">
+                <div className="flex items-start gap-4 rounded-2xl border border-[var(--line)]/60 bg-white p-6 shadow-sm">
+                  <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[var(--marigold)]/10 text-2xl text-[var(--rust)]">✉️</span>
+                  <div>
+                    <h4 className="text-sm font-bold text-[var(--ink)]/50 uppercase tracking-wider">Email Us</h4>
+                    <a href={`mailto:${contact.email}`} className="mt-1 text-base font-black text-[var(--ink)] hover:text-[var(--marigold)] transition-colors">{contact.email}</a>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4 rounded-2xl border border-[var(--line)]/60 bg-white p-6 shadow-sm">
+                  <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[var(--good)]/10 text-2xl text-[var(--good)]">📞</span>
+                  <div>
+                    <h4 className="text-sm font-bold text-[var(--ink)]/50 uppercase tracking-wider">Call or WhatsApp</h4>
+                    <a href={contact.whatsapp} target="_blank" rel="noopener noreferrer" className="mt-1 text-base font-black text-[var(--ink)] hover:text-[var(--good)] transition-colors">{contact.phone}</a>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4 rounded-2xl border border-[var(--line)]/60 bg-white p-6 shadow-sm">
+                  <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[var(--chalk)]/10 text-2xl text-[var(--chalk)]">📍</span>
+                  <div>
+                    <h4 className="text-sm font-bold text-[var(--ink)]/50 uppercase tracking-wider">Location</h4>
+                    <p className="mt-1 text-base font-black text-[var(--ink)]">{contact.location}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Direct Inquiry Form */}
+              <div className="rounded-3xl border border-[var(--line)]/60 bg-white p-8 shadow-sm lg:col-span-2 sm:p-10">
+                {contactSubmitted ? (
+                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--good)]/15 text-3xl text-[var(--good)]">✓</div>
+                    <h3 className="font-serif text-2xl font-black text-[var(--ink)]">Message Sent!</h3>
+                    <p className="mt-2 text-base font-medium text-[var(--ink)]/60">Thank you for reaching out. We will get back to you shortly.</p>
+                    <button
+                      onClick={() => setContactSubmitted(false)}
+                      className="mt-6 text-sm font-bold text-[var(--chalk)] underline hover:text-[var(--marigold)]"
+                    >
+                      Send another message
+                    </button>
+                  </div>
+                ) : (
+                  <form onSubmit={handleContactSubmit} className="flex flex-col gap-6">
+                    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                      <div className="flex flex-col gap-2">
+                        <label htmlFor="contact-name" className="text-xs font-bold uppercase tracking-wider text-[var(--ink)]/70">Your Name</label>
+                        <input
+                          id="contact-name"
+                          type="text"
+                          required
+                          value={contactForm.name}
+                          onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
+                          placeholder="e.g. Ananya Sharma"
+                          className="rounded-xl border border-[var(--line)] bg-[var(--paper)]/50 px-4 py-3 text-sm font-semibold text-[var(--ink)] focus:border-[var(--chalk)] focus:bg-white focus:outline-none"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <label htmlFor="contact-email" className="text-xs font-bold uppercase tracking-wider text-[var(--ink)]/70">Email Address</label>
+                        <input
+                          id="contact-email"
+                          type="email"
+                          required
+                          value={contactForm.email}
+                          onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
+                          placeholder="ananya@example.com"
+                          className="rounded-xl border border-[var(--line)] bg-[var(--paper)]/50 px-4 py-3 text-sm font-semibold text-[var(--ink)] focus:border-[var(--chalk)] focus:bg-white focus:outline-none"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <label htmlFor="contact-message" className="text-xs font-bold uppercase tracking-wider text-[var(--ink)]/70">Message</label>
+                      <textarea
+                        id="contact-message"
+                        rows="4"
+                        required
+                        value={contactForm.message}
+                        onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
+                        placeholder="How can we help you today?"
+                        className="rounded-xl border border-[var(--line)] bg-[var(--paper)]/50 px-4 py-3 text-sm font-semibold text-[var(--ink)] focus:border-[var(--chalk)] focus:bg-white focus:outline-none resize-none"
+                      ></textarea>
+                    </div>
+                    <button
+                      type="submit"
+                      className={`rounded-2xl bg-[var(--chalk)] px-8 py-4 text-sm font-bold text-white shadow-md hover:scale-[1.01] active:scale-[0.99] transition-all ${focusRing}`}
+                    >
+                      Send Message →
+                    </button>
+                  </form>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* --- FAQ --- */}
+        <section className="py-20 sm:py-28 bg-white">
           <div className="mx-auto max-w-[800px] px-4 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-2xl text-center">
               <span className="mb-4 inline-block rounded-full bg-[var(--chalk)]/10 px-4 py-1.5 font-mono text-xs font-bold uppercase tracking-widest text-[var(--chalk)]">{faq.tagline}</span>
@@ -671,7 +778,7 @@ export default function Home() {
         </section>
       </main>
 
-      {/* --- PREMIUM FOOTER --- */}
+      {/* --- FOOTER --- */}
       <footer className="mt-auto border-t border-[var(--line)]/40 bg-white pb-28 pt-16 sm:pb-16">
         <div className="mx-auto max-w-[1300px] px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 gap-10 sm:grid-cols-4">
@@ -704,7 +811,7 @@ export default function Home() {
         </div>
       </footer>
 
-      {/* --- STICKY MOBILE CTA (appears after scrolling past the hero) --- */}
+      {/* --- STICKY MOBILE CTA --- */}
       <div
         className={`fixed inset-x-0 bottom-0 z-40 border-t border-[var(--line)]/60 bg-white/95 px-4 py-3 shadow-[0_-8px_30px_rgba(0,0,0,0.08)] backdrop-blur-md transition-transform duration-300 sm:hidden ${showStickyCta ? 'translate-y-0' : 'translate-y-full'}`}
         style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}
@@ -718,10 +825,9 @@ export default function Home() {
         </Link>
       </div>
 
-      {/* --- QUICK CONTACT (desktop/tablet only, avoids overlapping the mobile sticky CTA) --- */}
-      {/* TODO: replace with the real WhatsApp business number before launch */}
+      {/* --- QUICK CONTACT --- */}
       <a
-        href="https://wa.me/919588057703"
+        href={contact.whatsapp}
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Chat with us on WhatsApp"

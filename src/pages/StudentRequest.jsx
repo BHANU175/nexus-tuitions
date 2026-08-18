@@ -65,6 +65,7 @@ const DEFAULT_NAV_LINKS = [
   { label: 'Why Us', href: '/#why' },
   { label: 'Find a Tutor', href: '/request-tutor', current: 'true' },
   { label: 'Become a Tutor', href: '/apply-teacher' },
+  { label: 'Contact Us', href: '/contact' },
 ];
 
 const DEFAULT_HERO = {
@@ -362,8 +363,7 @@ export default function StudentRequest() {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  // Reveal a persistent mobile CTA once the visitor has scrolled past the hero,
-  // so the request form is always one tap away while they're reading Trust / How-it-works.
+  // Reveal a persistent mobile CTA once the visitor has scrolled past the hero
   useEffect(() => {
     const handleScroll = () => setShowStickyCta(window.scrollY > 700);
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -574,7 +574,7 @@ export default function StudentRequest() {
             ))}
           </div>
 
-          {/* Mobile menu toggle — nav links were previously unreachable below md */}
+          {/* Mobile menu toggle */}
           <button
             type="button"
             onClick={() => setMobileMenuOpen((v) => !v)}
@@ -1041,8 +1041,17 @@ export default function StudentRequest() {
       </section>
 
       {/* --- FOOTER --- */}
-      <footer className="mt-auto bg-[var(--chalk)] py-10 text-center font-mono text-[12px] font-medium uppercase tracking-widest text-[var(--line)]/50">
-        nexus. tuitions — connecting elite educators and ambitious students across Jaipur.
+      <footer className="mt-auto border-t border-[var(--line)] bg-[var(--chalk)] py-12 text-center text-white">
+        <div className="mx-auto max-w-[1200px] px-4 font-mono text-xs uppercase tracking-widest text-[var(--line)]/70">
+          <div className="mb-6 flex flex-wrap justify-center gap-6 font-sans text-sm font-semibold capitalize text-white">
+            <Link to="/#why" className="hover:text-[var(--marigold)]">Why Us</Link>
+            <Link to="/request-tutor" className="hover:text-[var(--marigold)]">Find a Tutor</Link>
+            <Link to="/apply-teacher" className="hover:text-[var(--marigold)]">Become a Tutor</Link>
+            <Link to="/contact" className="hover:text-[var(--marigold)]">Contact Us</Link>
+            <Link to="/privacy" className="hover:text-[var(--marigold)]">Privacy Policy</Link>
+          </div>
+          <p>Nexus Tuitions — connecting elite educators and ambitious students across Jaipur.</p>
+        </div>
       </footer>
 
       {/* --- STICKY MOBILE CTA (jumps back to the request form) --- */}
@@ -1056,7 +1065,7 @@ export default function StudentRequest() {
         </a>
       )}
 
-      {/* --- QUICK CONTACT (tablet/desktop, avoids overlapping the mobile sticky CTA) --- */}
+      {/* --- QUICK CONTACT --- */}
       <a
         href="https://wa.me/919588057703"
         target="_blank"

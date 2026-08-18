@@ -791,6 +791,7 @@ export default function TeacherApply() {
             <a href="#why" className="transition-colors hover:text-[var(--ink)]">Benefits</a>
             <a href="#how" className="transition-colors hover:text-[var(--ink)]">Process</a>
             <Link to="/request-tutor" className="transition-colors hover:text-[var(--ink)]">Hire a Tutor</Link>
+            <Link to="/contact" className="transition-colors hover:text-[var(--ink)]">Contact Us</Link>
           </div>
 
           <a
