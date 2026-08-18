@@ -720,7 +720,7 @@ export default function StudentRequest() {
               {content.sections.requestFormSubtitle}
             </p>
             <p className="mt-2 text-sm font-semibold text-[var(--ink)]/50">
-              Prefer to talk it through? <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className={`font-bold text-[var(--marigold)] underline underline-offset-2 rounded ${focusRing}`}>Message us on WhatsApp</a> instead.
+              Prefer to talk it through? <a href="https://wa.me/919588057703" target="_blank" rel="noopener noreferrer" className={`font-bold text-[var(--marigold)] underline underline-offset-2 rounded ${focusRing}`}>Message us on WhatsApp</a> instead.
             </p>
           </div>
 
