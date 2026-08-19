@@ -215,6 +215,14 @@ export default function Contact() {
             rowsDict[row.key] = parseSiteContentValue(row.value);
           });
 
+          // TEMP DEBUG — remove once the sync issue is confirmed fixed.
+          // Shows exactly what was pulled from `site_content` for this page's keys.
+          const contactRowsFound = {};
+          Object.entries(CONTACT_CONTENT_KEYS).forEach(([field, key]) => {
+            contactRowsFound[key] = rowsDict[key] !== undefined ? rowsDict[key] : '⛔ MISSING — no row in DB, or blocked by RLS';
+          });
+          console.log('[site_content] contact_* rows fetched from Supabase:', contactRowsFound);
+
           setPageData((prev) => {
             const next = { ...prev };
             Object.entries(CONTACT_CONTENT_KEYS).forEach(([field, key]) => {
@@ -222,6 +230,8 @@ export default function Contact() {
             });
             return next;
           });
+        } else {
+          console.warn('[site_content] contentRows was empty/undefined — table returned no rows at all (RLS or empty table).');
         }
       } catch (err) {
         console.error('Failed to fetch site content from Supabase:', err);
@@ -322,6 +332,7 @@ export default function Contact() {
 
   const { global, nav, hero, methods, socials, hours, form, faq, footer } = pageData;
   const whatsappMethod = methods.find((m) => m.type === 'whatsapp');
+  const showDebug = typeof window !== 'undefined' && window.location.search.includes('debug=1');
 
   return (
     <div
@@ -337,6 +348,15 @@ export default function Contact() {
       }}
       className="min-h-screen bg-[var(--paper)] font-sans text-[var(--ink)] selection:bg-[var(--marigold)]/30 scroll-smooth overflow-x-hidden"
     >
+      {/* TEMP DEBUG PANEL — visit this page with ?debug=1 to see exactly what pageData
+          the component is rendering with. Remove once the sync issue is resolved. */}
+      {showDebug && (
+        <div className="fixed inset-x-0 top-0 z-[9999] max-h-[50vh] overflow-auto bg-black/95 p-4 font-mono text-[11px] text-lime-300">
+          <p className="mb-2 font-bold text-white">🔍 DEBUG — live pageData this page is rendering right now:</p>
+          <pre className="whitespace-pre-wrap">{JSON.stringify(pageData, null, 2)}</pre>
+        </div>
+      )}
+
       {/* --- NAV --- */}
       <nav className="fixed top-0 z-50 w-full border-b border-[var(--line)]/40 bg-[var(--paper)]/85 backdrop-blur-xl transition-all duration-300">
         <div className="mx-auto flex max-w-[1300px] items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
