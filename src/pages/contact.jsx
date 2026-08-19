@@ -27,11 +27,9 @@ const CONTACT_CONTENT_KEYS = {
   global: 'contact_global',
   nav: 'contact_nav',
   hero: 'contact_hero',
-  trust: 'contact_trust',
   methods: 'contact_methods',
   socials: 'contact_socials',
   hours: 'contact_hours',
-  testimonials: 'contact_testimonials',
   form: 'contact_form',
   faq: 'contact_faq',
   footer: 'contact_footer',
@@ -57,22 +55,11 @@ const DEFAULT_CONTENT = {
     ],
   },
   hero: {
-    badge: '⚡ Avg. reply time: under 2 hours',
+    badge: '📬 We usually reply within a few hours',
     title: "Let's talk",
     highlight: 'tutoring',
     description:
       "Questions about finding a tutor, applying to teach, or anything else? Reach us however's easiest — call, WhatsApp, email or Instagram — or send a message below.",
-  },
-  /* Social-proof strip shown right under the hero. Swap these placeholder
-     numbers for your real ones (or edit from the admin Site Content panel) —
-     concrete, specific numbers convert far better than adjectives like "many". */
-  trust: {
-    stats: [
-      { value: '500+', label: 'Students matched' },
-      { value: '120+', label: 'Verified tutors' },
-      { value: '4.9★', label: 'Average rating' },
-      { value: '<2 hrs', label: 'Avg. reply time' },
-    ],
   },
   methods: [
     {
@@ -94,7 +81,6 @@ const DEFAULT_CONTENT = {
       actionLabel: 'Chat now',
       type: 'whatsapp',
       note: 'Fastest way to reach us',
-      recommended: true,
     },
     {
       id: 'email',
@@ -118,18 +104,6 @@ const DEFAULT_CONTENT = {
       { day: 'Sunday', time: '10:00 AM – 4:00 PM' },
     ],
     note: 'All times in IST',
-  },
-  /* Replace with 3 real quotes (a parent, a student, a tutor) — nothing
-     de-risks "send us your details" like proof that real people did it
-     and it worked out. Keep names to first name + area for privacy. */
-  testimonials: {
-    tagline: 'From families like yours',
-    title: "We've done this before",
-    items: [
-      { quote: 'We messaged on WhatsApp and had a tutor shortlist by the next morning. No back-and-forth, no pressure.', name: 'Priya S.', role: 'Parent, Class 10' },
-      { quote: "Applied to teach on a Sunday, had my first trial class booked within the week.", name: 'Arjun M.', role: 'Tutor, Mathematics' },
-      { quote: 'Switched tutors once when the first fit wasn\'t right — support team sorted it in a day.', name: 'Fatima R.', role: 'Parent, Class 7' },
-    ],
   },
   form: {
     title: 'Send us a message',
@@ -356,7 +330,7 @@ export default function Contact() {
 
   if (isMaintenance) return <Maintenance />;
 
-  const { global, nav, hero, trust, methods, socials, hours, testimonials, form, faq, footer } = pageData;
+  const { global, nav, hero, methods, socials, hours, form, faq, footer } = pageData;
   const whatsappMethod = methods.find((m) => m.type === 'whatsapp');
   const showDebug = typeof window !== 'undefined' && window.location.search.includes('debug=1');
 
@@ -477,37 +451,13 @@ export default function Contact() {
           </h1>
 
           <p className="mx-auto mt-6 max-w-2xl text-lg font-medium leading-relaxed text-[var(--ink)]/60">{hero.description}</p>
-
-          {trust?.stats?.length > 0 && (
-            <div className="mx-auto mt-10 flex max-w-3xl flex-wrap items-stretch justify-center gap-3 sm:gap-4">
-              {trust.stats.map((stat, idx) => (
-                <div
-                  key={idx}
-                  className="flex min-w-[130px] flex-1 flex-col items-center gap-1 rounded-2xl border border-[var(--line)]/60 bg-white/70 px-4 py-4 shadow-sm backdrop-blur-sm"
-                >
-                  <span className="font-serif text-2xl font-black text-[var(--chalk)] sm:text-3xl">{stat.value}</span>
-                  <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-[var(--ink)]/50 sm:text-[11px]">{stat.label}</span>
-                </div>
-              ))}
-            </div>
-          )}
         </section>
 
         {/* --- CONTACT METHOD CARDS (fully driven by `methods` — add, remove or edit any card from the admin panel) --- */}
         <section className="mx-auto max-w-[1300px] px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {methods.map((method) => (
-              <div
-                key={method.id}
-                className={`group relative flex flex-col justify-between rounded-3xl border bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg ${
-                  method.recommended ? 'border-[var(--good)]/50 ring-1 ring-[var(--good)]/20' : 'border-[var(--line)]/60'
-                }`}
-              >
-                {method.recommended && (
-                  <span className="absolute -top-2.5 left-5 rounded-full bg-[var(--good)] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white shadow">
-                    Recommended
-                  </span>
-                )}
+              <div key={method.id} className="group relative flex flex-col justify-between rounded-3xl border border-[var(--line)]/60 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
                 <div>
                   <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--chalk)]/5 text-2xl">{method.icon}</span>
                   <h3 className="mt-4 font-serif text-lg font-black text-[var(--ink)]">{method.label}</h3>
@@ -670,46 +620,12 @@ export default function Contact() {
                     >
                       {isSubmitting ? 'Sending…' : 'Send message'}
                     </button>
-                    <p className="text-center font-mono text-[10px] uppercase tracking-wider text-[var(--ink)]/35">
-                      🔒 Your details stay private — used only to get back to you.
-                    </p>
                   </form>
                 </>
               )}
             </div>
           </div>
         </section>
-
-        {/* --- TESTIMONIALS --- */}
-        {testimonials?.items?.length > 0 && (
-          <section className="py-20 sm:py-28">
-            <div className="mx-auto max-w-[1300px] px-4 sm:px-6 lg:px-8">
-              <div className="mx-auto max-w-2xl text-center">
-                <span className="mb-4 inline-block rounded-full bg-[var(--marigold)]/10 px-4 py-1.5 font-mono text-xs font-bold uppercase tracking-widest text-[var(--rust)]">
-                  {testimonials.tagline}
-                </span>
-                <h2 className="mt-2 font-serif text-4xl font-black tracking-tight text-[var(--ink)] sm:text-5xl">{testimonials.title}</h2>
-              </div>
-
-              <div className="mt-14 grid grid-cols-1 gap-5 sm:grid-cols-3">
-                {testimonials.items.map((t, idx) => (
-                  <figure key={idx} className="flex flex-col justify-between rounded-3xl border border-[var(--line)]/60 bg-white p-6 shadow-sm">
-                    <blockquote className="text-[15px] font-medium leading-relaxed text-[var(--ink)]/75">“{t.quote}”</blockquote>
-                    <figcaption className="mt-5 flex items-center gap-3 border-t border-[var(--line)]/50 pt-4">
-                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--chalk)]/10 font-serif text-sm font-black text-[var(--chalk)]">
-                        {t.name.charAt(0)}
-                      </span>
-                      <span>
-                        <span className="block text-sm font-bold text-[var(--ink)]">{t.name}</span>
-                        <span className="block font-mono text-[11px] uppercase tracking-wider text-[var(--ink)]/40">{t.role}</span>
-                      </span>
-                    </figcaption>
-                  </figure>
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
 
         {/* --- FAQ --- */}
         <section className="py-20 sm:py-28">
