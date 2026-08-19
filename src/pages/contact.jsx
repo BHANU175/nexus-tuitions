@@ -196,10 +196,14 @@ export default function Contact() {
   useEffect(() => {
     async function fetchInitialData() {
       try {
-        const [{ data: settingsData }, { data: contentRows }] = await Promise.all([
+        const [{ data: settingsData }, { data: contentRows, error: contentError }] = await Promise.all([
           supabase.from('app_settings').select('maintenance_mode').eq('id', 1).maybeSingle(),
           supabase.from('site_content').select('*'),
         ]);
+
+        if (contentError) {
+          console.error('[site_content] fetch failed — check Supabase RLS/select policy:', contentError.message || contentError);
+        }
 
         if (settingsData && settingsData.maintenance_mode !== undefined) {
           setIsMaintenance(Boolean(settingsData.maintenance_mode));

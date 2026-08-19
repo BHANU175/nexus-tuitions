@@ -435,7 +435,11 @@ export default function TeacherApply() {
           );
         }
 
-        const { data: contentData } = await supabase.from('site_content').select('*');
+        const { data: contentData, error: contentError } = await supabase.from('site_content').select('*');
+
+        if (contentError) {
+          console.error('[site_content] fetch failed — check Supabase RLS/select policy:', contentError.message || contentError);
+        }
 
         if (contentData && contentData.length > 0) {
           const dynamicOverrides = {};

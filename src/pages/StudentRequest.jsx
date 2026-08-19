@@ -299,10 +299,14 @@ export default function StudentRequest() {
     let isMounted = true;
     async function fetchSiteData() {
       try {
-        const [{ data: settingsData }, { data: contentRows }] = await Promise.all([
+        const [{ data: settingsData }, { data: contentRows, error: contentError }] = await Promise.all([
           supabase.from('app_settings').select('maintenance_mode').eq('id', 1).maybeSingle(),
           supabase.from('site_content').select('*'),
         ]);
+
+        if (contentError) {
+          console.error('[site_content] fetch failed — check Supabase RLS/select policy:', contentError.message || contentError);
+        }
 
         if (isMounted && settingsData) {
           setIsMaintenance(Boolean(settingsData.maintenance_mode));
