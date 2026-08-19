@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { supabase } from '../supabaseClient';
@@ -154,42 +154,6 @@ function Field({ id, label, error, children }) {
         </p>
       )}
     </div>
-  );
-}
-
-/* Lightweight scroll-reveal wrapper — fades + lifts content in once it enters
-   the viewport. One IntersectionObserver per instance, unobserves itself after
-   firing, and fully respects prefers-reduced-motion. */
-function Reveal({ children, className = '', delay = 0, as: Tag = 'div' }) {
-  const ref = useRef(null);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const node = ref.current;
-    if (!node) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true);
-          observer.unobserve(node);
-        }
-      },
-      { threshold: 0.15, rootMargin: '0px 0px -40px 0px' }
-    );
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, []);
-
-  return (
-    <Tag
-      ref={ref}
-      style={{ transitionDelay: visible ? `${delay}ms` : '0ms' }}
-      className={`transition-all duration-700 ease-out motion-reduce:transition-none motion-reduce:opacity-100 motion-reduce:translate-y-0 ${
-        visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-      } ${className}`}
-    >
-      {children}
-    </Tag>
   );
 }
 
@@ -467,17 +431,16 @@ export default function Contact() {
         {/* --- HERO --- */}
         <section className="relative mx-auto max-w-[1300px] overflow-hidden px-4 py-14 text-center sm:px-6 lg:px-8 lg:py-20">
           <div className="absolute top-[-10%] left-1/2 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-[var(--marigold)]/10 blur-[100px] -z-10"></div>
-          <div className="absolute bottom-[-15%] right-[5%] h-[320px] w-[320px] rounded-full bg-[var(--chalk)]/[0.06] blur-[90px] -z-10"></div>
 
-          <Reveal className="mx-auto inline-flex items-center gap-2 rounded-full border border-[var(--marigold)]/30 bg-[var(--marigold)]/10 px-4 py-2 text-xs font-bold text-[var(--rust)] shadow-[0_0_15px_rgba(243,140,53,0.15)] backdrop-blur-sm">
+          <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-[var(--marigold)]/30 bg-[var(--marigold)]/10 px-4 py-2 text-xs font-bold text-[var(--rust)] shadow-[0_0_15px_rgba(243,140,53,0.15)] backdrop-blur-sm">
             <span className="relative flex h-2 w-2">
               <span className="motion-safe:animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--marigold)] opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--rust)]"></span>
             </span>
             {hero.badge}
-          </Reveal>
+          </div>
 
-          <Reveal delay={80} as="h1" className="mx-auto mt-8 max-w-3xl break-words font-serif text-5xl font-black leading-[1.1] tracking-tight text-[var(--ink)] sm:text-6xl md:text-7xl">
+          <h1 className="mx-auto mt-8 max-w-3xl break-words font-serif text-5xl font-black leading-[1.1] tracking-tight text-[var(--ink)] sm:text-6xl md:text-7xl">
             {hero.title}{' '}
             <span className="relative inline-block text-[var(--chalk)] z-10">
               {hero.highlight}
@@ -485,19 +448,18 @@ export default function Contact() {
                 <path d="M3 9C60 -2 140 -2 197 9" stroke="currentColor" strokeWidth="6" strokeLinecap="round" />
               </svg>
             </span>
-          </Reveal>
+          </h1>
 
-          <Reveal delay={160} as="p" className="mx-auto mt-6 max-w-2xl text-lg font-medium leading-relaxed text-[var(--ink)]/60">{hero.description}</Reveal>
+          <p className="mx-auto mt-6 max-w-2xl text-lg font-medium leading-relaxed text-[var(--ink)]/60">{hero.description}</p>
         </section>
 
         {/* --- CONTACT METHOD CARDS (fully driven by `methods` — add, remove or edit any card from the admin panel) --- */}
         <section className="mx-auto max-w-[1300px] px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {methods.map((method, idx) => (
-              <Reveal key={method.id} delay={idx * 90} className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-[var(--line)]/60 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[var(--marigold)]/40 hover:shadow-lg">
-                <span className="absolute inset-x-0 top-0 h-1 origin-left scale-x-0 bg-[var(--marigold)] transition-transform duration-300 group-hover:scale-x-100"></span>
+            {methods.map((method) => (
+              <div key={method.id} className="group relative flex flex-col justify-between rounded-3xl border border-[var(--line)]/60 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
                 <div>
-                  <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--chalk)]/5 text-2xl transition-colors duration-300 group-hover:bg-[var(--marigold)]/15">{method.icon}</span>
+                  <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--chalk)]/5 text-2xl">{method.icon}</span>
                   <h3 className="mt-4 font-serif text-lg font-black text-[var(--ink)]">{method.label}</h3>
                   <p className="mt-1 break-words text-sm font-semibold text-[var(--ink)]/70">{method.value}</p>
                   {method.note && <p className="mt-1 font-mono text-[11px] uppercase tracking-wider text-[var(--ink)]/40">{method.note}</p>}
@@ -526,182 +488,14 @@ export default function Contact() {
                     Copied
                   </span>
                 )}
-              </Reveal>
+              </div>
             ))}
           </div>
         </section>
 
-        {/* --- SEND A MESSAGE (form logic already exists in state above — this renders it) --- */}
-        <section className="mx-auto mt-6 max-w-[1300px] px-4 sm:px-6 lg:px-8">
-          <Reveal className="relative overflow-hidden rounded-3xl border border-[var(--line)]/60 bg-white p-6 shadow-sm sm:p-10">
-            <div className="absolute -right-24 -top-24 h-64 w-64 rounded-full bg-[var(--marigold)]/[0.06] blur-[80px]"></div>
-
-            <div className="relative grid grid-cols-1 gap-10 lg:grid-cols-5">
-              <div className="lg:col-span-2">
-                <span className="inline-block rounded-full bg-[var(--chalk)]/10 px-4 py-1.5 font-mono text-xs font-bold uppercase tracking-widest text-[var(--chalk)]">Message us</span>
-                <h2 className="mt-3 font-serif text-3xl font-black leading-tight tracking-tight text-[var(--ink)] sm:text-4xl">{form.title}</h2>
-                <p className="mt-3 max-w-sm text-sm font-medium leading-relaxed text-[var(--ink)]/60">{form.description}</p>
-
-                <div className="mt-8 hidden flex-col gap-4 lg:flex">
-                  {methods.slice(0, 3).map((method) => (
-                    <div key={method.id} className="flex items-center gap-3 text-sm">
-                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--chalk)]/5 text-base">{method.icon}</span>
-                      <div>
-                        <p className="font-bold text-[var(--ink)]">{method.label}</p>
-                        <p className="text-[var(--ink)]/50">{method.value}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="lg:col-span-3">
-                {isSuccess ? (
-                  <div className="flex h-full flex-col items-center justify-center rounded-2xl border border-[var(--good)]/25 bg-[var(--good)]/5 px-6 py-16 text-center motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95">
-                    <span className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--good)] text-3xl text-white shadow-md">✓</span>
-                    <h3 className="mt-5 font-serif text-2xl font-black text-[var(--ink)]">{form.successTitle}</h3>
-                    <p className="mt-2 max-w-sm text-sm font-medium text-[var(--ink)]/60">{form.successMessage}</p>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsSuccess(false);
-                        setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
-                        setTouched({});
-                        setErrors({});
-                      }}
-                      className={`mt-6 rounded-xl border border-[var(--line)] px-5 py-2.5 text-sm font-bold text-[var(--ink)] transition-all hover:border-[var(--ink)]/30 ${focusRing}`}
-                    >
-                      Send another message
-                    </button>
-                  </div>
-                ) : (
-                  <form onSubmit={handleSubmit} noValidate className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <Field id="name" label="Full name" error={touched.name && errors.name}>
-                      <input
-                        id="name"
-                        name="name"
-                        type="text"
-                        autoComplete="name"
-                        placeholder="Your name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        aria-invalid={Boolean(touched.name && errors.name)}
-                        aria-describedby={touched.name && errors.name ? 'name-error' : undefined}
-                        className={inputClass(touched.name && errors.name)}
-                      />
-                    </Field>
-
-                    <Field id="email" label="Email address" error={touched.email && errors.email}>
-                      <input
-                        id="email"
-                        name="email"
-                        type="email"
-                        autoComplete="email"
-                        placeholder="you@example.com"
-                        value={formData.email}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        aria-invalid={Boolean(touched.email && errors.email)}
-                        aria-describedby={touched.email && errors.email ? 'email-error' : undefined}
-                        className={inputClass(touched.email && errors.email)}
-                      />
-                    </Field>
-
-                    <Field id="phone" label="Phone (optional)" error={touched.phone && errors.phone}>
-                      <input
-                        id="phone"
-                        name="phone"
-                        type="tel"
-                        inputMode="numeric"
-                        autoComplete="tel"
-                        placeholder="98765 43210"
-                        value={formData.phone}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        aria-invalid={Boolean(touched.phone && errors.phone)}
-                        aria-describedby={touched.phone && errors.phone ? 'phone-error' : undefined}
-                        className={inputClass(touched.phone && errors.phone)}
-                      />
-                    </Field>
-
-                    <Field id="subject" label="Subject">
-                      <select
-                        id="subject"
-                        name="subject"
-                        value={formData.subject}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        className={`${inputClass(false)} appearance-none bg-[url('data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%3E%3Cpath%20d%3D%22M5%207.5L10%2012.5L15%207.5%22%20stroke%3D%22%231C2420%22%20stroke-opacity%3D%220.4%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E')] bg-[length:18px] bg-[right_0.9rem_center] bg-no-repeat pr-10`}
-                      >
-                        <option value="">Choose one…</option>
-                        {form.subjectOptions.map((opt) => (
-                          <option key={opt} value={opt}>{opt}</option>
-                        ))}
-                      </select>
-                    </Field>
-
-                    <div className="sm:col-span-2">
-                      <Field id="message" label="Message" error={touched.message && errors.message}>
-                        <textarea
-                          id="message"
-                          name="message"
-                          rows={5}
-                          placeholder="What can we help with?"
-                          value={formData.message}
-                          onChange={handleChange}
-                          onBlur={handleBlur}
-                          aria-invalid={Boolean(touched.message && errors.message)}
-                          aria-describedby={touched.message && errors.message ? 'message-error' : 'message-hint'}
-                          className={`${inputClass(touched.message && errors.message)} resize-none`}
-                        />
-                        <p id="message-hint" className="text-right font-mono text-[10px] font-semibold uppercase tracking-wider text-[var(--ink)]/35">
-                          {formData.message.trim().length}/10 min
-                        </p>
-                      </Field>
-                    </div>
-
-                    <div className="sm:col-span-2">
-                      {statusMessage.text && (
-                        <p
-                          role="status"
-                          aria-live="polite"
-                          className={`mb-4 rounded-xl px-4 py-3 text-sm font-semibold ${
-                            statusMessage.type === 'error'
-                              ? 'bg-[var(--rust)]/10 text-[var(--rust)]'
-                              : 'bg-[var(--chalk)]/10 text-[var(--chalk)]'
-                          }`}
-                        >
-                          {statusMessage.text}
-                        </p>
-                      )}
-
-                      <button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className={`inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--chalk)] px-6 py-3.5 text-sm font-bold text-white shadow-sm transition-all hover:scale-[1.01] hover:shadow-md active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto ${focusRing}`}
-                      >
-                        {isSubmitting ? (
-                          <>
-                            <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"></span>
-                            Sending…
-                          </>
-                        ) : (
-                          <>Send message →</>
-                        )}
-                      </button>
-                      <p className="mt-3 font-mono text-[11px] text-[var(--ink)]/40">We only use these details to reply to you — never shared, never sold.</p>
-                    </div>
-                  </form>
-                )}
-              </div>
-            </div>
-          </Reveal>
-        </section>
-
         {/* --- SOCIALS + HOURS --- */}
         <section className="mx-auto mt-6 grid max-w-[1300px] grid-cols-1 gap-5 px-4 sm:px-6 lg:grid-cols-3 lg:px-8">
-          <Reveal className="rounded-3xl border border-[var(--line)]/60 bg-white p-6 shadow-sm lg:col-span-2">
+          <div className="rounded-3xl border border-[var(--line)]/60 bg-white p-6 shadow-sm lg:col-span-2">
             <h3 className="font-serif text-lg font-black text-[var(--ink)]">Follow along</h3>
             <p className="mt-1 text-sm font-medium text-[var(--ink)]/60">Tips, tutor spotlights and openings — follow us on socials.</p>
             <div className="mt-5 flex flex-wrap gap-3">
@@ -719,9 +513,9 @@ export default function Contact() {
                 </a>
               ))}
             </div>
-          </Reveal>
+          </div>
 
-          <Reveal delay={100} className="rounded-3xl border border-[var(--line)]/60 bg-[var(--chalk)] p-6 text-white shadow-sm">
+          <div className="rounded-3xl border border-[var(--line)]/60 bg-[var(--chalk)] p-6 text-white shadow-sm">
             <h3 className="font-serif text-lg font-black">{hours.title}</h3>
             <div className="mt-4 flex flex-col gap-2.5">
               {hours.rows.map((row, idx) => (
@@ -732,7 +526,7 @@ export default function Contact() {
               ))}
             </div>
             {hours.note && <p className="mt-4 font-mono text-[11px] uppercase tracking-wider text-white/40">{hours.note}</p>}
-          </Reveal>
+          </div>
         </section>
 
         {/* --- FAQ --- */}
@@ -747,7 +541,7 @@ export default function Contact() {
               {faq.items.map((item, idx) => {
                 const isOpen = openFaq === idx;
                 return (
-                  <Reveal key={idx} delay={idx * 80} className="overflow-hidden rounded-2xl border border-[var(--line)]/60 bg-white">
+                  <div key={idx} className="overflow-hidden rounded-2xl border border-[var(--line)]/60 bg-white">
                     <button
                       type="button"
                       onClick={() => setOpenFaq(isOpen ? -1 : idx)}
@@ -762,7 +556,7 @@ export default function Contact() {
                         <p className="px-6 pb-5 text-base font-medium leading-relaxed text-[var(--ink)]/60">{item.a}</p>
                       </div>
                     </div>
-                  </Reveal>
+                  </div>
                 );
               })}
             </div>
