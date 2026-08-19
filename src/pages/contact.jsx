@@ -137,7 +137,7 @@ const focusRing =
   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--marigold)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--paper)]';
 
 const inputClass = (hasError) =>
-  `w-full rounded-xl border bg-white px-4 py-3 text-sm font-semibold text-[var(--ink)] placeholder-[var(--ink)]/30 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-[var(--marigold)]/40 ${
+  `w-full rounded-xl border bg-[var(--paper)]/50 px-4 py-3.5 text-sm font-semibold text-[var(--ink)] placeholder-[var(--ink)]/35 transition-all duration-200 hover:border-[var(--ink)]/25 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--marigold)]/40 ${
     hasError ? 'border-[var(--rust)] focus:border-[var(--rust)]' : 'border-[var(--line)] focus:border-[var(--marigold)]'
   }`;
 
@@ -530,100 +530,101 @@ export default function Contact() {
         </section>
 
         {/* --- CONTACT FORM --- */}
-        <section className="mx-auto mt-16 max-w-[800px] px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 gap-10">
-            {/* Form */}
-            <div className="rounded-3xl border border-[var(--line)]/60 bg-white p-6 shadow-sm sm:p-10">
-              {isSuccess ? (
-                <div className="flex flex-col items-center justify-center py-10 text-center">
-                  <span className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--good)]/15 text-3xl text-[var(--good)]">✓</span>
-                  <h3 className="mt-5 font-serif text-2xl font-black text-[var(--ink)]">{form.successTitle}</h3>
-                  <p className="mt-2 max-w-sm text-sm font-medium text-[var(--ink)]/60">{form.successMessage}</p>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsSuccess(false);
-                      setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
-                      setTouched({});
-                    }}
-                    className={`mt-6 rounded-xl border border-[var(--line)] px-5 py-2.5 text-sm font-bold text-[var(--ink)] transition-colors hover:border-[var(--ink)]/40 ${focusRing}`}
-                  >
-                    Send another message
-                  </button>
+        <section className="mx-auto mt-16 max-w-[680px] px-4 sm:px-6 lg:px-8">
+          <div className="relative overflow-hidden rounded-3xl border border-[var(--line)]/60 bg-white p-6 shadow-sm sm:p-10">
+            <span className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-[var(--marigold)] via-[var(--rust)] to-[var(--chalk)]" aria-hidden="true"></span>
+
+            {isSuccess ? (
+              <div className="flex flex-col items-center justify-center py-10 text-center">
+                <span className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--good)]/15 text-3xl text-[var(--good)]">✓</span>
+                <h3 className="mt-5 font-serif text-2xl font-black text-[var(--ink)]">{form.successTitle}</h3>
+                <p className="mt-2 max-w-sm text-sm font-medium text-[var(--ink)]/60">{form.successMessage}</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsSuccess(false);
+                    setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
+                    setTouched({});
+                  }}
+                  className={`mt-6 rounded-xl border border-[var(--line)] px-5 py-2.5 text-sm font-bold text-[var(--ink)] transition-colors hover:border-[var(--ink)]/40 ${focusRing}`}
+                >
+                  Send another message
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} noValidate className="space-y-5">
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                  <Field id="name" label="Full name" error={touched.name ? errors.name : ''}>
+                    <input
+                      id="name" name="name" type="text" autoComplete="name" placeholder="Your name"
+                      value={formData.name} onChange={handleChange} onBlur={handleBlur}
+                      aria-invalid={!!errors.name} aria-describedby={errors.name ? 'name-error' : undefined}
+                      className={inputClass(touched.name && !!errors.name)}
+                    />
+                  </Field>
+                  <Field id="email" label="Email address" error={touched.email ? errors.email : ''}>
+                    <input
+                      id="email" name="email" type="email" autoComplete="email" placeholder="you@example.com"
+                      value={formData.email} onChange={handleChange} onBlur={handleBlur}
+                      aria-invalid={!!errors.email} aria-describedby={errors.email ? 'email-error' : undefined}
+                      className={inputClass(touched.email && !!errors.email)}
+                    />
+                  </Field>
                 </div>
-              ) : (
-                <>
-                  <h3 className="font-serif text-2xl font-black text-[var(--ink)]">{form.title}</h3>
-                  <p className="mt-1.5 text-sm font-medium text-[var(--ink)]/60">{form.description}</p>
 
-                  <form onSubmit={handleSubmit} noValidate className="mt-7 space-y-5">
-                    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                      <Field id="name" label="Full name" error={touched.name ? errors.name : ''}>
-                        <input
-                          id="name" name="name" type="text" autoComplete="name" placeholder="Your name"
-                          value={formData.name} onChange={handleChange} onBlur={handleBlur}
-                          aria-invalid={!!errors.name} aria-describedby={errors.name ? 'name-error' : undefined}
-                          className={inputClass(touched.name && !!errors.name)}
-                        />
-                      </Field>
-                      <Field id="email" label="Email address" error={touched.email ? errors.email : ''}>
-                        <input
-                          id="email" name="email" type="email" autoComplete="email" placeholder="you@example.com"
-                          value={formData.email} onChange={handleChange} onBlur={handleBlur}
-                          aria-invalid={!!errors.email} aria-describedby={errors.email ? 'email-error' : undefined}
-                          className={inputClass(touched.email && !!errors.email)}
-                        />
-                      </Field>
-                    </div>
-
-                    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                      <Field id="phone" label="Phone (optional)" error={touched.phone ? errors.phone : ''}>
-                        <input
-                          id="phone" name="phone" type="tel" inputMode="numeric" autoComplete="tel" placeholder="98765 43210"
-                          value={formData.phone} onChange={handleChange} onBlur={handleBlur}
-                          aria-invalid={!!errors.phone} aria-describedby={errors.phone ? 'phone-error' : undefined}
-                          className={inputClass(touched.phone && !!errors.phone)}
-                        />
-                      </Field>
-                      <Field id="subject" label="Subject">
-                        <select
-                          id="subject" name="subject" value={formData.subject} onChange={handleChange}
-                          className={inputClass(false)}
-                        >
-                          <option value="">Select a topic</option>
-                          {form.subjectOptions.map((opt) => (
-                            <option key={opt} value={opt}>{opt}</option>
-                          ))}
-                        </select>
-                      </Field>
-                    </div>
-
-                    <Field id="message" label="Message" error={touched.message ? errors.message : ''}>
-                      <textarea
-                        id="message" name="message" rows={5} placeholder="How can we help?"
-                        value={formData.message} onChange={handleChange} onBlur={handleBlur}
-                        aria-invalid={!!errors.message} aria-describedby={errors.message ? 'message-error' : undefined}
-                        className={inputClass(touched.message && !!errors.message)}
-                      />
-                    </Field>
-
-                    {statusMessage.text && (
-                      <p className={`font-mono text-[12px] font-semibold ${statusMessage.type === 'error' ? 'text-[var(--rust)]' : 'text-[var(--ink)]/60'}`}>
-                        {statusMessage.text}
-                      </p>
-                    )}
-
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className={`w-full rounded-xl bg-[var(--chalk)] px-6 py-3.5 text-sm font-bold text-white shadow-md transition-all hover:scale-[1.01] hover:shadow-lg active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60 ${focusRing}`}
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                  <Field id="phone" label="Phone (optional)" error={touched.phone ? errors.phone : ''}>
+                    <input
+                      id="phone" name="phone" type="tel" inputMode="numeric" autoComplete="tel" placeholder="98765 43210"
+                      value={formData.phone} onChange={handleChange} onBlur={handleBlur}
+                      aria-invalid={!!errors.phone} aria-describedby={errors.phone ? 'phone-error' : undefined}
+                      className={inputClass(touched.phone && !!errors.phone)}
+                    />
+                  </Field>
+                  <Field id="subject" label="Subject">
+                    <select
+                      id="subject" name="subject" value={formData.subject} onChange={handleChange}
+                      className={inputClass(false)}
                     >
-                      {isSubmitting ? 'Sending…' : 'Send message'}
-                    </button>
-                  </form>
-                </>
-              )}
-            </div>
+                      <option value="">Select a topic</option>
+                      {form.subjectOptions.map((opt) => (
+                        <option key={opt} value={opt}>{opt}</option>
+                      ))}
+                    </select>
+                  </Field>
+                </div>
+
+                <Field id="message" label="Message" error={touched.message ? errors.message : ''}>
+                  <textarea
+                    id="message" name="message" rows={5} placeholder="How can we help?"
+                    value={formData.message} onChange={handleChange} onBlur={handleBlur}
+                    aria-invalid={!!errors.message} aria-describedby={errors.message ? 'message-error' : undefined}
+                    className={inputClass(touched.message && !!errors.message)}
+                  />
+                </Field>
+
+                {statusMessage.text && (
+                  <p className={`font-mono text-[12px] font-semibold ${statusMessage.type === 'error' ? 'text-[var(--rust)]' : 'text-[var(--ink)]/60'}`}>
+                    {statusMessage.text}
+                  </p>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className={`group flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--chalk)] px-6 py-3.5 text-sm font-bold text-white shadow-md transition-all hover:scale-[1.01] hover:shadow-lg active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100 ${focusRing}`}
+                >
+                  {isSubmitting ? (
+                    'Sending…'
+                  ) : (
+                    <>
+                      Send message
+                      <span className="transition-transform duration-200 group-hover:translate-x-0.5">→</span>
+                    </>
+                  )}
+                </button>
+              </form>
+            )}
           </div>
         </section>
 
