@@ -30,7 +30,6 @@ const CONTACT_CONTENT_KEYS = {
   methods: 'contact_methods',
   socials: 'contact_socials',
   hours: 'contact_hours',
-  map: 'contact_map',
   form: 'contact_form',
   faq: 'contact_faq',
   footer: 'contact_footer',
@@ -93,16 +92,6 @@ const DEFAULT_CONTENT = {
       type: 'email',
       note: 'We reply within 24 hrs',
     },
-    {
-      id: 'address',
-      icon: '📍',
-      label: 'Visit Us',
-      value: 'C-Scheme, Jaipur, Rajasthan, India',
-      href: 'https://maps.google.com/?q=C-Scheme+Jaipur+Rajasthan',
-      actionLabel: 'Get directions',
-      type: 'address',
-      note: 'By appointment only',
-    },
   ],
   socials: [
     { id: 'instagram', icon: '📷', label: 'Instagram', handle: '@nexustuitions', url: 'https://instagram.com/nexustuitions' },
@@ -115,10 +104,6 @@ const DEFAULT_CONTENT = {
       { day: 'Sunday', time: '10:00 AM – 4:00 PM' },
     ],
     note: 'All times in IST',
-  },
-  map: {
-    address: 'C-Scheme, Jaipur, Rajasthan, India',
-    embedUrl: 'https://www.google.com/maps?q=C-Scheme,Jaipur,Rajasthan&output=embed',
   },
   form: {
     title: 'Send us a message',
@@ -331,7 +316,7 @@ export default function Contact() {
 
   if (isMaintenance) return <Maintenance />;
 
-  const { global, nav, hero, methods, socials, hours, map, form, faq, footer } = pageData;
+  const { global, nav, hero, methods, socials, hours, form, faq, footer } = pageData;
   const whatsappMethod = methods.find((m) => m.type === 'whatsapp');
 
   return (
@@ -520,9 +505,9 @@ export default function Contact() {
           </div>
         </section>
 
-        {/* --- CONTACT FORM + MAP --- */}
-        <section className="mx-auto mt-16 max-w-[1300px] px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 gap-10 lg:grid-cols-2">
+        {/* --- CONTACT FORM --- */}
+        <section className="mx-auto mt-16 max-w-[800px] px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 gap-10">
             {/* Form */}
             <div className="rounded-3xl border border-[var(--line)]/60 bg-white p-6 shadow-sm sm:p-10">
               {isSuccess ? (
@@ -614,34 +599,6 @@ export default function Contact() {
                   </form>
                 </>
               )}
-            </div>
-
-            {/* Map */}
-            <div className="flex flex-col gap-5">
-              <div className="overflow-hidden rounded-3xl border border-[var(--line)]/60 shadow-sm">
-                <iframe
-                  title="Location map"
-                  src={map.embedUrl}
-                  width="100%"
-                  height="320"
-                  style={{ border: 0 }}
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  className="block"
-                />
-              </div>
-              <div className="rounded-3xl border border-[var(--line)]/60 bg-white p-6 shadow-sm">
-                <h4 className="font-serif text-base font-black text-[var(--ink)]">Our location</h4>
-                <p className="mt-1.5 text-sm font-medium text-[var(--ink)]/60">{map.address}</p>
-                <a
-                  href={`https://maps.google.com/?q=${encodeURIComponent(map.address)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-[var(--rust)] hover:text-[var(--marigold)] rounded ${focusRing}`}
-                >
-                  Open in Google Maps →
-                </a>
-              </div>
             </div>
           </div>
         </section>
