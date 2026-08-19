@@ -169,6 +169,14 @@ const DEFAULT_CONTENT = {
   }
 };
 
+const NAV_ITEMS = [
+  { label: 'Why Us', href: '#why', isExternal: false },
+  { label: 'How It Works', href: '#how', isExternal: false },
+  { label: 'Find a Tutor', href: '/request-tutor', isExternal: false },
+  { label: 'Become a Tutor', href: '/apply-teacher', isExternal: false },
+  { label: 'Contact Us', href: '#contact', isExternal: false }
+];
+
 function ComparisonMark({ value }) {
   if (value === 'yes') {
     return <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[var(--good)]/15 text-[var(--good)] font-black">✓</span>;
@@ -265,7 +273,7 @@ export default function Home() {
 
   if (isMaintenance) return <Maintenance />;
 
-  const { global, nav, hero, statsBanner, whyUs, howItWorks, comparison, whatWeBelieve, testimonials, dualCta, contact, faq, footer } = pageData;
+  const { global, hero, statsBanner, whyUs, howItWorks, comparison, whatWeBelieve, testimonials, dualCta, contact, faq, footer } = pageData;
 
   return (
     <div
@@ -296,8 +304,9 @@ export default function Home() {
             </div>
           </div>
 
+          {/* Explicitly rendered navigation links */}
           <div className="hidden items-center gap-8 text-[14px] font-bold tracking-wide text-[var(--ink)] lg:flex">
-            {nav.links.map((link, idx) => (
+            {NAV_ITEMS.map((link, idx) => (
               link.href.startsWith('#') ? (
                 <a key={idx} href={link.href} className={`group relative rounded transition-colors hover:text-[var(--marigold)] ${focusRing}`}>
                   {link.label}
@@ -341,7 +350,7 @@ export default function Home() {
         <div className={`grid overflow-hidden border-t border-[var(--line)]/40 bg-[var(--paper)] transition-all duration-300 ease-in-out lg:hidden ${mobileMenuOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0 border-t-0'}`}>
           <div className="overflow-hidden">
             <div className="flex flex-col gap-1 px-4 py-4 sm:px-6">
-              {nav.links.map((link, idx) => (
+              {NAV_ITEMS.map((link, idx) => (
                 link.href.startsWith('#') ? (
                   <a key={idx} href={link.href} onClick={() => setMobileMenuOpen(false)} className={`rounded-lg px-3 py-3 text-base font-bold text-[var(--ink)] hover:bg-[var(--chalk)]/5 ${focusRing}`}>
                     {link.label}
