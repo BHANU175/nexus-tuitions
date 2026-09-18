@@ -306,7 +306,7 @@ export default function Contact() {
     try {
       // NOTE: point this at your real backend endpoint — mirrors the pattern
       // used by StudentRequest.jsx's /api/public/student-request call.
-      await axios.post('https://learning-hub-backend-one.vercel.app/api/public/contact-message', formData);
+      await axios.post('https://learning-hub-backend-e5rl5lnse-nexus-9b39.vercel.app/api/public/contact-message', formData);
       setIsSuccess(true);
       setStatusMessage({ text: '', type: '' });
     } catch (err) {
