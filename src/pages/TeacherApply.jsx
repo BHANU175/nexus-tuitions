@@ -708,7 +708,7 @@ export default function TeacherApply() {
     if (idProof) formData.append('idProof', idProof);
 
     try {
-      await axios.post('https://learning-hub-backend-e5rl5lnse-nexus-9b39.vercel.app/api/public/teacher-apply', formData, {
+      await axios.post('https://learning-hub-backend-chi.vercel.app/api/public/teacher-apply', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
         onUploadProgress: (evt) => { if (evt.total) setUploadProgress(Math.round((evt.loaded * 100) / evt.total)); },
       });

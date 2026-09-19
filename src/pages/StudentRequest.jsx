@@ -492,7 +492,7 @@ export default function StudentRequest() {
     setStatusMessage({ text: 'Submitting your request securely…', type: 'loading' });
 
     try {
-      await axios.post('https://learning-hub-backend-e5rl5lnse-nexus-9b39.vercel.app/api/public/student-request', {
+      await axios.post('https://learning-hub-backend-chi.vercel.app/api/public/student-request', {
         ...formData,
         subjects: formData.subjects, 
       });
