@@ -1272,4 +1272,4 @@ export default function TeacherApply() {
         💬
       </a>
     </div>
-  )
+  );}
